@@ -1,0 +1,35 @@
+# ===== Backend (Java/Maven/Spring Boot) =====
+backend/target/
+backend/*.db
+backend/english.db
+*.class
+*.jar
+*.war
+
+# ===== Android (Gradle) =====
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/*.iml
+android/.idea/
+
+# ===== IDE =====
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Trae =====
+.trae/
+
+# ===== Logs =====
+*.log
+logs/
