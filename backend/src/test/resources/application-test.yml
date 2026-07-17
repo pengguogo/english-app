@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    url: jdbc:sqlite::memory:
+    driver-class-name: org.sqlite.JDBC
+  flyway:
+    enabled: true
