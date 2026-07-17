@@ -4,12 +4,9 @@ import com.englishapp.domain.enums.LessonType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -29,10 +26,6 @@ public class Lesson {
     private String content;
     private Integer sortOrder;
     private Integer starReward;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "unit_id", insertable = false, updatable = false)
-    private Unit unit;
 
     public Integer getId() {
         return id;
@@ -88,13 +81,5 @@ public class Lesson {
 
     public void setStarReward(Integer starReward) {
         this.starReward = starReward;
-    }
-
-    public Unit getUnit() {
-        return unit;
-    }
-
-    public void setUnit(Unit unit) {
-        this.unit = unit;
     }
 }

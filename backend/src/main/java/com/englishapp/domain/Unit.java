@@ -1,12 +1,9 @@
 package com.englishapp.domain;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -21,10 +18,6 @@ public class Unit {
     private String name;
     private Integer sortOrder;
     private Boolean isLocked;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "theme_id", insertable = false, updatable = false)
-    private Theme theme;
 
     public Integer getId() {
         return id;
@@ -64,13 +57,5 @@ public class Unit {
 
     public void setIsLocked(Boolean isLocked) {
         this.isLocked = isLocked;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public void setTheme(Theme theme) {
-        this.theme = theme;
     }
 }
