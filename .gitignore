@@ -33,3 +33,4 @@ Thumbs.db
 # ===== Logs =====
 *.log
 logs/
+.gh_config/
