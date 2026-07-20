@@ -1,18 +1,26 @@
 # AI 幼小衔接英语启蒙 APP
 
-面向 5-6 岁儿童的英语启蒙学习应用，以游戏化学习地图为核心，结合语音识别与发音评分，让孩子在闯关中自然习得英语。
+面向 5-6 岁儿童的英语启蒙学习应用,以游戏化学习地图为核心,结合语音识别与发音评分,让孩子在闯关中自然习得英语。
+
+> **当前阶段**:Phase 2 网页版核心学习闭环已完成,优先以电脑网页版让孩子快速使用并收集反馈。Android 版暂停,待网页版验证后再定。
+
+---
 
 ## 技术栈
 
 | 层级 | 技术 | 版本 |
 |------|------|------|
 | 后端 | Java + Spring Boot | 17 / 3.2.0 |
-| 数据库 | SQLite（开发）→ PostgreSQL（生产） | Flyway 管理迁移 |
-| 前端 | Kotlin + Jetpack Compose | 1.9.20 / BOM 2023.10 |
-| 依赖注入 | Hilt（前端）/ 构造器注入（后端） | 2.48 |
-| 网络层 | Retrofit + Gson | 2.9.0 |
-| 本地缓存 | Room | 2.6.1 |
-| 语音服务 | 百度 TTS / ASR（适配器模式抽象） | - |
+| 数据库 | SQLite(开发)→ PostgreSQL(生产) | Flyway 管理迁移 |
+| 前端 | Vue 3 + Vite + Pinia + Vue Router | 3.5 / 6.3 / 4.0 / 4.6 |
+| HTTP 客户端 | Axios | 1.18 |
+| 语音服务 | 百度 TTS + 发音评测(适配器模式抽象) | - |
+| 测试 | JUnit 5 + Mockito + H2 | Spring Boot Test |
+| 部署 | Vue 构建产物嵌入 Spring Boot `static/`,单 JAR 运行 | - |
+
+> Android 版(Kotlin + Jetpack Compose + Hilt + Retrofit + Room)骨架已保留在 `android/` 目录,后续视网页版反馈决定是否继续迭代。
+
+---
 
 ## 项目结构
 
@@ -21,107 +29,160 @@ english-app/
 ├── backend/                          # Spring Boot 后端
 │   ├── src/main/java/com/englishapp/
 │   │   ├── controller/               # REST API 控制器
-│   │   ├── service/                  # 业务逻辑层
+│   │   │   ├── ThemeController.java        # 主题
+│   │   │   ├── UnitController.java         # 单元
+│   │   │   ├── LessonController.java       # 课时
+│   │   │   ├── ProgressController.java     # 学习进度
+│   │   │   └── VoiceController.java        # TTS / 发音评测
+│   │   ├── service/                  # 业务逻辑层(接口 + Impl)
 │   │   ├── repository/               # Spring Data JPA 接口
-│   │   ├── domain/                   # JPA 实体 + 枚举
+│   │   ├── domain/                   # JPA 实体 + 枚举(LessonType/ProgressStatus)
 │   │   ├── dto/                      # 数据传输对象
-│   │   ├── config/                   # 配置类
-│   │   ├── exception/                # 全局异常处理
-│   │   └── voice/                    # 语音服务抽象层（适配器模式）
+│   │   ├── voice/                    # 语音服务抽象层(适配器模式)
+│   │   ├── common/                   # Result / ResultCode 统一响应
+│   │   ├── config/                   # VoiceProperties / WebConfig
+│   │   └── exception/                # 全局异常处理
 │   ├── src/main/resources/
 │   │   ├── application.yml           # 主配置
-│   │   └── db/migration/             # Flyway 迁移脚本
-│   └── src/test/                     # 单元测试 + 集成测试
-├── android/                          # Android 前端
-│   └── app/src/main/java/com/englishapp/
-│       ├── data/
-│       │   ├── model/                # Room Entity
-│       │   ├── remote/               # Retrofit API
-│       │   └── local/                # Room DAO
-│       ├── di/                       # Hilt 依赖注入模块
-│       ├── repository/               # 离线优先策略
-│       └── ui/
-│           ├── home/                 # 首页（主题列表）
-│           ├── map/                  # 学习地图（课程列表）
-│           └── theme/                # Material 主题配置
-└── docs/                             # 设计文档与实施计划
+│   │   ├── static/                   # Vue 构建产物(生产模式)
+│   │   └── db/migration/             # Flyway 迁移脚本 V1~V4
+│   ├── src/test/                     # 单元测试 + 集成测试
+│   ├── .env.example                  # 百度密钥模板
+│   ├── run.sh                        # 启动脚本(自动加载 .env)
+│   └── pom.xml
+├── frontend/                         # Vue 3 前端
+│   ├── src/
+│   │   ├── api/                      # Axios 实例 + 各资源 API
+│   │   ├── components/               # AudioButton / RecordButton / StarBar
+│   │   ├── composables/              # useRecorder / useTts
+│   │   ├── views/                    # Home / Theme / Unit / Lesson
+│   │   ├── stores/                   # Pinia: progress / audio
+│   │   ├── router/                   # Vue Router(history 模式)
+│   │   ├── App.vue
+│   │   └── main.js
+│   ├── vite.config.js                # 构建输出到后端 static/,开发期代理 /api
+│   └── package.json
+├── android/                          # Android 版骨架(暂停迭代)
+├── docs/                             # 设计文档与实施计划
+└── README.md
 ```
+
+---
 
 ## 快速开始
 
 ### 环境要求
 
 - JDK 17+
-- Maven 3.8+
-- Android Studio（Iguana 或更高）
-- Android SDK 34（minSdk 26）
+- Maven 3.8+(或使用 `./mvnw`)
+- Node.js 18+ 与 npm
+- (可选)百度智能云语音服务密钥
 
 ### 后端启动
 
 ```bash
 cd backend
-mvn spring-boot:run
+./run.sh          # 自动加载 .env 并启动
+# 或: mvn spring-boot:run
 ```
 
-后端启动后访问 `http://localhost:8080`，API 文档见下方。
+后端启动后访问 `http://localhost:8080`,API 文档见下方。
 
-如果需要接入百度语音服务，设置环境变量：
+如需接入百度语音服务,复制 `.env.example` 为 `.env` 并填入密钥:
 
 ```bash
-export BAIDU_APP_ID=你的AppID
-export BAIDU_API_KEY=你的APIKey
-export BAIDU_SECRET_KEY=你的SecretKey
+cp .env.example .env
+# 编辑 .env 填入以下字段
+# BAIDU_APP_ID=你的AppID
+# BAIDU_API_KEY=你的APIKey
+# BAIDU_SECRET_KEY=你的SecretKey
 ```
 
-未配置时后端正常启动，语音接口返回空数据占位。
+未配置密钥时后端正常启动,语音接口返回降级提示。
 
-### Android 启动
+### 前端启动(开发模式)
 
-1. 用 Android Studio 打开 `android/` 目录
-2. 等待 Gradle 同步完成
-3. 启动模拟器（API 26+）或连接真机
-4. 点击 Run
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-模拟器通过 `10.0.2.2` 访问宿主机后端，无需额外配置。
+Vite 开发服务器运行在 `http://localhost:5173`,自动将 `/api` 请求代理到后端 8080,支持热更新。
+
+### 生产构建(单 JAR 部署)
+
+```bash
+# 1. 构建前端,产物自动写入 backend/src/main/resources/static/
+cd frontend && npm run build
+
+# 2. 打包后端
+cd ../backend && ./mvnw clean package -DskipTests
+
+# 3. 一个 JAR 启动,浏览器访问 http://localhost:8080
+java -jar target/english-app-backend-1.0.0.jar
+```
 
 ### 验证
 
-后端启动后，执行以下命令验证：
-
 ```bash
-# 获取主题列表
+# 获取主题列表(含交通工具乐园)
 curl http://localhost:8080/api/v1/themes
-# 预期: [{"id":1,"name":"水果乐园","iconUrl":null,"sortOrder":1,"isLocked":false}]
 
-# 获取单元课程
-curl http://localhost:8080/api/v1/lessons/unit/1
-# 预期: [{"id":1,"unitId":1,"name":"认识水果","type":"WORD","content":"{\"words\":[\"apple\",\"banana\",\"orange\"]}","sortOrder":1,"starReward":3}]
+# 获取某主题下单元
+curl http://localhost:8080/api/v1/units/theme/2
+
+# 获取某单元下课时
+curl http://localhost:8080/api/v1/lessons/unit/4
+
+# 获取全部进度概览
+curl http://localhost:8080/api/v1/progress
 ```
+
+---
 
 ## API 文档
 
-### 主题
+所有接口统一响应格式:
+
+```json
+{ "code": 200, "message": "success", "data": { ... } }
+```
+
+### 主题与单元
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | GET | `/api/v1/themes` | 获取所有主题列表 |
+| GET | `/api/v1/units/theme/{themeId}` | 获取某主题下所有单元(带进度) |
 
 ### 课程
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/v1/lessons/unit/{unitId}` | 获取指定单元的课程列表 |
-| GET | `/api/v1/lessons/{id}` | 获取单个课程详情 |
+| GET | `/api/v1/lessons/unit/{unitId}` | 获取指定单元的课时列表 |
+| GET | `/api/v1/lessons/{id}` | 获取单个课时详情 |
+
+### 学习进度(固定 user_id=1)
+
+| 方法 | 路径 | 说明 | 请求体 |
+|------|------|------|--------|
+| GET | `/api/v1/progress` | 获取全部进度概览(主题树 + 进度) | - |
+| GET | `/api/v1/progress/lesson/{lessonId}` | 获取某课时进度 | - |
+| POST | `/api/v1/progress/lesson/{lessonId}/complete` | 标记完成并解锁下一课 | `{ "stars": 3, "score": 85 }` |
 
 ### 语音
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/api/v1/voice/tts` | 文本转语音（body 为纯文本） |
+| 方法 | 路径 | 说明 | 请求 |
+|------|------|------|------|
+| POST | `/api/v1/voice/tts` | 文本转语音 | body 纯文本 |
+| POST | `/api/v1/voice/score` | 发音评测 | `multipart`: audio(wav 16k 16bit mono) + `text` |
+
+---
 
 ## 数据库设计
 
-5 张核心表，通过 Flyway 管理迁移：
+5 张核心表,通过 Flyway 管理迁移(V1 初始化 / V2 水果种子 / V3 交通工具 / V4 课时扩容):
 
 ```
 theme (主题)
@@ -138,7 +199,7 @@ unit (单元)
 lesson (课程)
   ├── id (PK)
   ├── unit_id (FK → unit)
-  ├── name, type(WORD/SENTENCE/GAME/SPEAK), content(JSON)
+  ├── name, type(WORD/SENTENCE), content(JSON)
   ├── sort_order, star_reward
   └── ...
 
@@ -151,38 +212,69 @@ user_progress (学习进度)
   ├── id (PK)
   ├── user_id (FK → app_user)
   ├── lesson_id (FK → lesson)
-  ├── status(LOCKED/IN_PROGRESS/COMPLETED)
+  ├── status(LOCKED/UNLOCKED/COMPLETED)
   ├── stars, score, completed_at
   └── UNIQUE(user_id, lesson_id)
 ```
 
-### 种子数据
+### 课程内容(交通工具乐园)
 
-预置数据供开箱即用验证：
-- 1 个用户（"小朋友"）
-- 1 个主题（"水果乐园"）
-- 3 个单元（Unit 1 解锁，Unit 2/3 锁定）
-- 1 节课程（"认识水果"，含 apple/banana/orange）
+```
+🚗 交通工具乐园
+├── Unit 1: 陆地交通(4 课时)
+│   ├── L1: 认识汽车(WORD: car, bus, bike, truck)
+│   ├── L2: 认识火车(WORD: train, subway, taxi, police car)
+│   ├── L3: 我看见了(SENTENCE: I see a car. ...)
+│   └── L4: 它是什么颜色(SENTENCE: The car is red. ...)
+├── Unit 2: 空中交通(3 课时)
+│   ├── L5: 认识飞机(WORD: airplane, helicopter, rocket, balloon)
+│   ├── L6: 飞得高(SENTENCE)
+│   └── L7: 我喜欢(SENTENCE)
+└── Unit 3: 水上交通(3 课时)
+    ├── L8: 认识船(WORD: boat, ship, submarine, canoe)
+    ├── L9: 在水上(SENTENCE)
+    └── L10: 复习大挑战(SENTENCE)
+```
+
+> 原"水果乐园"主题保留作为第二个主题。
+
+### 解锁逻辑
+
+- 首次进入:某 unit 下第一课时 `UNLOCKED`,其余 `LOCKED`
+- 完成当前课时 → 下一课时 `UNLOCKED`
+- 某 unit 所有课时完成 → 下一 unit 解锁
+- 每课时可重复挑战,取历史最高分
+
+---
 
 ## 架构设计
 
 ### 后端分层
 
-严格遵循 Controller → Service → Repository 三层架构，Controller 不含业务逻辑，Service 抛出业务异常，全局异常处理器统一捕获。
+严格遵循 Controller → Service → Repository 三层架构,Controller 不含业务逻辑,Service 抛出业务异常,`GlobalExceptionHandler` 统一捕获并返回 `{code, message, data}` 结构。
 
 ### 语音服务抽象层
 
-采用适配器模式，`VoiceService` 接口定义 `textToSpeech` 和 `speechToText` 两个方法。`BaiduVoiceService` 通过 `@ConditionalOnProperty` 条件装配，后续可平滑切换至阿里云、腾讯云等其他供应商。
+采用适配器模式,`VoiceService` 接口定义 `textToSpeech` 与 `scorePronunciation` 两个方法。`BaiduVoiceService` 通过 `@ConditionalOnProperty` 条件装配,后续可平滑切换至阿里云、腾讯云等其他供应商。
 
-### Android 离线优先
+### 前端状态管理
 
-`ThemeRepository` 先请求远程 API，成功后写入 Room 本地缓存；网络异常时降级读取本地数据，保证离线可用。
+- **Pinia `progress` store**:缓存进度树,减少请求
+- **Pinia `audio` store**:统一管理 TTS 播放与录音状态
+- **`useRecorder` composable**:基于 Web Audio API 封装录音,强制输出 wav 16kHz 16bit mono
+- **`useTts` composable**:TTS 请求 + Blob URL 播放封装
+
+### 单 JAR 部署
+
+Vue 构建产物通过 `vite.config.js` 直接输出到 `backend/src/main/resources/static/`,`WebConfig` 配置 Vue Router history 模式 fallback:非 `/api` 请求统一返回 `index.html`,生产环境无 CORS 问题。
 
 ### 云迁移准备
 
-- 配置外部化：敏感信息通过环境变量注入
-- 数据库迁移：Flyway 管理，切换到 PostgreSQL 只需改数据源配置
-- 无状态服务：后端不持有会话状态，可水平扩展
+- 配置外部化:敏感信息通过 `.env` 环境变量注入
+- 数据库迁移:Flyway 管理,切换到 PostgreSQL 只需改数据源配置
+- 无状态服务:后端不持有会话状态,可水平扩展
+
+---
 
 ## 测试
 
@@ -191,45 +283,63 @@ cd backend
 mvn test
 ```
 
-测试分层：
-- **单元测试**（Mockito）：Service 层逻辑
-- **集成测试**（H2 内存数据库）：Repository 层 + Controller 层端到端
+测试分层:
+- **单元测试**(Mockito):Service 层业务逻辑(进度解锁、最高分、首课逻辑等)
+- **集成测试**(H2 内存数据库):Repository 层 + Controller 层端到端
+
+测试类:`ThemeServiceTest`、`ProgressServiceImplTest`、`ThemeControllerTest`、`ThemeRepositoryTest`。
+
+---
 
 ## 开发计划
 
-### Phase 1：骨架搭建（已完成）
+### Phase 1:骨架搭建(已完成)
 
 - [x] Spring Boot 项目初始化
 - [x] 数据库设计与 Flyway 迁移
 - [x] Domain 实体 + Repository + Service + Controller
-- [x] 语音服务抽象层（百度 TTS 占位）
-- [x] Android 项目初始化（Compose + Hilt + Retrofit + Room）
-- [x] 首页 UI（主题列表）
-- [x] 学习地图页面（课程列表 + 导航）
+- [x] 语音服务抽象层(百度 TTS 占位)
+- [x] Android 项目初始化(Compose + Hilt + Retrofit + Room)
 - [x] 种子数据 + 端到端验证
 
-### Phase 2：核心学习闭环（规划中）
+### Phase 2:网页版核心学习闭环(已完成)
 
-- [ ] 接入真实百度语音 API（TTS 播放单词/句子）
-- [ ] 单词学习页面（图文 + 发音 + 跟读）
-- [ ] 发音评分（ASR + 评分算法）
-- [ ] 学习进度记录与星星奖励
-- [ ] 更多课程内容填充
+- [x] Vue 3 + Vite 项目初始化,构建产物嵌入后端 static/
+- [x] 首页 / 主题 / 单元 / 课时列表页面
+- [x] 核心学习页 `LessonView`(听发音 + 跟读 + 评分 + 完成)
+- [x] 录音组件 `RecordButton`(wav 16k 16bit mono)
+- [x] `StarBar` 与 `AudioButton` 组件
+- [x] 进度 API(查询 / 完成 / 解锁下一课)
+- [x] 交通工具主题(1 主题 + 3 单元 + 10 课时)
+- [x] 进度业务单元测试
+- [x] 接入百度语音 TTS + 发音评测
 
-### Phase 3：游戏化与扩展
+### Phase 3:游戏化与扩展(规划中)
 
 - [ ] 学习地图可视化路径
-- [ ] 趣味游戏课程（配对、连线等）
+- [ ] 趣味游戏课程(配对、连线等)
 - [ ] 成就系统与勋章
 - [ ] 家长端数据看板
+- [ ] 内容难度自适应
+
+---
 
 ## 分支策略
 
 | 分支 | 用途 |
 |------|------|
 | `main` | 稳定发布分支 |
-| `feature/phase1-skeleton` | Phase 1 开发分支 |
+| `feature/phase1-skeleton` | Phase 1 骨架开发分支(已合并) |
+| `feature/web-version-transport` | Phase 2 网页版 + 交通工具主题(已合并) |
 
-提交信息格式：`<type>(<scope>): <subject>`
-- type: feat / fix / docs / refactor / chore
-- 示例：`feat(lesson): add word learning page with TTS playback`
+提交信息格式:`<type>(<scope>): <subject>`
+- type: `feat` / `fix` / `docs` / `refactor` / `test` / `chore`
+- 示例:`feat(lesson): 扩充课时内容,单词课4→8个,句子课3→5个`
+
+---
+
+## 安全说明
+
+- 百度密钥存于 `backend/.env`(已被 `.gitignore` 忽略),`.env.example` 提供模板
+- 录音功能需通过 `https://` 或 `localhost` 访问(浏览器安全限制)
+- 后续版本将引入 JWT 认证、API 限流与 CORS 白名单
