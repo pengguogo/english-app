@@ -2,6 +2,7 @@
   LessonView.vue - 课时核心学习页
   用途:实现"听发音 -> 跟读录音 -> 百度发音评分 -> 切换下一项 -> 完成课时"的完整学习闭环,
        支持单词课(WORD)与句型课(SENTENCE)两种课时类型。
+       UI 美化:暖底背景 + 小老鼠陪伴插画 + 顶部进度条 + 美化评分区 + 结算页庆祝插画。
   作者:english-app
   创建日期:2026-07-20
 -->
@@ -14,6 +15,10 @@ import { scorePronunciation } from '../api/voice'
 import StarBar from '../components/StarBar.vue'
 import AudioButton from '../components/AudioButton.vue'
 import RecordButton from '../components/RecordButton.vue'
+import BackBar from '../components/BackBar.vue'
+import AppButton from '../components/AppButton.vue'
+import mascotCompanion from '../assets/mascot/mascot-companion.jpg'
+import mascotCelebrate from '../assets/mascot/mascot-celebrate.jpg'
 
 const route = useRoute()
 const router = useRouter()
@@ -68,6 +73,14 @@ const totalItems = computed(() => {
 })
 
 /**
+ * 当前学习进度百分比(0-100),用于顶部进度条填充。
+ */
+const progressPercent = computed(() => {
+  if (totalItems.value === 0) return 0
+  return Math.round(((currentIndex.value + 1) / totalItems.value) * 100)
+})
+
+/**
  * 是否为最后一个学习项,用于切换按钮文案与完成判断。
  */
 const isLastItem = computed(() => currentIndex.value >= totalItems.value - 1)
@@ -110,16 +123,78 @@ function scoreToStars(score) {
 }
 
 /**
+ * 简单的英文单词到 emoji 映射表(常见水果与交通工具)。
+ * 后端 content 仅返回单词字符串,前端补充 emoji 与释义以丰富儿童视觉。
+ * 未命中的单词回退为 🔤 通用图标。
+ */
+const wordMetaMap = {
+  // 水果
+  apple: { emoji: '🍎', translation: '苹果', phonetic: 'ˈæpl' },
+  banana: { emoji: '🍌', translation: '香蕉', phonetic: 'bəˈnɑːnə' },
+  orange: { emoji: '🍊', translation: '橙子', phonetic: 'ˈɒrɪndʒ' },
+  grape: { emoji: '🍇', translation: '葡萄', phonetic: 'greɪp' },
+  // 陆地交通
+  car: { emoji: '🚗', translation: '小汽车', phonetic: 'kɑː' },
+  bus: { emoji: '🚌', translation: '公交车', phonetic: 'bʌs' },
+  bike: { emoji: '🚲', translation: '自行车', phonetic: 'baɪk' },
+  train: { emoji: '🚂', translation: '火车', phonetic: 'treɪn' },
+  // 天空交通
+  plane: { emoji: '✈️', translation: '飞机', phonetic: 'pleɪn' },
+  helicopter: { emoji: '🚁', translation: '直升机', phonetic: 'ˈhelɪkɒptə' },
+  balloon: { emoji: '🎈', translation: '热气球', phonetic: 'bəˈluːn' },
+  rocket: { emoji: '🚀', translation: '火箭', phonetic: 'ˈrɒkɪt' },
+  // 水上交通
+  boat: { emoji: '⛵', translation: '小船', phonetic: 'bəʊt' },
+  ship: { emoji: '🚢', translation: '大船', phonetic: 'ʃɪp' },
+  submarine: { emoji: '🤿', translation: '潜水艇', phonetic: 'ˌsʌbməˈriːn' }
+}
+
+/**
+ * 将后端 content 原始格式统一转换为 { items: [...] } 结构。
+ * 后端单词课返回 { words: ["apple", ...] },
+ * 句型课返回 { sentences: ["I have a car", ...] },
+ * 这里转换为统一的 item 对象数组,补齐 emoji/phonetic/translation。
+ * @param {Object} raw 解析后的 content 对象
+ * @return {Object} { items: [...] }
+ */
+function normalizeContent(raw) {
+  const items = []
+  if (Array.isArray(raw.words)) {
+    // 单词课:每个单词生成一个 item
+    raw.words.forEach((w) => {
+      const meta = wordMetaMap[w.toLowerCase()] || {}
+      items.push({
+        word: w,
+        emoji: meta.emoji || '🔤',
+        phonetic: meta.phonetic || '',
+        translation: meta.translation || ''
+      })
+    })
+  } else if (Array.isArray(raw.sentences)) {
+    // 句型课:每个句子生成一个 item
+    raw.sentences.forEach((s) => {
+      items.push({ sentence: s, emoji: '💬', phonetic: '', translation: '' })
+    })
+  } else if (Array.isArray(raw.items)) {
+    // 已是标准格式,直接使用
+    raw.items.forEach((it) => items.push(it))
+  }
+  return { items }
+}
+
+/**
  * 加载课时详情并解析 content。
- * 后端 LessonDto.content 是 JSON 字符串(如 '{"items":[...]}' ),
- * 直接访问 .items 会返回 undefined,必须先 JSON.parse 解析为对象。
+ * 后端 LessonDto.content 是 JSON 字符串(如 '{"words":["apple"]}' ),
+ * 必须先 JSON.parse 再通过 normalizeContent 统一为 items 结构。
  */
 async function loadLesson() {
   try {
     const data = await getLessonById(route.params.lessonId)
-    // content 是 JSON 字符串,解析为对象后才能访问 .items
+    // content 是 JSON 字符串,解析后通过 normalizeContent 统一为 items 结构
     if (typeof data.content === 'string') {
-      data.content = JSON.parse(data.content)
+      data.content = normalizeContent(JSON.parse(data.content))
+    } else if (data.content && typeof data.content === 'object') {
+      data.content = normalizeContent(data.content)
     }
     lesson.value = data
     // 初始化每个 item 的最佳分槽位为 0,后续取 Math.max 更新
@@ -221,13 +296,17 @@ async function finishLesson() {
 <template>
   <div class="lesson-view">
     <!-- 顶部栏:返回按钮 + 当前星星(结算时展示累计星星) -->
-    <div class="top-bar">
-      <button class="back-btn" @click="router.back()">← 返回</button>
-      <StarBar :stars="isComplete ? totalStars : currentStars" />
-    </div>
+    <BackBar @back="router.back()">
+      <template #right>
+        <StarBar :stars="isComplete ? totalStars : currentStars" size="sm" />
+      </template>
+    </BackBar>
 
     <!-- 加载中 -->
-    <div v-if="isLoading" class="state-tip">加载中...</div>
+    <div v-if="isLoading" class="state-tip">
+      <div class="loading-dot"></div>
+      <p>加载中...</p>
+    </div>
     <!-- 加载失败 -->
     <div v-else-if="errorMsg" class="state-tip error">{{ errorMsg }}</div>
 
@@ -235,10 +314,18 @@ async function finishLesson() {
     <template v-else>
       <!-- 未完成:展示当前学习项卡片 -->
       <div v-if="!isComplete && currentItem" class="card-area">
-        <!-- 进度指示 -->
-        <div class="progress">
-          第 {{ currentIndex + 1 }} / {{ totalItems }} 项
+        <!-- 顶部进度条 + 数字标注 -->
+        <div class="progress-section">
+          <div class="progress-info">
+            <span>第 {{ currentIndex + 1 }} / {{ totalItems }} 项</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+          </div>
         </div>
+
+        <!-- 小老鼠陪伴插画(右上角) -->
+        <img :src="mascotCompanion" alt="小老鼠陪伴" class="mascot-companion" />
 
         <!-- 学习项卡片:emoji + 英文 + 音标 + 中文释义 -->
         <div class="item-card">
@@ -256,180 +343,315 @@ async function finishLesson() {
 
         <!-- 评分结果区:已有分数时展示分数;评分中展示等待文案 -->
         <div v-if="currentScore !== null" class="score-area">
-          <p class="score">{{ currentScore }} 分</p>
+          <div class="score-row">
+            <span class="score">{{ currentScore }} 分</span>
+            <StarBar :stars="currentStars" size="sm" />
+          </div>
           <p class="feedback">{{ scoreMessage }}</p>
         </div>
-        <div v-else-if="isScoring" class="score-area">
+        <div v-else-if="isScoring" class="score-area scoring">
+          <div class="scoring-dot"></div>
           <p class="feedback">{{ scoreMessage }}</p>
         </div>
 
         <!-- 下一步 / 完成本课 -->
-        <button class="next-btn" @click="nextItem">
+        <AppButton
+          variant="primary"
+          size="lg"
+          block
+          @click="nextItem"
+        >
           {{ isLastItem ? '完成本课' : '下一步 →' }}
-        </button>
+        </AppButton>
       </div>
 
       <!-- 已完成:结算页 -->
       <div v-else class="complete-area">
+        <!-- 小老鼠庆祝插画(主视觉) -->
+        <img :src="mascotCelebrate" alt="小老鼠庆祝" class="mascot-celebrate" />
+
         <h2>太棒了!</h2>
-        <p>你完成了《{{ lesson.name }}》</p>
-        <StarBar :stars="totalStars" />
+        <p class="complete-lesson-name">你完成了《{{ lesson.name }}》</p>
+
+        <StarBar :stars="totalStars" size="lg" />
+
         <p class="total-score">平均得分:{{ totalBestScore }} 分</p>
-        <button
-          class="finish-btn"
+
+        <AppButton
+          variant="success"
+          size="lg"
           :disabled="isSubmitting"
           @click="finishLesson"
         >
           {{ isSubmitting ? '保存中...' : '完成' }}
-        </button>
+        </AppButton>
       </div>
     </template>
   </div>
 </template>
 
 <style scoped>
-/* 页面容器:暖色渐变背景,营造儿童友好的学习氛围 */
+/* 页面容器:暖色背景,营造儿童友好的学习氛围 */
 .lesson-view {
   min-height: 100vh;
-  padding: 24px;
-  background: linear-gradient(135deg, #fff3e0 0%, #fff8e1 100%);
+  padding: var(--space-4);
+  background: var(--gradient-warm);
   box-sizing: border-box;
+  position: relative;
 }
 
-/* 顶部栏:返回按钮靠左,星星靠右 */
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-.back-btn {
-  background: none;
-  border: none;
-  font-size: 1rem;
-  color: #667eea;
-  cursor: pointer;
-}
-
-/* 状态提示(加载中 / 错误) */
+/* ===== 状态提示 ===== */
 .state-tip {
   text-align: center;
-  padding: 40px;
-  color: #888;
-  font-size: 1.1rem;
+  padding: var(--space-8);
+  color: var(--text-tertiary);
 }
-.state-tip.error { color: #f44336; }
+.state-tip.error { color: var(--color-warning); }
 
-/* 学习区:限制最大宽度,大屏居中 */
+.loading-dot {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-light);
+  border-top-color: var(--color-primary);
+  border-radius: var(--radius-pill);
+  margin: 0 auto var(--space-3);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .loading-dot { animation: spin 0.8s linear infinite; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 学习区 ===== */
 .card-area {
   max-width: 480px;
   margin: 0 auto;
+  position: relative;
 }
 
-/* 进度指示 */
-.progress {
+/* 顶部进度条 */
+.progress-section {
+  margin-bottom: var(--space-5);
+}
+
+.progress-info {
   text-align: center;
-  color: #999;
-  font-size: 0.9rem;
-  margin-bottom: 12px;
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-2);
+}
+
+.progress-bar {
+  height: 8px;
+  background: var(--bg-card);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-slow) var(--ease-smooth);
+}
+
+/* 小老鼠陪伴插画: 右上角,不遮挡内容 */
+.mascot-companion {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  z-index: 1;
+  opacity: 0.9;
 }
 
 /* 学习项卡片:大圆角 + 白底,儿童视觉风格 */
 .item-card {
-  background: white;
-  border-radius: 24px;
-  padding: 40px 24px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);
   text-align: center;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-card);
 }
-.emoji { font-size: 5rem; margin-bottom: 16px; }
+
+.emoji {
+  font-size: 5rem;
+  margin-bottom: var(--space-4);
+}
+
 .word {
   font-size: 2.5rem;
-  margin-bottom: 8px;
-  color: #333;
+  margin-bottom: var(--space-2);
+  color: var(--text-primary);
   word-break: break-word;
+  font-weight: var(--font-bold);
 }
+
 .phonetic {
-  color: #888;
-  font-size: 1.2rem;
-  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-2);
 }
+
 .translation {
-  color: #555;
-  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
 }
 
 /* 操作区:两个按钮水平排列 */
 .actions {
   display: flex;
-  gap: 16px;
+  gap: var(--space-4);
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
-/* 评分结果区:暖色背景突出展示 */
+/* 评分结果区 */
 .score-area {
   text-align: center;
-  background: #fff3e0;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 24px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-soft);
 }
+
+.score-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+/* 得分数字: 橙色大号字 + 弹跳动效 */
 .score {
   font-size: 2rem;
-  font-weight: bold;
-  color: #FF9800;
+  font-weight: var(--font-bold);
+  color: var(--color-orange);
 }
-.feedback { color: #666; }
 
-/* 下一步按钮:主色填充,大圆角,触控友好 */
-.next-btn {
-  width: 100%;
-  padding: 16px;
-  font-size: 1.1rem;
-  border: none;
-  border-radius: 24px;
-  background: #667eea;
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s;
+@media (prefers-reduced-motion: no-preference) {
+  .score {
+    animation: scoreBounce var(--duration-normal) var(--ease-bounce) both;
+  }
 }
-.next-btn:hover { background: #5568d3; }
 
-/* 结算区:卡片式展示,突出成就感 */
+@keyframes scoreBounce {
+  0% {
+    transform: translateY(8px) scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-4px) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.feedback {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* 评分中状态 */
+.score-area.scoring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.scoring-dot {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-light);
+  border-top-color: var(--color-orange);
+  border-radius: var(--radius-pill);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scoring-dot {
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+/* ===== 结算区 ===== */
 .complete-area {
   text-align: center;
-  padding: 40px 24px;
-  background: white;
-  border-radius: 24px;
+  padding: var(--space-6) var(--space-4);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
   max-width: 480px;
-  margin: 40px auto;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  margin: var(--space-6) auto;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
 }
-.complete-area h2 {
-  font-size: 2rem;
-  color: #FF9800;
-  margin-bottom: 16px;
-}
-.complete-area p { color: #555; margin-bottom: 12px; }
-.total-score { color: #888; }
 
-/* 完成按钮:绿色,鼓励孩子 */
-.finish-btn {
-  margin-top: 24px;
-  padding: 16px 48px;
-  font-size: 1.1rem;
-  border: none;
-  border-radius: 24px;
-  background: #4CAF50;
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s;
+/* 小老鼠庆祝插画: 主视觉 */
+.mascot-celebrate {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  border-radius: var(--radius-md);
 }
-.finish-btn:hover { background: #43A047; }
-.finish-btn:disabled {
-  background: #9E9E9E;
-  cursor: not-allowed;
+
+@media (prefers-reduced-motion: no-preference) {
+  .mascot-celebrate {
+    animation: celebrateBounce var(--duration-slow) var(--ease-bounce) both;
+  }
+}
+
+@keyframes celebrateBounce {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15) rotate(10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+.complete-area h2 {
+  font-size: var(--text-xl);
+  color: var(--color-orange);
+  font-weight: var(--font-bold);
+}
+
+.complete-lesson-name {
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+}
+
+.total-score {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
+/* ===== 响应式: 手机端缩小吉祥物 ===== */
+@media (max-width: 480px) {
+  .mascot-companion { width: 64px; height: 64px; }
+  .mascot-celebrate { width: 128px; height: 128px; }
+  .word { font-size: 2rem; }
+  .emoji { font-size: 4rem; }
 }
 </style>
