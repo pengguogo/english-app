@@ -19,6 +19,7 @@ import BackBar from '../components/BackBar.vue'
 import AppButton from '../components/AppButton.vue'
 import mascotCompanion from '../assets/mascot/mascot-companion.jpg'
 import mascotCelebrate from '../assets/mascot/mascot-celebrate.jpg'
+import { getWordImage } from '../assets/word-images/index.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -327,9 +328,12 @@ async function finishLesson() {
         <!-- 小老鼠陪伴插画(右上角) -->
         <img :src="mascotCompanion" alt="小老鼠陪伴" class="mascot-companion" />
 
-        <!-- 学习项卡片:emoji + 英文 + 音标 + 中文释义 -->
+        <!-- 学习项卡片:emoji/图片 + 英文 + 音标 + 中文释义 -->
         <div class="item-card">
-          <div class="emoji">{{ currentItem.emoji }}</div>
+          <div v-if="currentItem.image && getWordImage(currentItem.word)" class="word-image-wrapper">
+            <img :src="getWordImage(currentItem.word)" :alt="currentItem.word" class="word-image" />
+          </div>
+          <div v-else class="emoji">{{ currentItem.emoji }}</div>
           <h1 class="word">{{ currentText }}</h1>
           <p v-if="currentItem.phonetic" class="phonetic">/{{ currentItem.phonetic }}/</p>
           <p class="translation">{{ currentItem.translation }}</p>
@@ -337,7 +341,7 @@ async function finishLesson() {
 
         <!-- 操作区:听发音 + 跟读录音 -->
         <div class="actions">
-          <AudioButton :text="currentText" />
+          <AudioButton :text="currentText" :translation="currentItem.translation || ''" />
           <RecordButton @recorded="handleRecorded" />
         </div>
 
@@ -485,6 +489,19 @@ async function finishLesson() {
 .emoji {
   font-size: 5rem;
   margin-bottom: var(--space-4);
+}
+
+/* 单词图片展示(替代 emoji):圆角卡片内居中 */
+.word-image-wrapper {
+  margin-bottom: var(--space-4);
+}
+
+.word-image {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
 }
 
 .word {

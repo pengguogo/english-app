@@ -21,13 +21,26 @@ public class WebConfig implements WebMvcConfigurer {
 
     /**
      * 配置 CORS:开发期放行 Vite dev server。
-     * 使用 allowedOriginPatterns 支持 5173/5174 等 Vite 自动切换的端口,
-     * 避免 Vite 端口被占用时 POST 请求被 403 拒绝。
+     * 使用 allowedOriginPatterns 支持:
+     *  - http/https 的 localhost(5173/5174 等 Vite 自动切换的端口)
+     *  - http/https 的局域网 IP(手机通过 https://192.168.x.x:5173 访问时)
+     * 避免 Vite 端口被占用或启用 HTTPS 后 POST 请求被 403 拒绝。
      */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOriginPatterns("http://localhost:*")
+                .allowedOriginPatterns(
+                        "http://localhost:*",
+                        "https://localhost:*",
+                        "http://127.0.0.1:*",
+                        "https://127.0.0.1:*",
+                        "http://192.168.*:*",
+                        "https://192.168.*:*",
+                        "http://10.*:*",
+                        "https://10.*:*",
+                        "http://172.16.*:*",
+                        "https://172.16.*:*"
+                )
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);

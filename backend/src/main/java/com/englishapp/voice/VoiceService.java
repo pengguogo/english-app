@@ -17,9 +17,10 @@ public interface VoiceService {
      * 文字转语音
      *
      * @param text 待合成语音的文本
+     * @param lan  语言代码("en" 英文, "zh" 中文)
      * @return 音频二进制数据
      */
-    byte[] textToSpeech(String text);
+    byte[] textToSpeech(String text, String lan);
 
     /**
      * 语音转文字

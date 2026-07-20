@@ -39,13 +39,15 @@ public class VoiceController {
     /**
      * 文字转语音
      *
-     * @param body 包含 text 字段的 JSON
+     * @param body 包含 text 字段(必填)和 lan 字段(可选,默认 "en")的 JSON
      * @return 音频二进制流
      */
     @PostMapping("/tts")
     public ResponseEntity<byte[]> textToSpeech(@RequestBody Map<String, String> body) {
         String text = body.get("text");
-        byte[] audio = voiceService.textToSpeech(text);
+        // 默认英文,支持中文(zh)
+        String lan = body.getOrDefault("lan", "en");
+        byte[] audio = voiceService.textToSpeech(text, lan);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
                 .body(audio);

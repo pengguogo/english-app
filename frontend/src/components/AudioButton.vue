@@ -1,6 +1,6 @@
 <!--
   AudioButton.vue - 发音播放按钮组件
-  用途: 点击后调用 useTts 播放传入文本的英文发音,面向儿童的英语学习场景。
+  用途: 点击后先播放中文翻译,再播放英文单词/句子。面向儿童的英语学习场景。
   作者: english-app
   创建日期: 2026-07-20
 -->
@@ -10,13 +10,34 @@ import { useTts } from '../composables/useTts'
 /**
  * 组件 props:
  * @param {String} text - 需要播放发音的英文文本(必填)
+ * @param {String} translation - 中文翻译文本(可选),传入时先播放中文再播放英文
  */
 const props = defineProps({
-  text: { type: String, required: true }
+  text: { type: String, required: true },
+  translation: { type: String, default: '' }
 })
 
 /* 复用 TTS 组合式函数,获取 loading 状态与播放方法 */
-const { isLoading, play } = useTts()
+const { isLoading, playAndWait } = useTts()
+
+/**
+ * 点击播放:先播放中文翻译(如果有),播完后再播放英文。
+ * 两个音频顺序播放,播放期间按钮显示"播放中..."并禁用。
+ */
+async function handlePlay() {
+  if (isLoading.value) return
+  try {
+    // 如果有中文翻译,先播放中文
+    if (props.translation) {
+      await playAndWait(props.translation, 'zh')
+    }
+    // 再播放英文
+    await playAndWait(props.text, 'en')
+  } catch (e) {
+    console.error('TTS 播放失败:', e)
+    alert('发音加载失败,请重试')
+  }
+}
 </script>
 
 <template>
@@ -24,7 +45,7 @@ const { isLoading, play } = useTts()
     class="audio-btn"
     :class="{ loading: isLoading }"
     :disabled="isLoading"
-    @click="play(props.text)"
+    @click="handlePlay"
   >
     <!-- 扬声器 SVG 图标 -->
     <svg class="icon-speaker" width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -35,7 +56,7 @@ const { isLoading, play } = useTts()
             stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"
             class="wave wave-1"/>
     </svg>
-    <span>{{ isLoading ? '加载中...' : '听发音' }}</span>
+    <span>{{ isLoading ? '播放中...' : '听发音' }}</span>
   </button>
 </template>
 

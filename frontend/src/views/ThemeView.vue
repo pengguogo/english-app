@@ -10,6 +10,25 @@ import { useRoute, useRouter } from 'vue-router'
 import { getUnitsByTheme } from '../api/unit'
 import { getThemeConfig } from '../config/themeConfig'
 import BackBar from '../components/BackBar.vue'
+// 汪汪队角色图片(仅主题 3 使用)
+import ryderImg from '../assets/paw-patrol/ryder.jpg'
+import chaseImg from '../assets/paw-patrol/chase.jpg'
+import marshallImg from '../assets/paw-patrol/marshall.jpg'
+import skyeImg from '../assets/paw-patrol/skye.jpg'
+import rubbleImg from '../assets/paw-patrol/rubble.jpg'
+import zumaImg from '../assets/paw-patrol/zuma.jpg'
+import rockyImg from '../assets/paw-patrol/rocky.jpg'
+
+// 汪汪队角色列表:图片 + 名字 + 职责描述
+const pawPatrolCharacters = [
+  { img: ryderImg, name: 'Ryder', cn: '莱德', role: '队长' },
+  { img: chaseImg, name: 'Chase', cn: '阿奇', role: '警察狗' },
+  { img: marshallImg, name: 'Marshall', cn: '毛毛', role: '消防狗' },
+  { img: skyeImg, name: 'Skye', cn: '天天', role: '飞行狗' },
+  { img: rubbleImg, name: 'Rubble', cn: '小砾', role: '工程狗' },
+  { img: zumaImg, name: 'Zuma', cn: '路马', role: '水上救生狗' },
+  { img: rockyImg, name: 'Rocky', cn: '灰灰', role: '回收狗' }
+]
 
 const route = useRoute()
 const router = useRouter()
@@ -68,6 +87,25 @@ function getNodeStatus(unit, index) {
         <p>{{ themeVisual.description }}</p>
       </div>
     </div>
+
+    <!-- 汪汪队角色介绍(仅主题 3 显示) -->
+    <section v-if="Number(route.params.themeId) === 3" class="characters-section">
+      <h2 class="section-title">🐶 汪汪队成员</h2>
+      <div class="characters-grid">
+        <div
+          v-for="char in pawPatrolCharacters"
+          :key="char.name"
+          class="character-card"
+        >
+          <img :src="char.img" :alt="char.cn" class="character-img" />
+          <div class="character-info">
+            <span class="character-name">{{ char.name }}</span>
+            <span class="character-cn">{{ char.cn }}</span>
+            <span class="character-role">{{ char.role }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- 加载中 -->
     <div v-if="isLoading" class="state-tip">
@@ -267,6 +305,60 @@ function getNodeStatus(unit, index) {
   padding: var(--space-5);
   margin-bottom: var(--space-6);
   box-shadow: var(--shadow-card);
+}
+
+/* ===== 汪汪队角色介绍 ===== */
+.characters-section {
+  margin-bottom: var(--space-6);
+}
+
+.characters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-3);
+}
+
+.character-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  transition: transform var(--duration-fast) var(--ease-bounce);
+}
+
+.character-card:hover {
+  transform: translateY(-4px) scale(1.03);
+}
+
+.character-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+
+.character-info {
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.character-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+.character-cn {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.character-role {
+  font-size: 10px;
+  color: var(--text-tertiary);
 }
 
 .section-title {

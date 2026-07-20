@@ -92,16 +92,18 @@ public class BaiduVoiceService implements VoiceService {
     /**
      * 文字转语音
      * <p>
-     * 调用百度 TTS 接口合成中文语音,使用度小薇(女声)音色。
+     * 调用百度 TTS 接口合成语音,根据 lan 参数选择语言。
+     * 英文使用 per=0(英文男声),中文使用 per=4118(度小薇女声)。
      * 调用失败时返回空字节数组,保证接口不抛异常。
      * </p>
      *
      * @param text 待合成的文本
+     * @param lan  语言代码("en" 英文, "zh" 中文)
      * @return 音频二进制数据;失败时返回空数组
      */
     @Override
-    public byte[] textToSpeech(String text) {
-        log.info("TTS 请求: {}", text);
+    public byte[] textToSpeech(String text, String lan) {
+        log.info("TTS 请求: text={}, lan={}", text, lan);
         try {
             String token = getToken();
             HttpHeaders headers = new HttpHeaders();
@@ -111,9 +113,10 @@ public class BaiduVoiceService implements VoiceService {
             form.add("tex", text);
             form.add("tok", token);
             form.add("cuid", "english-app-web");
-            form.add("lan", "zh");
+            form.add("lan", lan);
             form.add("ctp", "1");
-            form.add("per", "4118");   // 度小薇(女声,适合儿童)
+            // 英文使用英文男声,中文使用度小薇(女声,适合儿童)
+            form.add("per", "en".equals(lan) ? "0" : "4118");
 
             HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(form, headers);
             ResponseEntity<byte[]> resp = restTemplate.postForEntity(TTS_URL, entity, byte[].class);

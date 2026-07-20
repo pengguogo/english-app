@@ -48,6 +48,27 @@ const themeConfig = {
       { icon: '✈️', color: 'var(--color-sky)', label: '天空' },
       { icon: '🚢', color: 'var(--color-primary)', label: '水上' }
     ]
+  },
+  // 主题 3:汪汪队立大功(3 单元:狗狗小队 / 救援行动 / 团队精神)
+  3: {
+    emoji: '🐕',
+    title: '汪汪队立大功',
+    description: '和汪汪队一起学习救援与合作',
+    scenes: [
+      { icon: '🐕', color: 'var(--color-primary)', label: '狗狗小队' },
+      { icon: '🚑', color: 'var(--color-danger)', label: '救援行动' },
+      { icon: '🤝', color: 'var(--color-accent)', label: '团队精神' }
+    ]
+  },
+  // 主题 4:小砾工程队(2 单元:工程工具 / 工程家族)
+  4: {
+    emoji: '🏗️',
+    title: '小砾工程队',
+    description: '和工程狗狗们一起建造有趣的东西',
+    scenes: [
+      { icon: '🔧', color: 'var(--color-primary)', label: '工程工具' },
+      { icon: '🐕', color: 'var(--color-accent)', label: '工程家族' }
+    ]
   }
 }
 

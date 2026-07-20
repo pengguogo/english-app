@@ -14,10 +14,11 @@ import http from './http'
  * 拦截器识别为 Blob 后直接透传,调用方可直接用于 <audio> 播放或 URL.createObjectURL。
  *
  * @param {string} text 待合成语音的文本
+ * @param {string} [lan='en'] 语言代码("en" 英文, "zh" 中文)
  * @return {Promise<Blob>} 语音二进制数据
  */
-export const textToSpeech = (text) =>
-  http.post('/voice/tts', { text }, { responseType: 'blob' })
+export const textToSpeech = (text, lan = 'en') =>
+  http.post('/voice/tts', { text, lan }, { responseType: 'blob' })
 
 /**
  * 发音评测。
