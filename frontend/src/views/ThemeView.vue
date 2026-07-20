@@ -8,6 +8,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getUnitsByTheme } from '../api/unit'
+import { getThemeConfig } from '../config/themeConfig'
 import BackBar from '../components/BackBar.vue'
 
 const route = useRoute()
@@ -15,6 +16,9 @@ const router = useRouter()
 const units = ref([])
 const isLoading = ref(true)
 const errorMsg = ref('')
+
+// 当前主题视觉配置:按路由 themeId 动态读取,避免硬编码某一主题内容
+const themeVisual = computed(() => getThemeConfig(route.params.themeId))
 
 onMounted(async () => {
   const themeId = route.params.themeId
@@ -30,15 +34,13 @@ onMounted(async () => {
 
 /**
  * 根据单元索引返回对应的场景配置(emoji + 主色调)。
+ * 场景来自当前主题配置,不同主题(水果/交通工具)展示不同图标,
+ * 超出配置数量时回退到第一个场景,保证渲染安全。
  * @param {number} index 单元在列表中的索引
- * @return {Object} 场景配置 { icon, color, scene }
+ * @return {Object} 场景配置 { icon, color, label }
  */
 function getSceneConfig(index) {
-  const scenes = [
-    { icon: '🚗', color: 'var(--color-success)', label: '陆地' },
-    { icon: '✈️', color: 'var(--color-sky)', label: '天空' },
-    { icon: '🚢', color: 'var(--color-primary)', label: '水上' }
-  ]
+  const scenes = themeVisual.value.scenes
   return scenes[index] || scenes[0]
 }
 
@@ -57,13 +59,13 @@ function getNodeStatus(unit, index) {
 
 <template>
   <div class="theme-view">
-    <BackBar title="交通工具乐园" @back="router.push('/')" />
+    <BackBar :title="themeVisual.title" @back="router.push('/')" />
 
     <!-- 场景 banner -->
     <div class="scene-banner">
       <div class="banner-content">
-        <h1>🚗 交通工具乐园</h1>
-        <p>探索陆地、天空和水上的交通工具</p>
+        <h1>{{ themeVisual.emoji }} {{ themeVisual.title }}</h1>
+        <p>{{ themeVisual.description }}</p>
       </div>
     </div>
 

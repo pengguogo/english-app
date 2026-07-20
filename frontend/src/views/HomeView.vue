@@ -8,6 +8,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getThemes } from '../api/theme'
+import { getThemeConfig } from '../config/themeConfig'
 import mascotWelcome from '../assets/mascot/mascot-welcome.jpg'
 
 const router = useRouter()
@@ -28,12 +29,12 @@ onMounted(async () => {
 
 /**
  * 根据主题 ID 返回对应的 emoji 图标。
+ * 图标来自集中配置 themeConfig,新增主题无需改动本组件。
  * @param {number} id 主题 ID
  * @return {string} emoji 字符
  */
 function getThemeIcon(id) {
-  const iconMap = { 1: '🍎', 2: '🚗' }
-  return iconMap[id] || '📚'
+  return getThemeConfig(id).emoji
 }
 </script>
 
