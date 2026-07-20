@@ -1,6 +1,8 @@
 <!--
   UnitView.vue - 课时列表页:展示某单元下的所有课时
   用途: 学习卡片风格列表 + 类型标签药丸形 + 星星徽章 + 当前课时脉冲提示。
+  改进: 锁定逻辑改为基于后端进度状态(LOCKED/IN_PROGRESS/COMPLETED)判断,
+        替代原先硬编码的 index===0 逻辑,支持完成一课后自动解锁下一课。
   作者: english-app
   创建日期: 2026-07-20
 -->
@@ -8,18 +10,31 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getLessonsByUnit } from '../api/lesson'
+import { getUnitProgress } from '../api/progress'
 import BackBar from '../components/BackBar.vue'
+import StarBar from '../components/StarBar.vue'
 
 const route = useRoute()
 const router = useRouter()
 const lessons = ref([])
+// 课时进度映射: lessonId → { status, stars, score }
+const progressMap = ref(new Map())
 const isLoading = ref(true)
 const errorMsg = ref('')
 
 onMounted(async () => {
   const unitId = route.params.unitId
   try {
-    lessons.value = await getLessonsByUnit(unitId)
+    // 并行请求课时列表与单元进度,提升首屏加载速度
+    // 进度接口失败时降级为 null,课时列表仍可正常展示
+    const [lessonList, progressList] = await Promise.all([
+      getLessonsByUnit(unitId),
+      getUnitProgress(unitId).catch(() => null)
+    ])
+    lessons.value = lessonList
+    if (progressList) {
+      progressMap.value = new Map(progressList.map(p => [p.lessonId, p]))
+    }
   } catch (e) {
     errorMsg.value = '加载失败,请返回重试'
     console.error('加载课时失败:', e)
@@ -39,13 +54,51 @@ function getTypeTag(type) {
 }
 
 /**
- * 判断课时是否可点击(当前仅第一课可学,后续按进度解锁)。
- * 简化逻辑: index === 0 可学,其余锁定。
- * @param {number} index 课时索引
+ * 获取某课时的进度对象。
+ * @param {Object} lesson 课时对象
+ * @return {Object|undefined} 进度对象 { status, stars, score }
+ */
+function getProgress(lesson) {
+  return progressMap.value.get(lesson.id)
+}
+
+/**
+ * 判断课时是否可点击(已解锁或已完成均可进入复习)。
+ * 进度数据缺失时降级为可点击,避免用户被卡住。
+ * @param {Object} lesson 课时对象
  * @return {boolean} 是否可点击
  */
-function isAvailable(index) {
-  return index === 0
+function isAvailable(lesson) {
+  const p = getProgress(lesson)
+  if (!p) return true
+  return p.status === 'IN_PROGRESS' || p.status === 'COMPLETED'
+}
+
+/**
+ * 判断课时是否为当前正在学习的课时(IN_PROGRESS)。
+ * @param {Object} lesson 课时对象
+ * @return {boolean} 是否为当前课时
+ */
+function isCurrent(lesson) {
+  return getProgress(lesson)?.status === 'IN_PROGRESS'
+}
+
+/**
+ * 判断课时是否已完成(COMPLETED)。
+ * @param {Object} lesson 课时对象
+ * @return {boolean} 是否已完成
+ */
+function isCompleted(lesson) {
+  return getProgress(lesson)?.status === 'COMPLETED'
+}
+
+/**
+ * 获取已完成课时的星星数。
+ * @param {Object} lesson 课时对象
+ * @return {number} 星星数(0-3)
+ */
+function getStars(lesson) {
+  return getProgress(lesson)?.stars || 0
 }
 </script>
 
@@ -71,14 +124,22 @@ function isAvailable(index) {
         :key="lesson.id"
         class="lesson-card"
         :class="{
-          locked: !isAvailable(index),
-          current: isAvailable(index)
+          locked: !isAvailable(lesson),
+          current: isCurrent(lesson),
+          completed: isCompleted(lesson)
         }"
-        @click="isAvailable(index) && router.push(`/lesson/${lesson.id}`)"
+        @click="isAvailable(lesson) && router.push(`/lesson/${lesson.id}`)"
       >
         <!-- 左侧缩略图 -->
-        <div class="lesson-thumb" :class="{ locked: !isAvailable(index) }">
-          <span class="thumb-num">{{ index + 1 }}</span>
+        <div
+          class="lesson-thumb"
+          :class="{
+            locked: !isAvailable(lesson),
+            completed: isCompleted(lesson)
+          }"
+        >
+          <span v-if="isCompleted(lesson)" class="thumb-check">✓</span>
+          <span v-else class="thumb-num">{{ index + 1 }}</span>
         </div>
 
         <!-- 中间信息 -->
@@ -91,7 +152,11 @@ function isAvailable(index) {
 
         <!-- 右侧状态 -->
         <div class="lesson-status">
-          <span v-if="isAvailable(index)" class="play-icon">▶</span>
+          <!-- 已完成: 显示星星徽章 -->
+          <StarBar v-if="isCompleted(lesson)" :stars="getStars(lesson)" size="sm" />
+          <!-- 当前可学: 播放图标 -->
+          <span v-else-if="isAvailable(lesson)" class="play-icon">▶</span>
+          <!-- 锁定: 锁图标 -->
           <span v-else class="lock-icon">🔒</span>
         </div>
       </div>
@@ -137,6 +202,11 @@ function isAvailable(index) {
   cursor: not-allowed;
 }
 
+/* 已完成课时: 成功色左边框,给予成就感 */
+.lesson-card.completed {
+  border-left: 4px solid var(--color-success);
+}
+
 /* 当前可学课时: 轻微脉冲提示 */
 @media (prefers-reduced-motion: no-preference) {
   .lesson-card.current {
@@ -167,7 +237,19 @@ function isAvailable(index) {
   box-shadow: none;
 }
 
+/* 已完成课时缩略图: 成功色背景 + 对勾 */
+.lesson-thumb.completed {
+  background: var(--color-success);
+  box-shadow: 0 2px 8px rgba(76, 217, 100, 0.3);
+}
+
 .thumb-num {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: white;
+}
+
+.thumb-check {
   font-size: var(--text-lg);
   font-weight: var(--font-bold);
   color: white;
@@ -217,6 +299,8 @@ function isAvailable(index) {
 .lesson-status {
   font-size: 1.5rem;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .play-icon {

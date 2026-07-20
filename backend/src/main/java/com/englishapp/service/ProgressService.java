@@ -3,6 +3,9 @@ package com.englishapp.service;
 import com.englishapp.dto.CompleteRequest;
 import com.englishapp.dto.CompleteResponse;
 import com.englishapp.dto.ProgressDto;
+import com.englishapp.dto.UnitProgressDto;
+
+import java.util.List;
 
 /**
  * 进度业务接口
@@ -50,4 +53,21 @@ public interface ProgressService {
      * @return 下一课解锁信息(若已是最后一课,nextLessonId 为 null,unlocked 为 false)
      */
     CompleteResponse completeLesson(Integer lessonId, CompleteRequest request, Integer userId);
+
+    /**
+     * 批量获取某单元下所有课时的进度
+     * <p>
+     * 供前端课时列表页一次性渲染整单元的锁定/可学/已完成状态,避免逐课 N+1 查询。
+     * 对于无进度记录的课时,按以下规则返回默认状态:
+     * <ul>
+     *     <li>该单元 sortOrder 最小的课时(首课)返回 {@code IN_PROGRESS}(可学习)</li>
+     *     <li>其余课时返回 {@code LOCKED}</li>
+     * </ul>
+     * </p>
+     *
+     * @param unitId 单元 ID
+     * @param userId 用户 ID(为 null 时由实现决定默认值)
+     * @return 该单元所有课时的进度列表(按课时 sortOrder 升序排列)
+     */
+    List<UnitProgressDto> getUnitProgress(Integer unitId, Integer userId);
 }

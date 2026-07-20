@@ -6,6 +6,7 @@ import com.englishapp.domain.enums.ProgressStatus;
 import com.englishapp.dto.CompleteRequest;
 import com.englishapp.dto.CompleteResponse;
 import com.englishapp.dto.ProgressDto;
+import com.englishapp.dto.UnitProgressDto;
 import com.englishapp.repository.LessonRepository;
 import com.englishapp.repository.UserProgressRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -278,5 +279,114 @@ class ProgressServiceImplTest {
         // Assert:应保留历史最高分 90 而非本次 75,保留最高星数 3 而非 2
         assertEquals(90, existing.getScore());
         assertEquals(3, existing.getStars());
+    }
+
+    /**
+     * 批量查询单元进度时应正确合并已有记录与默认状态
+     * <p>
+     * 验证:当用户已完成首课、解锁第二课、第三课无记录时,
+     * getUnitProgress 应返回三条记录,状态依次为 COMPLETED / IN_PROGRESS / LOCKED。
+     * </p>
+     */
+    @Test
+    void should_returnMixedStatus_when_unitHasPartialProgress() {
+        // Arrange:单元4 有三节课
+        Lesson lesson1 = new Lesson();
+        lesson1.setId(10);
+        lesson1.setUnitId(4);
+        lesson1.setSortOrder(1);
+
+        Lesson lesson2 = new Lesson();
+        lesson2.setId(11);
+        lesson2.setUnitId(4);
+        lesson2.setSortOrder(2);
+
+        Lesson lesson3 = new Lesson();
+        lesson3.setId(12);
+        lesson3.setUnitId(4);
+        lesson3.setSortOrder(3);
+
+        // 用户1 的进度:首课已完成(3星90分),第二课已解锁(IN_PROGRESS)
+        UserProgress progress1 = new UserProgress();
+        progress1.setUserId(1);
+        progress1.setLessonId(10);
+        progress1.setStatus(ProgressStatus.COMPLETED);
+        progress1.setStars(3);
+        progress1.setScore(90);
+
+        UserProgress progress2 = new UserProgress();
+        progress2.setUserId(1);
+        progress2.setLessonId(11);
+        progress2.setStatus(ProgressStatus.IN_PROGRESS);
+        progress2.setStars(0);
+        progress2.setScore(0);
+
+        when(lessonRepository.findByUnitIdOrderBySortOrderAsc(4))
+                .thenReturn(List.of(lesson1, lesson2, lesson3));
+        when(userProgressRepository.findByUserIdAndLessonUnitId(1, 4))
+                .thenReturn(List.of(progress1, progress2));
+
+        // Act
+        List<UnitProgressDto> result = progressService.getUnitProgress(4, 1);
+
+        // Assert:三条记录,状态依次为 COMPLETED / IN_PROGRESS / LOCKED
+        assertEquals(3, result.size());
+        assertEquals("COMPLETED", result.get(0).status());
+        assertEquals(3, result.get(0).stars());
+        assertEquals("IN_PROGRESS", result.get(1).status());
+        assertEquals("LOCKED", result.get(2).status());
+    }
+
+    /**
+     * 全新单元无任何进度记录时首课应可学、其余锁定
+     * <p>
+     * 验证:当用户从未学习某单元时,getUnitProgress 应将首课(sortOrder 最小)
+     * 返回为 IN_PROGRESS,其余课时返回 LOCKED。
+     * </p>
+     */
+    @Test
+    void should_returnFirstInProgress_when_noProgressRecords() {
+        // Arrange:单元5 有两节课,用户无任何进度记录
+        Lesson lesson1 = new Lesson();
+        lesson1.setId(20);
+        lesson1.setUnitId(5);
+        lesson1.setSortOrder(1);
+
+        Lesson lesson2 = new Lesson();
+        lesson2.setId(21);
+        lesson2.setUnitId(5);
+        lesson2.setSortOrder(2);
+
+        when(lessonRepository.findByUnitIdOrderBySortOrderAsc(5))
+                .thenReturn(List.of(lesson1, lesson2));
+        when(userProgressRepository.findByUserIdAndLessonUnitId(1, 5))
+                .thenReturn(List.of());
+
+        // Act
+        List<UnitProgressDto> result = progressService.getUnitProgress(5, 1);
+
+        // Assert:首课 IN_PROGRESS,第二课 LOCKED
+        assertEquals(2, result.size());
+        assertEquals("IN_PROGRESS", result.get(0).status());
+        assertEquals("LOCKED", result.get(1).status());
+    }
+
+    /**
+     * 空单元应返回空列表
+     * <p>
+     * 验证:当某单元下无任何课时时,getUnitProgress 应返回空列表而非异常。
+     * </p>
+     */
+    @Test
+    void should_returnEmptyList_when_unitHasNoLessons() {
+        // Arrange:单元6 无任何课时
+        when(lessonRepository.findByUnitIdOrderBySortOrderAsc(6))
+                .thenReturn(List.of());
+
+        // Act
+        List<UnitProgressDto> result = progressService.getUnitProgress(6, 1);
+
+        // Assert:应返回空列表
+        assertTrue(result.isEmpty());
     }
 }

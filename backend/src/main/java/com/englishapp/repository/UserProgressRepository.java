@@ -61,4 +61,22 @@ public interface UserProgressRepository extends JpaRepository<UserProgress, Inte
     Integer countByUserIdAndLessonUnitIdAndStatus(@Param("userId") Integer userId,
                                                   @Param("unitId") Integer unitId,
                                                   @Param("status") ProgressStatus status);
+
+    /**
+     * 查询某用户在某单元下所有课时的进度记录
+     * <p>
+     * 由于 UserProgress 未关联 Lesson 实体,此处通过隐式 join
+     * (up.lessonId = l.id)关联 Lesson,再按 unitId 过滤。
+     * 用于课时列表页批量获取进度,避免逐课 N+1 查询。
+     * </p>
+     *
+     * @param userId 用户 ID
+     * @param unitId 单元 ID
+     * @return 该用户在该单元下所有有进度记录的课时进度列表
+     */
+    @Query("SELECT up FROM UserProgress up, Lesson l " +
+            "WHERE up.userId = :userId AND up.lessonId = l.id " +
+            "AND l.unitId = :unitId")
+    List<UserProgress> findByUserIdAndLessonUnitId(@Param("userId") Integer userId,
+                                                    @Param("unitId") Integer unitId);
 }

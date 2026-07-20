@@ -6,13 +6,17 @@ import com.englishapp.domain.enums.ProgressStatus;
 import com.englishapp.dto.CompleteRequest;
 import com.englishapp.dto.CompleteResponse;
 import com.englishapp.dto.ProgressDto;
+import com.englishapp.dto.UnitProgressDto;
 import com.englishapp.repository.LessonRepository;
 import com.englishapp.repository.UserProgressRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 进度业务实现
@@ -153,5 +157,47 @@ public class ProgressServiceImpl implements ProgressService {
                 userProgressRepository.save(up);
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<UnitProgressDto> getUnitProgress(Integer unitId, Integer userId) {
+        // 未指定用户时使用默认用户,便于匿名/调试场景
+        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
+
+        // 查询单元下所有课时(按 sortOrder 升序),作为返回顺序的基准
+        List<Lesson> unitLessons = lessonRepository.findByUnitIdOrderBySortOrderAsc(unitId);
+        if (unitLessons.isEmpty()) {
+            return List.of();
+        }
+
+        // 一次性查询该用户在该单元下所有有进度记录的课时,避免 N+1
+        List<UserProgress> progressList = userProgressRepository
+                .findByUserIdAndLessonUnitId(uid, unitId);
+        // 构建 lessonId → UserProgress 映射,便于 O(1) 查找
+        Map<Integer, UserProgress> progressMap = progressList.stream()
+                .collect(Collectors.toMap(UserProgress::getLessonId, Function.identity()));
+
+        // 首课 sortOrder:无进度记录时,首课默认 IN_PROGRESS,其余 LOCKED
+        int firstSortOrder = unitLessons.stream()
+                .mapToInt(Lesson::getSortOrder).min().orElse(0);
+
+        // 遍历所有课时,有记录用记录状态,无记录按首课规则推断
+        return unitLessons.stream()
+                .map(lesson -> {
+                    UserProgress up = progressMap.get(lesson.getId());
+                    if (up != null) {
+                        return new UnitProgressDto(lesson.getId(),
+                                up.getStatus().name(), up.getStars(), up.getScore());
+                    }
+                    // 无记录:首课可学(IN_PROGRESS),其余锁定(LOCKED)
+                    String status = lesson.getSortOrder() == firstSortOrder
+                            ? ProgressStatus.IN_PROGRESS.name()
+                            : ProgressStatus.LOCKED.name();
+                    return new UnitProgressDto(lesson.getId(), status, 0, 0);
+                })
+                .toList();
     }
 }
