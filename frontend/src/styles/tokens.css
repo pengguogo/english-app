@@ -1,0 +1,94 @@
+/**
+ * tokens.css - 设计令牌系统
+ * 用途: 集中定义配色、圆角、阴影、间距、字号、动效等设计变量,
+ *       所有组件和页面必须通过 var(--xxx) 引用,禁止硬编码色值。
+ * 作者: english-app
+ * 创建日期: 2026-07-20
+ */
+
+:root {
+  /* ===== 配色令牌 ===== */
+  /* 主色: 蓝紫色,用于主按钮、导航、链接 */
+  --color-primary: #6B7CFF;
+  --color-primary-hover: #5568D3;
+  --color-primary-light: #8A96FF;
+
+  /* 强调色: 明黄色,用于星星、奖励、CTA */
+  --color-accent: #FFD93D;
+
+  /* 成功色: 绿色,用于完成、正确反馈 */
+  --color-success: #4CD964;
+  --color-success-hover: #43A047;
+
+  /* 警示色: 珊瑚红,用于错误、未解锁 */
+  --color-warning: #FF6B6B;
+
+  /* 柔和色: 用于装饰、场景 */
+  --color-pink: #FFB6C1;
+  --color-sky: #87CEEB;
+
+  /* 橙色: 用于评分、录音 */
+  --color-orange: #FF9800;
+  --color-orange-hover: #F57C00;
+
+  /* ===== 文字层级 ===== */
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+
+  /* ===== 背景层 ===== */
+  --bg-page: #FFF8F0;
+  --bg-card: #FFFFFF;
+  --bg-muted: #F5F5F7;
+
+  /* ===== 边框 ===== */
+  --border-light: #E8E8EC;
+  --border-muted: #F0F0F2;
+
+  /* ===== 圆角令牌 ===== */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* ===== 阴影令牌 ===== */
+  --shadow-card: 0 4px 16px rgba(107, 124, 255, 0.08);
+  --shadow-hover: 0 8px 24px rgba(107, 124, 255, 0.15);
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  /* ===== 间距令牌(8 倍数体系) ===== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* ===== 字号令牌 ===== */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 24px;
+  --text-xl: 32px;
+
+  /* ===== 字重令牌 ===== */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-bold: 700;
+
+  /* ===== 字体族 ===== */
+  --font-sans: 'PingFang SC', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+
+  /* ===== 动效令牌 ===== */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 300ms;
+
+  /* ===== 渐变令牌 ===== */
+  --gradient-primary: linear-gradient(135deg, #6B7CFF 0%, #8A96FF 100%);
+  --gradient-warm: linear-gradient(135deg, #FFF3E0 0%, #FFF8E1 100%);
+  --gradient-success: linear-gradient(135deg, #4CD964 0%, #5BDB73 100%);
+}
