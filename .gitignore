@@ -6,6 +6,16 @@ backend/english.db
 *.jar
 *.war
 
+# 环境变量/密钥(不提交)
+.env
+backend/.env
+*.env.local
+*.env.production
+
+# 构建产物
+backend/src/main/resources/static/
+frontend/dist/
+
 # ===== Android (Gradle) =====
 android/.gradle/
 android/build/
