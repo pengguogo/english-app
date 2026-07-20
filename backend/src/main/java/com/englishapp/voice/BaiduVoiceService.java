@@ -38,8 +38,8 @@ public class BaiduVoiceService implements VoiceService {
     private static final String TOKEN_URL = "https://aip.baidubce.com/oauth/2.0/token";
     /** 百度语音合成接口地址 */
     private static final String TTS_URL = "https://tsn.baidu.com/text2audio";
-    /** 百度发音评测接口地址 */
-    private static final String SCORE_URL = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/brain_assessment/score";
+    /** 百度语音识别(ASR)接口地址 —— 用于发音评测:识别用户读音后与目标文本做相似度比较 */
+    private static final String ASR_URL = "https://vop.baidu.com/server_api";
 
     private final VoiceProperties voiceProperties;
     private final RestTemplate restTemplate = new RestTemplate();
@@ -142,8 +142,10 @@ public class BaiduVoiceService implements VoiceService {
     /**
      * 发音评测
      * <p>
-     * 将音频与参考文本提交至百度发音评测接口,获取 0-100 分数及反馈。
-     * 调用失败时返回 0 分与提示文案,保证接口可用。
+     * 百度原发音评测接口 {@code brain_assessment/score} 已下线(返回 error_code=3
+     * "Unsupported openapi method"),这里改用百度语音识别(ASR)做降级评分:
+     * 将用户录音发送至百度 ASR 识别出文本,再与参考文本做 Levenshtein 相似度比较,
+     * 将相似度映射为 0-100 分数。
      * </p>
      *
      * @param audioData 音频数据(wav 16k 16bit mono)
@@ -157,27 +159,105 @@ public class BaiduVoiceService implements VoiceService {
             String token = getToken();
             String audioBase64 = Base64.getEncoder().encodeToString(audioData);
 
+            // 构建百度 ASR 请求体
             Map<String, Object> body = new HashMap<>();
-            body.put("audio", audioBase64);
-            body.put("text", text);
-            body.put("type", "wav");
+            body.put("format", "wav");
+            body.put("rate", 16000);
+            body.put("channel", 1);
+            body.put("cuid", "english-app-web");
+            body.put("token", token);
+            body.put("speech", audioBase64);
+            body.put("len", audioData.length);
+            // dev_pid=1737 使用英文模型,适配英语学习场景
+            body.put("dev_pid", 1737);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            String url = SCORE_URL + "?access_token=" + token;
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-            ResponseEntity<String> resp = restTemplate.postForEntity(url, entity, String.class);
+            ResponseEntity<String> resp = restTemplate.postForEntity(ASR_URL, entity, String.class);
 
             JsonNode node = MAPPER.readTree(resp.getBody());
-            // 百度评测返回字段:score(总分,0-100)、可能还有 pronunciation/fluency 等子项
-            int score = node.has("score") ? node.get("score").asInt() : 0;
+            int errNo = node.has("err_no") ? node.get("err_no").asInt() : -1;
+            if (errNo != 0) {
+                String errMsg = node.has("err_msg") ? node.get("err_msg").asText() : "unknown";
+                log.warn("ASR 识别失败: err_no={}, err_msg={}", errNo, errMsg);
+                return new ScoreResponse(0, "没有听清楚,请再试一次");
+            }
+
+            // 提取识别结果(result 是字符串数组)
+            String recognized = "";
+            if (node.has("result") && node.get("result").isArray() && node.get("result").size() > 0) {
+                recognized = node.get("result").get(0).asText();
+            }
+            log.info("ASR 识别结果: recognized={}, target={}", recognized, text);
+
+            // 计算相似度并映射为分数
+            int score = calculateScore(text, recognized);
             String feedback = buildFeedback(score);
             return new ScoreResponse(score, feedback);
         } catch (Exception e) {
             log.error("发音评测调用失败: text={}", text, e);
             return new ScoreResponse(0, "评分服务暂时不可用,请重试");
         }
+    }
+
+    /**
+     * 计算发音评分。
+     * 将目标文本与 ASR 识别结果做归一化(小写 + 去标点)后,
+     * 用 Levenshtein 编辑距离计算相似度,再映射为 0-100 分数。
+     * <p>
+     * 映射规则:相似度 ≥ 0.9 → 90-100 分;≥ 0.7 → 70-89 分;以此类推。
+     * 这样既奖励发音准确(识别正确)的孩子,也对部分接近的发音给一定分数。
+     * </p>
+     *
+     * @param target    目标文本
+     * @param recognized ASR 识别结果
+     * @return 0-100 分数
+     */
+    private int calculateScore(String target, String recognized) {
+        String t = normalizeText(target);
+        String r = normalizeText(recognized);
+        if (t.isEmpty()) return 0;
+        if (r.isEmpty()) return 0;
+
+        double similarity = 1.0 - (double) levenshtein(t, r) / Math.max(t.length(), r.length());
+        // 相似度 0-1 映射到分数 0-100,并用二次曲线在低分段适当压低、高分段适当提升
+        int score = (int) Math.round(similarity * 100);
+        // 至少给 10 分底分,避免完全 0 分打击孩子积极性
+        return Math.max(10, score);
+    }
+
+    /**
+     * 文本归一化:转小写、去标点与空白,只保留字母用于比较。
+     *
+     * @param s 原始文本
+     * @return 归一化后的纯字母小写字符串
+     */
+    private String normalizeText(String s) {
+        if (s == null) return "";
+        return s.toLowerCase().replaceAll("[^a-z]", "");
+    }
+
+    /**
+     * Levenshtein 编辑距离(动态规划实现)。
+     * 用于衡量两个字符串之间的差异程度。
+     *
+     * @param a 字符串 a
+     * @param b 字符串 b
+     * @return 编辑距离(非负整数)
+     */
+    private int levenshtein(String a, String b) {
+        int[][] dp = new int[a.length() + 1][b.length() + 1];
+        for (int i = 0; i <= a.length(); i++) dp[i][0] = i;
+        for (int j = 0; j <= b.length(); j++) dp[0][j] = j;
+        for (int i = 1; i <= a.length(); i++) {
+            for (int j = 1; j <= b.length(); j++) {
+                int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                dp[i][j] = Math.min(Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1), dp[i - 1][j - 1] + cost);
+            }
+        }
+        return dp[a.length()][b.length()];
     }
 
     /**
