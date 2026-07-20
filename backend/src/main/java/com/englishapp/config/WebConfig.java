@@ -20,12 +20,14 @@ import java.io.IOException;
 public class WebConfig implements WebMvcConfigurer {
 
     /**
-     * 配置 CORS:开发期放行 Vite dev server
+     * 配置 CORS:开发期放行 Vite dev server。
+     * 使用 allowedOriginPatterns 支持 5173/5174 等 Vite 自动切换的端口,
+     * 避免 Vite 端口被占用时 POST 请求被 403 拒绝。
      */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:5173")
+                .allowedOriginPatterns("http://localhost:*")
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
