@@ -23,5 +23,9 @@ public enum LessonType {
     /** 保留，暂未使用 */
     GAME,
     /** 保留，暂未使用 */
-    SPEAK
+    SPEAK,
+    /** 自然拼读：字母发音规则学习（英语启蒙） */
+    PHONICS,
+    /** 情景对话：角色扮演式对话练习（英语口语） */
+    DIALOGUE
 }
