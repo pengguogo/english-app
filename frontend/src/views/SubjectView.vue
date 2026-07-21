@@ -64,7 +64,7 @@ function getThemeIcon(id) {
 
 <template>
   <div class="subject-page">
-    <BackBar :title="subjectName + '学习'" />
+    <BackBar :title="subjectName + '学习'" @back="router.back()" />
 
     <!-- 主题选择区 -->
     <section class="theme-section">
