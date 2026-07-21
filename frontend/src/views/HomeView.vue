@@ -1,46 +1,73 @@
 <!--
-  HomeView.vue - 首页:展示学习主题列表
-  用途: 吉祥物欢迎 header + 主题卡片网格,儿童友好的视觉风格。
+  HomeView.vue - 首页：学科选择
+  用途: 吉祥物欢迎 header + 四大学科卡片网格，儿童友好的视觉风格。
   作者: english-app
-  创建日期: 2026-07-20
+  创建日期: 2026-07-21
 -->
 <script setup>
+/**
+ * @description 学科选择首页，展示英语/语文/数学/课外四个学科入口卡片。
+  点击学科卡片跳转到 /subject/:subjectId 展示该学科下的主题列表。
+ */
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getThemes } from '../api/theme'
-import { getThemeConfig } from '../config/themeConfig'
+import { getSubjects } from '../api/subject'
 import mascotWelcome from '../assets/mascot/mascot-welcome.jpg'
 
 const router = useRouter()
-const themes = ref([])
+const subjects = ref([])
 const isLoading = ref(true)
 const errorMsg = ref('')
 
+// 学科卡片配色映射（CSS 变量名）
+const subjectColorVars = {
+  'ENGLISH': 'var(--subject-english)',
+  'CHINESE': 'var(--subject-chinese)',
+  'MATH': 'var(--subject-math)',
+  'EXTRACURRICULAR': 'var(--subject-extracurricular)'
+}
+
+// 学科 emoji 映射（后续替换为 AI 生成图标）
+const subjectEmojis = {
+  'ENGLISH': 'ABC',
+  'CHINESE': '语',
+  'MATH': '123',
+  'EXTRACURRICULAR': '🚂'
+}
+
 onMounted(async () => {
   try {
-    themes.value = await getThemes()
+    subjects.value = await getSubjects()
   } catch (e) {
-    errorMsg.value = '加载失败,请刷新重试'
-    console.error('加载主题失败:', e)
+    errorMsg.value = '加载失败，请刷新重试'
+    console.error('加载学科失败:', e)
   } finally {
     isLoading.value = false
   }
 })
 
 /**
- * 根据主题 ID 返回对应的 emoji 图标。
- * 图标来自集中配置 themeConfig,新增主题无需改动本组件。
- * @param {number} id 主题 ID
- * @return {string} emoji 字符
+ * 获取学科卡片的主题色
+ * @param {string} code 学科代码
+ * @return {string} CSS 变量
  */
-function getThemeIcon(id) {
-  return getThemeConfig(id).emoji
+function getSubjectColor(code) {
+  return subjectColorVars[code] || 'var(--color-primary)'
+}
+
+/**
+ * 获取学科卡片的图标文字
+ * @param {string} code 学科代码
+ * @return {string} 图标文字
+ */
+function getSubjectIcon(code) {
+  return subjectEmojis[code] || '📚'
 }
 </script>
 
 <template>
   <div class="home">
-    <!-- 顶部欢迎 header: 渐变背景 + 吉祥物 + 飘浮装饰 -->
+    <!-- 顶部欢迎 header -->
     <header class="welcome-header">
       <span class="decor cloud c1">☁️</span>
       <span class="decor star c2">⭐</span>
@@ -48,15 +75,52 @@ function getThemeIcon(id) {
       <div class="header-content">
         <div class="greeting">
           <h1>嗨，小朋友！</h1>
-          <p>今天一起学英语吧 🎈</p>
+          <p>今天想学什么呢？🎈</p>
         </div>
         <img :src="mascotWelcome" alt="小老鼠 Mimi" class="mascot" />
       </div>
     </header>
 
-    <!-- 主题选择区 -->
-    <section class="theme-section">
-      <h2 class="section-title">选择主题</h2>
+    <!-- 快捷功能区 -->
+    <section class="quick-section">
+      <h2 class="section-title">快捷功能</h2>
+      <div class="quick-grid">
+        <!-- 错题集入口 -->
+        <div
+          class="quick-card"
+          :style="{ '--card-accent': 'var(--color-warning)' }"
+          @click="router.push('/wrong-answers')"
+        >
+          <div class="quick-left" :style="{ background: 'var(--color-warning)' }"></div>
+          <div class="quick-body">
+            <span class="quick-icon">📝</span>
+            <div class="quick-text">
+              <h3 class="quick-title">错题集</h3>
+              <p class="quick-sub">复习错题</p>
+            </div>
+          </div>
+        </div>
+        <!-- 我学过的入口 -->
+        <div
+          class="quick-card"
+          :style="{ '--card-accent': 'var(--color-primary)' }"
+          @click="router.push('/learned')"
+        >
+          <div class="quick-left" :style="{ background: 'var(--color-primary)' }"></div>
+          <div class="quick-body">
+            <span class="quick-icon">📚</span>
+            <div class="quick-text">
+              <h3 class="quick-title">我学过的</h3>
+              <p class="quick-sub">学习记录</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 学科选择区 -->
+    <section class="subject-section">
+      <h2 class="section-title">选择学科</h2>
 
       <!-- 加载中 -->
       <div v-if="isLoading" class="state-tip">
@@ -69,19 +133,20 @@ function getThemeIcon(id) {
         <p>{{ errorMsg }}</p>
       </div>
 
-      <!-- 主题卡片网格 -->
-      <div v-else class="theme-grid">
+      <!-- 学科卡片网格 -->
+      <div v-else class="subject-grid">
         <div
-          v-for="theme in themes"
-          :key="theme.id"
-          class="theme-card"
-          :class="{ locked: theme.isLocked }"
-          @click="!theme.isLocked && router.push(`/theme/${theme.id}`)"
+          v-for="subject in subjects"
+          :key="subject.id"
+          class="subject-card"
+          :style="{ '--card-accent': getSubjectColor(subject.code) }"
+          @click="router.push(`/subject/${subject.id}`)"
         >
-          <div class="card-icon">{{ getThemeIcon(theme.id) }}</div>
-          <h3 class="card-title">{{ theme.name }}</h3>
-          <p class="card-desc" v-if="theme.isLocked">🔒 待解锁</p>
-          <p class="card-desc" v-else>点击进入 →</p>
+          <div class="card-icon" :style="{ background: getSubjectColor(subject.code) }">
+            {{ getSubjectIcon(subject.code) }}
+          </div>
+          <h3 class="card-title">{{ subject.name }}</h3>
+          <p class="card-desc">点击进入 →</p>
         </div>
       </div>
     </section>
@@ -89,13 +154,12 @@ function getThemeIcon(id) {
 </template>
 
 <style scoped>
-/* 首页容器: 暖底 + 上下内边距 */
 .home {
   padding: var(--space-4);
   min-height: 100vh;
 }
 
-/* ===== 欢迎 header ===== */
+/* 欢迎 header */
 .welcome-header {
   position: relative;
   background: var(--gradient-primary);
@@ -126,7 +190,6 @@ function getThemeIcon(id) {
   font-size: var(--text-base);
 }
 
-/* 吉祥物图片 */
 .mascot {
   width: 120px;
   height: 120px;
@@ -135,7 +198,7 @@ function getThemeIcon(id) {
   flex-shrink: 0;
 }
 
-/* 飘浮装饰元素 */
+/* 飘浮装饰 */
 .decor {
   position: absolute;
   z-index: 0;
@@ -157,7 +220,7 @@ function getThemeIcon(id) {
   50% { transform: translateY(-8px); }
 }
 
-/* ===== 主题选择区 ===== */
+/* 学科选择区 */
 .section-title {
   font-size: var(--text-lg);
   font-weight: var(--font-bold);
@@ -165,38 +228,116 @@ function getThemeIcon(id) {
   margin-bottom: var(--space-4);
 }
 
-/* 主题卡片网格 */
-.theme-grid {
+/* ===== 快捷功能区 ===== */
+.quick-section {
+  margin-bottom: var(--space-6);
+}
+
+/* 快捷卡片网格:两个并排 */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+/* 快捷卡片:白底圆角 + 左侧彩色竖条 */
+.quick-card {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: transform var(--duration-fast) var(--ease-bounce),
+              box-shadow var(--duration-fast) var(--ease-smooth);
+}
+
+.quick-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* 左侧彩色竖条 */
+.quick-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  flex-shrink: 0;
+}
+
+/* 主体内容 */
+.quick-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-left: var(--space-2);
+}
+
+.quick-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.quick-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quick-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+.quick-sub {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+/* 学科卡片网格 */
+.subject-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: var(--space-4);
 }
 
-/* 主题卡片: 白底 + 大圆角 + 柔和阴影 */
-.theme-card {
+/* 学科卡片 */
+.subject-card {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
   text-align: center;
   cursor: pointer;
   box-shadow: var(--shadow-card);
+  border-top: 4px solid var(--card-accent, var(--color-primary));
   transition: transform var(--duration-fast) var(--ease-bounce),
               box-shadow var(--duration-fast) var(--ease-smooth);
 }
 
-.theme-card:not(.locked):hover {
+.subject-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
 }
 
-.theme-card.locked {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
+/* 学科图标：彩色圆形背景 */
 .card-icon {
-  font-size: 3.5rem;
-  margin-bottom: var(--space-3);
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-3);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: white;
 }
 
 .card-title {
@@ -211,7 +352,7 @@ function getThemeIcon(id) {
   color: var(--text-tertiary);
 }
 
-/* ===== 状态提示 ===== */
+/* 状态提示 */
 .state-tip {
   text-align: center;
   padding: var(--space-8);
@@ -241,7 +382,7 @@ function getThemeIcon(id) {
   to { transform: rotate(360deg); }
 }
 
-/* ===== 响应式: 手机端缩小吉祥物 ===== */
+/* 响应式 */
 @media (max-width: 480px) {
   .mascot { width: 96px; height: 96px; }
   .greeting h1 { font-size: var(--text-lg); }

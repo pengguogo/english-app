@@ -1,8 +1,41 @@
 # AI 幼小衔接英语启蒙 APP
 
-面向 5-6 岁儿童的英语启蒙学习应用,以游戏化学习地图为核心,结合语音识别与发音评分,让孩子在闯关中自然习得英语。
+面向 5-6 岁儿童的多学科启蒙学习应用，以游戏化学习地图为核心，结合语音识别与发音评分，让孩子在闯关中自然习得英语。已扩展为英语、语文、数学、课外四大学科平台。
 
-> **当前阶段**:Phase 2 网页版核心学习闭环已完成,优先以电脑网页版让孩子快速使用并收集反馈。Android 版暂停,待网页版验证后再定。
+> **当前阶段**:Phase 2 多学科网页版核心学习闭环已完成。英语学科已扩展至 60 课时并新增自然拼读、情景对话课型；新增错题本与已学课程复习功能。Android 版骨架保留，待网页版验证后再定。
+
+---
+
+## 功能特性
+
+### 多学科学习平台
+
+| 学科 | 代码 | 主题示例 | 主要课型 |
+|------|------|----------|----------|
+| 英语 | ENGLISH | 水果乐园 / 交通工具 / 汪汪队 / 小砾工程 | WORD / SENTENCE / PHONICS / DIALOGUE / READING / QUIZ |
+| 语文 | CHINESE | 汉字识字 / 古诗朗诵 / 故事阅读 | WORD / SENTENCE / READING |
+| 数学 | MATH | 数字认知 / 加减运算 / 图形应用 | WORD / CALCULATE / QUIZ |
+| 课外 | EXTRACURRICULAR | 火车科普 | READING / QUIZ |
+
+### 七种课时类型
+
+| 类型 | 说明 | 交互模式 |
+|------|------|----------|
+| WORD | 看图认字 | 听发音 → 跟读评分 |
+| SENTENCE | 句型朗诵 | 听音 → 跟读评分 |
+| READING | 图文阅读 | 翻页阅读 |
+| QUIZ | 选择题 | 判对错，答错自动入错题本 |
+| CALCULATE | 计算题 | 数字输入判对错 |
+| PHONICS | 自然拼读 | 字母发音规则学习 |
+| DIALOGUE | 情景对话 | 角色扮演式对话练习 |
+
+### 学习闭环
+
+- **错题本**:答错自动记录，支持掌握度统计、标记已掌握、按类型筛选复习
+- **已学课程**:已完成课时回顾，含按学科/课型的分类统计与累计星星
+- **语音评测**:百度 TTS 合成 + ASR 相似度评分（适配器模式，可切换供应商）
+- **单词配图后端托管**:数据库只存图片 key，后端下发完整 URL，迁移云存储零改动
+- **吉祥物 Mimi**:灰老鼠 + 黄围巾，仅在欢迎/学习陪伴/完成庆祝三场景出现
 
 ---
 
@@ -11,14 +44,14 @@
 | 层级 | 技术 | 版本 |
 |------|------|------|
 | 后端 | Java + Spring Boot | 17 / 3.2.0 |
-| 数据库 | SQLite(开发)→ PostgreSQL(生产) | Flyway 管理迁移 |
+| 数据库 | SQLite(开发)→ PostgreSQL(生产) | Flyway 管理迁移 V1~V18 |
 | 前端 | Vue 3 + Vite + Pinia + Vue Router | 3.5 / 6.3 / 4.0 / 4.6 |
 | HTTP 客户端 | Axios | 1.18 |
-| 语音服务 | 百度 TTS + 发音评测(适配器模式抽象) | - |
+| 语音服务 | 百度 TTS + ASR 发音评测(适配器模式抽象) | - |
 | 测试 | JUnit 5 + Mockito + H2 | Spring Boot Test |
 | 部署 | Vue 构建产物嵌入 Spring Boot `static/`,单 JAR 运行 | - |
 
-> Android 版(Kotlin + Jetpack Compose + Hilt + Retrofit + Room)骨架已保留在 `android/` 目录,后续视网页版反馈决定是否继续迭代。
+> Android 版(Kotlin + Jetpack Compose + Hilt + Retrofit + Room)骨架已保留在 `android/` 目录，后续视网页版反馈决定是否继续迭代。
 
 ---
 
@@ -28,36 +61,45 @@
 english-app/
 ├── backend/                          # Spring Boot 后端
 │   ├── src/main/java/com/englishapp/
-│   │   ├── controller/               # REST API 控制器
-│   │   │   ├── ThemeController.java        # 主题
-│   │   │   ├── UnitController.java         # 单元
-│   │   │   ├── LessonController.java       # 课时
-│   │   │   ├── ProgressController.java     # 学习进度
-│   │   │   └── VoiceController.java        # TTS / 发音评测
+│   │   ├── controller/               # REST API 控制器(7 个)
+│   │   │   ├── SubjectController.java       # 学科
+│   │   │   ├── ThemeController.java         # 主题(支持按学科筛选)
+│   │   │   ├── UnitController.java          # 单元
+│   │   │   ├── LessonController.java        # 课时
+│   │   │   ├── ProgressController.java      # 学习进度 + 已学课程
+│   │   │   ├── WrongAnswerController.java   # 错题本
+│   │   │   └── VoiceController.java         # TTS / 发音评测
 │   │   ├── service/                  # 业务逻辑层(接口 + Impl)
+│   │   │   └── WordImageResolver.java       # 单词配图 URL 解析器
 │   │   ├── repository/               # Spring Data JPA 接口
 │   │   ├── domain/                   # JPA 实体 + 枚举(LessonType/ProgressStatus)
 │   │   ├── dto/                      # 数据传输对象
 │   │   ├── voice/                    # 语音服务抽象层(适配器模式)
 │   │   ├── common/                   # Result / ResultCode 统一响应
-│   │   ├── config/                   # VoiceProperties / WebConfig
+│   │   ├── config/                   # VoiceProperties / WebConfig / WordImageProperties
 │   │   └── exception/                # 全局异常处理
 │   ├── src/main/resources/
 │   │   ├── application.yml           # 主配置
-│   │   ├── static/                   # Vue 构建产物(生产模式)
-│   │   └── db/migration/             # Flyway 迁移脚本 V1~V4
-│   ├── src/test/                     # 单元测试 + 集成测试
+│   │   ├── static/images/words/      # 单词配图静态资源(后端托管)
+│   │   └── db/migration/             # Flyway 迁移脚本 V1~V18
+│   ├── src/test/                     # 单元测试 + 集成测试(11 个测试类)
 │   ├── .env.example                  # 百度密钥模板
 │   ├── run.sh                        # 启动脚本(自动加载 .env)
 │   └── pom.xml
 ├── frontend/                         # Vue 3 前端
 │   ├── src/
 │   │   ├── api/                      # Axios 实例 + 各资源 API
-│   │   ├── components/               # AudioButton / RecordButton / StarBar
+│   │   ├── components/
+│   │   │   ├── AppButton / BackBar / StarBar / AudioButton / RecordButton
+│   │   │   └── lesson-templates/     # 7 种课时模板组件
+│   │   │       ├── WordLesson / SentenceLesson / ReadingLesson
+│   │   │       ├── QuizLesson / CalculateLesson
+│   │   │       └── PhonicsLesson / DialogueLesson / LessonComplete
 │   │   ├── composables/              # useRecorder / useTts
-│   │   ├── views/                    # Home / Theme / Unit / Lesson
+│   │   ├── views/                    # Home / Subject / Theme / Unit / Lesson / WrongAnswers / Learned
 │   │   ├── stores/                   # Pinia: progress / audio
 │   │   ├── router/                   # Vue Router(history 模式)
+│   │   ├── styles/tokens.css         # 设计令牌系统(禁止硬编码色值)
 │   │   ├── App.vue
 │   │   └── main.js
 │   ├── vite.config.js                # 构建输出到后端 static/,开发期代理 /api
@@ -73,7 +115,7 @@ english-app/
 
 ### 环境要求
 
-- JDK 17+
+- JDK 17+(必须显式指定 JAVA_HOME，系统默认可能是 1.8)
 - Maven 3.8+(或使用 `./mvnw`)
 - Node.js 18+ 与 npm
 - (可选)百度智能云语音服务密钥
@@ -82,6 +124,9 @@ english-app/
 
 ```bash
 cd backend
+# 必须显式指定 Java 17,否则报"无效的标记: --release"
+export JAVA_HOME=/Users/dawn/Library/Java/JavaVirtualMachines/corretto-17.0.13/Contents/Home
+export PATH=$JAVA_HOME/bin:$PATH
 ./run.sh          # 自动加载 .env 并启动
 # 或: mvn spring-boot:run
 ```
@@ -126,8 +171,11 @@ java -jar target/english-app-backend-1.0.0.jar
 ### 验证
 
 ```bash
-# 获取主题列表(含交通工具乐园)
-curl http://localhost:8080/api/v1/themes
+# 获取学科列表
+curl http://localhost:8080/api/v1/subjects
+
+# 获取英语学科下的主题
+curl http://localhost:8080/api/v1/themes/subject/1
 
 # 获取某主题下单元
 curl http://localhost:8080/api/v1/units/theme/2
@@ -135,8 +183,14 @@ curl http://localhost:8080/api/v1/units/theme/2
 # 获取某单元下课时
 curl http://localhost:8080/api/v1/lessons/unit/4
 
-# 获取全部进度概览
-curl http://localhost:8080/api/v1/progress
+# 获取课时详情(含 image 完整 URL)
+curl http://localhost:8080/api/v1/lessons/22
+
+# 获取已学课程统计
+curl http://localhost:8080/api/v1/progress/learned/stats
+
+# 获取错题统计
+curl http://localhost:8080/api/v1/wrong-answers/stats
 ```
 
 ---
@@ -149,11 +203,20 @@ curl http://localhost:8080/api/v1/progress
 { "code": 200, "message": "success", "data": { ... } }
 ```
 
+> 除 TTS 返回音频二进制流外,所有接口均用 `Result<T>` 包装。
+
+### 学科
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/subjects` | 获取所有学科列表 |
+
 ### 主题与单元
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/v1/themes` | 获取所有主题列表 |
+| GET | `/api/v1/themes/subject/{subjectId}` | 按学科获取主题列表(推荐) |
+| GET | `/api/v1/themes` | 获取所有主题(已废弃,兼容旧接口) |
 | GET | `/api/v1/units/theme/{themeId}` | 获取某主题下所有单元(带进度) |
 
 ### 课程
@@ -161,32 +224,50 @@ curl http://localhost:8080/api/v1/progress
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | GET | `/api/v1/lessons/unit/{unitId}` | 获取指定单元的课时列表 |
-| GET | `/api/v1/lessons/{id}` | 获取单个课时详情 |
+| GET | `/api/v1/lessons/{id}` | 获取单个课时详情(含学习内容 JSON,image 已转为完整 URL) |
 
 ### 学习进度(固定 user_id=1)
 
 | 方法 | 路径 | 说明 | 请求体 |
 |------|------|------|--------|
-| GET | `/api/v1/progress` | 获取全部进度概览(主题树 + 进度) | - |
 | GET | `/api/v1/progress/lesson/{lessonId}` | 获取某课时进度 | - |
+| GET | `/api/v1/progress/unit/{unitId}` | 批量获取某单元所有课时进度 | - |
 | POST | `/api/v1/progress/lesson/{lessonId}/complete` | 标记完成并解锁下一课 | `{ "stars": 3, "score": 85 }` |
+| GET | `/api/v1/progress/learned` | 获取已学课时列表(按完成时间降序) | - |
+| GET | `/api/v1/progress/learned/stats` | 获取已学课时统计(总数/星星/均分/分类) | - |
+
+### 错题本(固定 user_id=1)
+
+| 方法 | 路径 | 说明 | 请求 |
+|------|------|------|------|
+| POST | `/api/v1/wrong-answers/record` | 记录错题(同一题累加错误次数) | `{ lessonId, lessonName, questionIndex, questionType, questionSnapshot, userAnswer, correctAnswer }` |
+| GET | `/api/v1/wrong-answers` | 查询错题列表(可选 `resolved` 筛选) | - |
+| GET | `/api/v1/wrong-answers/stats` | 获取错题统计(总数/未掌握/已掌握/按类型) | - |
+| PATCH | `/api/v1/wrong-answers/{id}/resolve` | 标记某错题为已掌握 | - |
+| DELETE | `/api/v1/wrong-answers/{id}` | 删除某错题 | - |
 
 ### 语音
 
 | 方法 | 路径 | 说明 | 请求 |
 |------|------|------|------|
-| POST | `/api/v1/voice/tts` | 文本转语音 | body 纯文本 |
+| POST | `/api/v1/voice/tts` | 文本转语音 | `{ "text": "hello", "lan": "en" }`(`lan` 可选,默认 en) |
 | POST | `/api/v1/voice/score` | 发音评测 | `multipart`: audio(wav 16k 16bit mono) + `text` |
 
 ---
 
 ## 数据库设计
 
-5 张核心表,通过 Flyway 管理迁移(V1 初始化 / V2 水果种子 / V3 交通工具 / V4 课时扩容):
+7 张核心表,通过 Flyway 管理迁移(V1 初始化 ~ V18 英语课时扩展):
 
 ```
+subject (学科)            ← V11 新增
+  ├── id (PK)
+  ├── name, code, icon_url, color, sort_order, is_locked
+  └── created_at
+
 theme (主题)
   ├── id (PK)
+  ├── subject_id (FK → subject)   ← V12 新增
   ├── name, icon_url, sort_order, is_locked
   └── created_at
 
@@ -199,7 +280,7 @@ unit (单元)
 lesson (课程)
   ├── id (PK)
   ├── unit_id (FK → unit)
-  ├── name, type(WORD/SENTENCE), content(JSON)
+  ├── name, type(WORD/SENTENCE/READING/QUIZ/CALCULATE/PHONICS/DIALOGUE), content(JSON)
   ├── sort_order, star_reward
   └── ...
 
@@ -215,28 +296,28 @@ user_progress (学习进度)
   ├── status(LOCKED/UNLOCKED/COMPLETED)
   ├── stars, score, completed_at
   └── UNIQUE(user_id, lesson_id)
+
+wrong_answer (错题)        ← V17 新增
+  ├── id (PK)
+  ├── user_id (FK → app_user)
+  ├── lesson_id (FK → lesson)
+  ├── lesson_name, question_index, question_type
+  ├── question_snapshot(JSON), user_answer, correct_answer
+  ├── wrong_count, is_resolved, last_wrong_at
+  └── UNIQUE(user_id, lesson_id, question_index)
 ```
 
-### 课程内容(交通工具乐园)
+### 迁移版本概览
 
-```
-🚗 交通工具乐园
-├── Unit 1: 陆地交通(4 课时)
-│   ├── L1: 认识汽车(WORD: car, bus, bike, truck)
-│   ├── L2: 认识火车(WORD: train, subway, taxi, police car)
-│   ├── L3: 我看见了(SENTENCE: I see a car. ...)
-│   └── L4: 它是什么颜色(SENTENCE: The car is red. ...)
-├── Unit 2: 空中交通(3 课时)
-│   ├── L5: 认识飞机(WORD: airplane, helicopter, rocket, balloon)
-│   ├── L6: 飞得高(SENTENCE)
-│   └── L7: 我喜欢(SENTENCE)
-└── Unit 3: 水上交通(3 课时)
-    ├── L8: 认识船(WORD: boat, ship, submarine, canoe)
-    ├── L9: 在水上(SENTENCE)
-    └── L10: 复习大挑战(SENTENCE)
-```
-
-> 原"水果乐园"主题保留作为第二个主题。
+| 版本 | 内容 |
+|------|------|
+| V1~V4 | 初始化 + 水果 + 交通工具 + 课时扩容 |
+| V5~V8 | 水果主题 + 汪汪队 + 小砾工程队主题 |
+| V9~V10 | 单词配图字段(V10 用 `json_set` 修复 V9 的 emoji Unicode 问题) |
+| V11~V13 | 学科表 + theme.subject_id 外键 + 索引 |
+| V14~V16 | 课外火车 / 语文 / 数学 内容播种 |
+| V17 | 错题表 |
+| V18 | 英语课时扩展 36→60 课(新增 PHONICS/DIALOGUE 内容) |
 
 ### 解锁逻辑
 
@@ -251,11 +332,19 @@ user_progress (学习进度)
 
 ### 后端分层
 
-严格遵循 Controller → Service → Repository 三层架构,Controller 不含业务逻辑,Service 抛出业务异常,`GlobalExceptionHandler` 统一捕获并返回 `{code, message, data}` 结构。
+严格遵循 Controller → Service → Repository 三层架构,Controller 不含业务逻辑,Service 抛出业务异常,`GlobalExceptionHandler` 统一捕获并返回 `{code, message, data}` 结构。所有 Controller 通过构造器注入,不返回 JPA 实体,统一用 DTO。
 
 ### 语音服务抽象层
 
-采用适配器模式,`VoiceService` 接口定义 `textToSpeech` 与 `scorePronunciation` 两个方法。`BaiduVoiceService` 通过 `@ConditionalOnProperty` 条件装配,后续可平滑切换至阿里云、腾讯云等其他供应商。
+采用适配器模式,`VoiceService` 接口定义 `textToSpeech` 与 `scorePronunciation` 两个方法。`BaiduVoiceService` 通过 `@ConditionalOnProperty` 条件装配,后续可平滑切换至阿里云、腾讯云等其他供应商。发音评测采用百度 ASR 识别 + 文本相似度评分。
+
+### 课时模板路由
+
+前端 `LessonView` 作为分发器,根据 `lesson.type` 动态渲染对应的模板组件(`WordLesson`/`SentenceLesson`/`ReadingLesson`/`QuizLesson`/`CalculateLesson`/`PhonicsLesson`/`DialogueLesson`)。公共逻辑(加载、评分、完成提交、错题上报)由 `LessonView` 统一管理,模板只负责交互展示。
+
+### 单词配图后端托管
+
+`WordImageResolver` 负责将 `lesson.content` 中 item 的 `image` 字段(纯 key,如 `chase` 或 `paw-patrol/chase`)改写为完整 URL。数据库只存纯 key,迁移云存储时仅需修改 `WordImageProperties` 配置,无需改动数据。仅在课时**详情**接口解析,列表接口不解析以减少开销。
 
 ### 前端状态管理
 
@@ -263,6 +352,10 @@ user_progress (学习进度)
 - **Pinia `audio` store**:统一管理 TTS 播放与录音状态
 - **`useRecorder` composable**:基于 Web Audio API 封装录音,强制输出 wav 16kHz 16bit mono
 - **`useTts` composable**:TTS 请求 + Blob URL 播放封装
+
+### 设计令牌系统
+
+所有色值、间距、圆角、阴影、动效统一定义在 `frontend/src/styles/tokens.css`,组件通过 `var(--xxx)` 引用,禁止硬编码。吉祥物 Mimi(灰老鼠 + 黄围巾)资产存放在 `frontend/src/assets/mascot/`,仅在欢迎/学习陪伴/完成庆祝三场景出现。动效只用 CSS `transition`/`keyframes`,不引入动画库。
 
 ### 单 JAR 部署
 
@@ -273,6 +366,7 @@ Vue 构建产物通过 `vite.config.js` 直接输出到 `backend/src/main/resour
 - 配置外部化:敏感信息通过 `.env` 环境变量注入
 - 数据库迁移:Flyway 管理,切换到 PostgreSQL 只需改数据源配置
 - 无状态服务:后端不持有会话状态,可水平扩展
+- 图片存储:`WordImageResolver` 抽象使切换 OSS/COS 只需改配置
 
 ---
 
@@ -284,10 +378,17 @@ mvn test
 ```
 
 测试分层:
-- **单元测试**(Mockito):Service 层业务逻辑(进度解锁、最高分、首课逻辑等)
+- **单元测试**(Mockito):Service 层业务逻辑(进度解锁、最高分、首课逻辑、学科查询、图片解析等)
 - **集成测试**(H2 内存数据库):Repository 层 + Controller 层端到端
 
-测试类:`ThemeServiceTest`、`ProgressServiceImplTest`、`ThemeControllerTest`、`ThemeRepositoryTest`。
+测试类(11 个):
+- `SubjectServiceImplTest` / `SubjectControllerTest`
+- `ThemeServiceTest` / `ThemeControllerTest` / `ThemeRepositoryTest`
+- `UnitServiceImplTest`
+- `LessonServiceTest`
+- `ProgressServiceImplTest`
+- `WordImageResolverTest` / `WordImageResolverMultiDirTest`(多子目录兼容性)
+- `LessonTypeTest`(枚举完整性)
 
 ---
 
@@ -313,6 +414,19 @@ mvn test
 - [x] 交通工具主题(1 主题 + 3 单元 + 10 课时)
 - [x] 进度业务单元测试
 - [x] 接入百度语音 TTS + 发音评测
+
+### Phase 2.5:多学科与课型扩展(已完成)
+
+- [x] 多学科重构(Subject 实体 + 学科 API + 学科主题色令牌)
+- [x] 语文 / 数学 / 课外学科内容播种
+- [x] 英语课时扩展 36→60 课
+- [x] 新增 PHONICS / DIALOGUE 课型及模板组件
+- [x] 新增 READING / QUIZ / CALCULATE 课型模板
+- [x] `LessonView` 重构为按 type 分发的路由器
+- [x] 单词配图改为后端托管,后端下发完整 URL
+- [x] AI 生成课程插图替换占位图
+- [x] 错题本记录与复习功能
+- [x] 已学课程回顾与统计
 
 ### Phase 3:游戏化与扩展(规划中)
 

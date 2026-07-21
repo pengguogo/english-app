@@ -2,6 +2,7 @@ package com.englishapp.repository;
 
 import com.englishapp.domain.UserProgress;
 import com.englishapp.domain.enums.ProgressStatus;
+import com.englishapp.dto.LearnedLessonDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -79,4 +80,50 @@ public interface UserProgressRepository extends JpaRepository<UserProgress, Inte
             "AND l.unitId = :unitId")
     List<UserProgress> findByUserIdAndLessonUnitId(@Param("userId") Integer userId,
                                                     @Param("unitId") Integer unitId);
+
+    /**
+     * 查询用户已完成的课时列表(含课时→单元→主题→学科完整层级信息)
+     * <p>
+     * 通过 JPQL 构造表达式直接映射为 {@link LearnedLessonDto},避免在 Service 层
+     * 手动拼接。仅返回状态为 COMPLETED 的课时,按完成时间降序排列。
+     * </p>
+     *
+     * @param userId 用户 ID
+     * @return 已学课时 DTO 列表(按完成时间降序)
+     */
+    @Query("SELECT new com.englishapp.dto.LearnedLessonDto(" +
+            "l.id, l.name, l.type, u.id, u.name, t.id, t.name, s.id, s.name, " +
+            "up.stars, up.score, up.completedAt) " +
+            "FROM UserProgress up, Lesson l, Unit u, Theme t, Subject s " +
+            "WHERE up.userId = :userId AND up.status = com.englishapp.domain.enums.ProgressStatus.COMPLETED " +
+            "AND up.lessonId = l.id AND l.unitId = u.id AND u.themeId = t.id AND t.subjectId = s.id " +
+            "ORDER BY up.completedAt DESC")
+    List<LearnedLessonDto> findLearnedLessonsByUserId(@Param("userId") Integer userId);
+
+    /**
+     * 统计用户已完成的课时总数
+     *
+     * @param userId 用户 ID
+     * @return 已完成课时数
+     */
+    @Query("SELECT COUNT(up) FROM UserProgress up WHERE up.userId = :userId AND up.status = com.englishapp.domain.enums.ProgressStatus.COMPLETED")
+    Long countCompletedByUserId(@Param("userId") Integer userId);
+
+    /**
+     * 统计用户已完成课时的累计星星总数
+     *
+     * @param userId 用户 ID
+     * @return 累计星星数(无记录时返回 0)
+     */
+    @Query("SELECT COALESCE(SUM(up.stars), 0) FROM UserProgress up WHERE up.userId = :userId AND up.status = com.englishapp.domain.enums.ProgressStatus.COMPLETED")
+    Integer sumStarsByUserId(@Param("userId") Integer userId);
+
+    /**
+     * 计算用户已完成课时的平均分数
+     *
+     * @param userId 用户 ID
+     * @return 平均分数(无记录时返回 0)
+     */
+    @Query("SELECT COALESCE(AVG(up.score), 0) FROM UserProgress up WHERE up.userId = :userId AND up.status = com.englishapp.domain.enums.ProgressStatus.COMPLETED")
+    Double avgScoreByUserId(@Param("userId") Integer userId);
 }

@@ -12,8 +12,10 @@ backend/.env
 *.env.local
 *.env.production
 
-# 构建产物
-backend/src/main/resources/static/
+# 构建产物(前端打包输出,不提交)
+backend/src/main/resources/static/*
+# 但保留课程配图(源资源,需要版本控制)
+!backend/src/main/resources/static/images/
 frontend/dist/
 
 # ===== Android (Gradle) =====

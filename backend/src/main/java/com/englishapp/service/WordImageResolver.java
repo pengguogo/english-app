@@ -95,10 +95,24 @@ public class WordImageResolver {
 
     /**
      * 拼接单个图片的完整 URL。
-     * @param key 图片 key(如 "chase")
-     * @return 完整 URL(如 "http://localhost:8080/images/words/chase.jpg")
+     * <p>
+     * 支持两种 key 格式：
+     * <ul>
+     *   <li>不带斜杠的 key（如 "car"）：使用默认 pathPrefix，如 /images/words/car.jpg</li>
+     *   <li>带子目录前缀的 key（如 "train/steam-locomotive"）：使用 /images 作为前缀，如 /images/train/steam-locomotive.jpg</li>
+     * </ul>
+     * </p>
+     *
+     * @param key 图片 key
+     * @return 完整 URL
      */
     public String resolveUrl(String key) {
+        if (key.contains("/")) {
+            return properties.getBaseUrl()
+                    + "/images"
+                    + "/" + key
+                    + properties.getExtension();
+        }
         return properties.getBaseUrl()
                 + properties.getPathPrefix()
                 + "/" + key

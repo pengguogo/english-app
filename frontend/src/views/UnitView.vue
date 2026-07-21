@@ -1,8 +1,7 @@
 <!--
   UnitView.vue - 课时列表页:展示某单元下的所有课时
   用途: 学习卡片风格列表 + 类型标签药丸形 + 星星徽章 + 当前课时脉冲提示。
-  改进: 锁定逻辑改为基于后端进度状态(LOCKED/IN_PROGRESS/COMPLETED)判断,
-        替代原先硬编码的 index===0 逻辑,支持完成一课后自动解锁下一课。
+  修改: 2026-07-21 去掉锁定逻辑,所有课时均可点击学习,保留已完成/当前可学的状态区分。
   作者: english-app
   创建日期: 2026-07-20
 -->
@@ -63,15 +62,13 @@ function getProgress(lesson) {
 }
 
 /**
- * 判断课时是否可点击(已解锁或已完成均可进入复习)。
- * 进度数据缺失时降级为可点击,避免用户被卡住。
+ * 判断课时是否可点击。
+ * 去除锁定逻辑后,所有课时均可点击学习。
  * @param {Object} lesson 课时对象
- * @return {boolean} 是否可点击
+ * @return {boolean} 是否可点击(恒为 true)
  */
 function isAvailable(lesson) {
-  const p = getProgress(lesson)
-  if (!p) return true
-  return p.status === 'IN_PROGRESS' || p.status === 'COMPLETED'
+  return true
 }
 
 /**
@@ -124,17 +121,15 @@ function getStars(lesson) {
         :key="lesson.id"
         class="lesson-card"
         :class="{
-          locked: !isAvailable(lesson),
           current: isCurrent(lesson),
           completed: isCompleted(lesson)
         }"
-        @click="isAvailable(lesson) && router.push(`/lesson/${lesson.id}`)"
+        @click="router.push(`/lesson/${lesson.id}`)"
       >
         <!-- 左侧缩略图 -->
         <div
           class="lesson-thumb"
           :class="{
-            locked: !isAvailable(lesson),
             completed: isCompleted(lesson)
           }"
         >
@@ -155,9 +150,7 @@ function getStars(lesson) {
           <!-- 已完成: 显示星星徽章 -->
           <StarBar v-if="isCompleted(lesson)" :stars="getStars(lesson)" size="sm" />
           <!-- 当前可学: 播放图标 -->
-          <span v-else-if="isAvailable(lesson)" class="play-icon">▶</span>
-          <!-- 锁定: 锁图标 -->
-          <span v-else class="lock-icon">🔒</span>
+          <span v-else class="play-icon">▶</span>
         </div>
       </div>
     </div>
@@ -192,14 +185,9 @@ function getStars(lesson) {
               box-shadow var(--duration-fast) var(--ease-smooth);
 }
 
-.lesson-card:not(.locked):hover {
+.lesson-card:hover {
   transform: translateX(4px);
   box-shadow: var(--shadow-hover);
-}
-
-.lesson-card.locked {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* 已完成课时: 成功色左边框,给予成就感 */
@@ -232,11 +220,6 @@ function getStars(lesson) {
   box-shadow: 0 2px 8px rgba(107, 124, 255, 0.2);
 }
 
-.lesson-thumb.locked {
-  background: var(--bg-muted);
-  box-shadow: none;
-}
-
 /* 已完成课时缩略图: 成功色背景 + 对勾 */
 .lesson-thumb.completed {
   background: var(--color-success);
@@ -253,10 +236,6 @@ function getStars(lesson) {
   font-size: var(--text-lg);
   font-weight: var(--font-bold);
   color: white;
-}
-
-.lesson-thumb.locked .thumb-num {
-  color: var(--text-tertiary);
 }
 
 /* 中间信息 */
@@ -305,10 +284,6 @@ function getStars(lesson) {
 
 .play-icon {
   color: var(--color-primary);
-}
-
-.lock-icon {
-  opacity: 0.6;
 }
 
 /* ===== 状态提示 ===== */
