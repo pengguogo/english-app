@@ -37,6 +37,67 @@
 | 小砾工程 | 6 | 12 | +1 WORD(工程家族成员) +1 WORD(家族专属车辆) +1 QUIZ(成员与车辆配对) +1 PHONICS(M/C/W字母) +1 DIALOGUE(工地合作对话) +1 READING(建造者湾大工程故事) |
 | **合计** | **36** | **60** | **+24 课** |
 
+### 汪汪队立大功官方角色（重点）
+
+改用动画片《汪汪队立大功》(PAW Patrol) 官方角色，替换 V6 中的现有内容。本项目为个人自用，无版权风险。
+
+**主要狗狗角色（6 只原班 + 常驻新成员）**：
+
+| 角色名（英文） | 中文译名 | 品种 | 职责 | Emoji | 图片 |
+|---|---|---|---|---|---|
+| Chase | 阿奇 | 德国牧羊犬 | 警察犬/特工 | 🐕‍🦺 | ✅ `paw-patrol/chase.jpg` |
+| Marshall | 毛毛 | 大麦町犬 | 消防犬/医疗 | 🚒 | ✅ `paw-patrol/marshall.jpg` |
+| Skye | 天天 | 可卡颇犬 | 飞行犬 | 🚁 | ✅ `paw-patrol/skye.jpg` |
+| Rubble | 小砾 | 英国斗牛犬 | 工程犬 | 🚧 | ✅ `paw-patrol/rubble.jpg` |
+| Rocky | 灰灰 | 杂种犬 | 回收/维修 | ♻️ | ✅ `paw-patrol/rocky.jpg` |
+| Zuma | 路马 | 拉布拉多犬 | 水上救生 | 🚤 | ✅ `paw-patrol/zuma.jpg` |
+| Everest | 珠珠 | 哈士奇 | 雪地救援（S2 起） | ❄️ | ❌ 用 emoji |
+| Tracker | 小克 | 柴犬 | 丛林救援（S3 起） | 🌴 | ❌ 用 emoji |
+| Rex | 乐乐 | 伯恩山犬 | 恐龙专家（S7 起） | 🦖 | ❌ 用 emoji |
+| Liberty | 莉柏蒂 | 腊肠犬 | 城市犬（大电影） | 🏙️ | ❌ 用 emoji |
+
+**人类角色**：
+
+| 角色名 | 中文译名 | 身份 | Emoji |
+|---|---|---|---|
+| Ryder | 莱德 | 10 岁队长，人类主角 | 👦 |
+| Mayor Goodway | 古威市长 | 冒险湾市长 | 👩‍💼 |
+| Alex | 亚历克斯 | 镇上的小男孩 | 🧒 |
+| Katie | 凯蒂 | 宠物店老板 | 💇‍♀️ |
+| Cap'n Turbot | 船长特伯 | 海洋生物学家 | ⚓ |
+
+**反派角色**：
+
+| 角色名 | 中文译名 | 特点 | Emoji |
+|---|---|---|---|
+| Mayor Humdinger | 韩丁纳市长 | 雾底城捣蛋市长，常搞破坏 | 😈 |
+| Sweetie | 甜甜 | 巴金堡公主的贪心小狗，想篡位 | 👑 |
+| Sid Swashbuckle | 席德 | 海盗，S5 反派 | 🏴‍☠️ |
+| Arrby | 阿比 | 席德的腊肠犬跟班 | 🦮 |
+
+**地点/建筑**：
+
+| 名称 | 中文 | 说明 |
+|---|---|---|
+| Adventure Bay | 冒险湾 | 主舞台，汪汪队驻地 |
+| Foggy Bottom | 雾底城 | 韩丁纳市长的地盘 |
+| Barkingburg | 巴金堡 | 甜甜所在的城堡王国 |
+| The Lookout | 瞭望塔 | 汪汪队总部 |
+
+**数据迁移策略**：
+- V18 中用 `UPDATE lesson SET content = ...` 替换汪汪队主题（Lesson 22-31）的 content，从现有内容改为官方角色
+- Lesson 22-25「狗狗小队」单元：改为介绍 6 只原班狗狗（Chase/Marshall/Skye/Rubble/Rocky/Zuma）
+- Lesson 26-28「救援行动」单元：改为围绕官方救援场景（火灾/海上/高山）
+- Lesson 29-31「团队精神」单元：改为围绕莱德队长、韩丁纳反派、团队合作故事
+
+新增课时内容安排：
+- **SENTENCE 课「请求帮助」**：Ryder 接到求助，狗狗们响应的句型（"Ryder needs us!" / "Chase is on the case!"）
+- **SENTENCE 课「救援口令」**：狗狗口号式句子（"Ready for action!" / "No job is too big, no pup is too small!"）
+- **QUIZ 课「角色辨认」**：根据描述猜狗狗（消防犬→Marshall / 飞行犬→Skye）
+- **PHONICS 课**：字母 M(Marshall/Mayor)、R(Rubble/Rocky)、S(Skye/Sweetie)
+- **DIALOGUE 课「救援对话」**：Ryder 派任务，狗狗回答，Mimi 作为旁观者惊叹
+- **READING 课「团队故事」**：6 只狗狗合作救援冒险湾的故事
+
 ### 小砾工程家族官方角色（重点）
 
 改用动画片《小砾与工程家族》(Rubble & Crew) 官方 7 位角色，替换 V8 中的原创角色。本项目为个人自用，无版权风险。
@@ -51,6 +112,19 @@
 | Charger | 充电器 | 表兄弟，精力充沛 | 爆发力、关键时刻能量 | ⚡ | ❌ 用 emoji |
 | Motor | 摩托 | 最小表姐妹，小身材大力量 | 拆除专家 | 💥 | ❌ 用 emoji |
 
+**反派角色**：
+
+| 角色名 | 中文译名 | 特点 | Emoji |
+|---|---|---|---|
+| Speed Meister | 极速迈斯特 | 建造者湾的捣蛋鬼，追求速度不顾质量 | 🏎️ |
+
+**地点/建筑**：
+
+| 名称 | 中文 | 说明 |
+|---|---|---|
+| Builder Cove | 建造者湾 | 小砾工程家族驻地 |
+| Rubble & Crew HQ | 工程家族总部 | 家族基地 |
+
 **数据迁移策略**：
 - V18 中用 `UPDATE lesson SET content = ...` 替换 Lesson 35/36/37 的 content，从原创角色改为官方角色
 - Lesson 35「认识工程狗狗」→「认识工程家族」：7 位官方角色
@@ -62,8 +136,8 @@
 - **WORD 课 2「家族的车辆」**：每角色的专属工程车辆（起重机/搅拌车/清洁车/推土机等）
 - **QUIZ 课「成员找车辆」**：7 位角色与专属车辆配对
 - **PHONICS 课**：字母 M(Mix/Motor)、C(Charger/Crane)、W(Wheeler)，用角色名字学字母
-- **DIALOGUE 课「工地合作」**：家族成员协作建桥，Mimi 作为参观者与 Rubble 对话
-- **READING 课「建造者湾大工程」**：7 位家族成员齐心协力建造学校的故事
+- **DIALOGUE 课「工地合作」**：家族成员协作建桥，Mimi 作为参观者与 Rubble 对话，Speed Meister 来捣乱
+- **READING 课「建造者湾大工程」**：7 位家族成员齐心协力建造学校的故事，Speed Meister 试图破坏但失败
 
 ### 新增 24 课类型分布
 
@@ -140,10 +214,12 @@ DIALOGUE   // 情景对话练习
 ### Flyway 迁移策略
 
 - 新增 `V18__expand_english_lessons.sql`，包含两部分：
-  1. **UPDATE** Lesson 35/36/37 的 content：将原创角色（Dozer/Pipes/Bolt 等）替换为官方角色（Rubble/Mix/Wheeler 等）
+  1. **UPDATE** 现有课时 content：
+     - Lesson 22-31（汪汪队主题）：改为官方角色（Chase/Marshall/Skye/Rubble/Rocky/Zuma + Ryder + Mayor Humdinger）
+     - Lesson 35/36/37（小砾工程主题）：改为官方角色（Rubble/Grandpa Gravel/Auntie Crane/Mix/Wheeler/Charger/Motor + Speed Meister）
   2. **INSERT** 24 节新课：4 主题各新增 6 课
 - content 字段用 `json_set` 精确构建（避免 V9 的 emoji REPLACE 教训）
-- 除 Lesson 35/36/37 外，不修改其他现有课时
+- 除上述 13 节课外，不修改其他现有课时
 
 ## 前端分发与新组件
 
@@ -251,7 +327,7 @@ case 'DIALOGUE':  return DialogueLesson
 | PHONICS/DIALOGUE 前端组件开发工作量超预期 | 先做 1 个主题试点，验证后再铺开 |
 | AI 生成内容质量参差 | 人工审核环节，不合格内容重生成 |
 | TTS 对字母发音支持不佳 | 字母发音用预录音频或特殊 TTS 标记 |
-| 现有课时受影响 | 除 Lesson 35/36/37 改用官方角色外，其他课时不动，迁移文件独立 |
+| 现有课时受影响 | 除汪汪队(L22-31)和小砾工程(L35-37)共 13 课改用官方角色外，其他课时不动，迁移文件独立 |
 
 ## 后续演进
 
