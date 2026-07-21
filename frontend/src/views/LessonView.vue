@@ -19,6 +19,8 @@ import BackBar from '../components/BackBar.vue'
 import WordLesson from '../components/lesson-templates/WordLesson.vue'
 import SentenceLesson from '../components/lesson-templates/SentenceLesson.vue'
 import LessonComplete from '../components/lesson-templates/LessonComplete.vue'
+import ReadingLesson from '../components/lesson-templates/ReadingLesson.vue'
+import QuizLesson from '../components/lesson-templates/QuizLesson.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -38,6 +40,9 @@ const isSubmitting = ref(false)
 
 // 记录每个学习项的历史最佳分
 const bestScores = ref([])
+
+// QUIZ/CALCULATE 答题记录：每题是否答对
+const answerResults = ref([])
 
 // ===== 计算属性 =====
 
@@ -98,8 +103,12 @@ const lessonTemplate = computed(() => {
       return WordLesson
     case 'SENTENCE':
       return SentenceLesson
+    case 'READING':
+      return ReadingLesson
+    case 'QUIZ':
+      return QuizLesson
     default:
-      // READING/QUIZ/CALCULATE 等后续阶段实现
+      // CALCULATE 等后续阶段实现
       return null
   }
 })
@@ -226,6 +235,21 @@ function updateBestScore(index, score) {
 }
 
 /**
+ * QUIZ/CALCULATE 答题回调：记录每题对错，计算得分。
+ * 答对率 × 100 = 分数，映射到 bestScores 供结算使用。
+ * @param {boolean} correct 是否答对
+ */
+function handleAnswered(correct) {
+  answerResults.value[currentIndex.value] = correct
+  // 答对=100分，答错=0分，复用 bestScores 机制
+  updateBestScore(currentIndex.value, correct ? 100 : 0)
+  // 更新当前显示分数
+  currentScore.value = correct ? 100 : 0
+  currentStars.value = scoreToStars(correct ? 100 : 0)
+  scoreMessage.value = correct ? '回答正确！' : '答错了，再接再厉！'
+}
+
+/**
  * 重置当前项的评分展示状态。
  */
 function resetCurrentScoreState() {
@@ -310,6 +334,7 @@ async function finishLesson() {
         :is-scoring="isScoring"
         :is-last-item="isLastItem"
         @recorded="handleRecorded"
+        @answered="handleAnswered"
         @next="nextItem"
       />
 

@@ -23,6 +23,10 @@
   /* 警示色: 珊瑚红,用于错误、未解锁 */
   --color-warning: #FF6B6B;
 
+  /* 衍生浅底色: 用于正确/错误反馈背景（带透明度） */
+  --color-success-bg: rgba(76, 217, 100, 0.1);
+  --color-warning-bg: rgba(255, 107, 107, 0.1);
+
   /* 柔和色: 用于装饰、场景 */
   --color-pink: #FFB6C1;
   --color-sky: #87CEEB;
