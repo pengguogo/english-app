@@ -166,4 +166,54 @@ class WordImageResolverTest {
         // Assert
         assertEquals("http://localhost:8080/images/words/chase.jpg", url);
     }
+
+    /**
+     * PHONICS 类型 content 的 items 含 image 字段时,应被正确解析为完整 URL,
+     * 同时空 image 字段的 item 不影响整体 JSON 结构。
+     * <p>
+     * 场景:自然拼读课 items 包含 2 个元素,第一个 image="fish" 应改写,
+     * 第二个 image 为空字符串应原样保留。
+     * </p>
+     */
+    @Test
+    @DisplayName("PHONICS 类型:有 image 的 item 被改写,空 image 原样保留")
+    void should_resolvePhonicsImageUrls_when_contentHasItemsWithImage() {
+        // Arrange:模拟自然拼读课 content,两个 item 一个有 image 一个为空字符串
+        String content = "{\"type\":\"PHONICS\",\"items\":[" +
+                "{\"phonics\":\"sh\",\"image\":\"fish\"}," +
+                "{\"phonics\":\"ch\",\"image\":\"\"}]}";
+
+        // Act
+        String result = resolver.resolveContent(content);
+
+        // Assert:有 image 的被解析为完整 URL,空 image 不影响 JSON 结构
+        assertNotNull(result);
+        assertTrue(result.contains("/images/words/fish.jpg"),
+                "PHONICS item 的 image key 应被解析为完整 URL");
+        assertTrue(result.contains("\"image\":\"\""),
+                "空 image 字段应原样保留为空字符串");
+    }
+
+    /**
+     * DIALOGUE 类型 content 的 items 无 image 字段时,解析器不应报错,
+     * 原始文本字段应原样返回。
+     * <p>
+     * 场景:对话课 items 仅含 speaker/text 字段,不含 image,解析后应保持不变。
+     * </p>
+     */
+    @Test
+    @DisplayName("DIALOGUE 类型:无 image 字段时不报错,原样返回")
+    void should_notFail_when_dialogueContentHasNoImageField() {
+        // Arrange:模拟对话课 content,item 只有 speaker/text 字段,无 image
+        String content = "{\"type\":\"DIALOGUE\",\"items\":[" +
+                "{\"speaker\":\"Tom\",\"text\":\"Hello, how are you?\"}]}";
+
+        // Act
+        String result = resolver.resolveContent(content);
+
+        // Assert:不报错且原样返回,文本字段未被破坏
+        assertNotNull(result, "DIALOGUE content 无 image 字段时不应报错");
+        assertTrue(result.contains("Hello"),
+                "对话文本应原样返回不被破坏");
+    }
 }
