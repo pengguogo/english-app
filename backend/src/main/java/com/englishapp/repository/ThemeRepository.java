@@ -6,8 +6,19 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * 主题数据访问接口
+ *
+ * @author englishapp
+ * @since 1.0.0
+ */
 @Repository
 public interface ThemeRepository extends JpaRepository<Theme, Integer> {
+
+    /**
+     * 获取所有主题（按排序序号升序）
+     * @return 排序后的主题列表
+     */
     List<Theme> findAllByOrderBySortOrderAsc();
 
     /**
