@@ -88,12 +88,18 @@ const progressPercent = computed(() => {
   return Math.round(((props.currentIndex + 1) / props.totalItems) * 100)
 })
 
+// 听音选字母的选项列表（进入练习模式时生成一次，答题期间不变）
+const practiceOptions = ref([])
+
 /**
- * 听音选字母的选项列表: 1 个正确字母 + 2 个干扰字母，随机排序。
+ * 重新生成练习选项: 1 个正确字母 + 2 个干扰字母，随机排序。
  * 干扰字母优先使用 currentItem.distractors，不足时从 A-Z 自动生成。
  */
-const practiceOptions = computed(() => {
-  if (!currentLetter.value) return []
+function regenerateOptions() {
+  if (!currentLetter.value) {
+    practiceOptions.value = []
+    return
+  }
   const correct = currentLetter.value
   // 干扰项: 优先用 currentItem.distractors，否则自动生成补齐
   let distractors = props.currentItem?.distractors?.slice() || []
@@ -103,8 +109,8 @@ const practiceOptions = computed(() => {
     )
   }
   // 合并并随机排序，保证三选一
-  return shuffle([correct, ...distractors.slice(0, 2)])
-})
+  practiceOptions.value = shuffle([correct, ...distractors.slice(0, 2)])
+}
 
 /**
  * 当前答题是否正确。
@@ -122,8 +128,9 @@ const isCorrect = computed(() => {
  */
 function generateDistractors(correct, count) {
   const all = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-  // 排除正确字母的大写形式，避免重复
-  const pool = all.filter(l => l !== correct.toUpperCase())
+  // 取首字符大写进行排除，兼容 "Ff" 格式，避免正确字母重复出现
+  const correctUpper = correct.charAt(0).toUpperCase()
+  const pool = all.filter(l => l !== correctUpper)
   return shuffle(pool)
     .slice(0, count)
     .map(l => l + l.toLowerCase())
@@ -147,6 +154,7 @@ function shuffle(arr) {
  * 切换到练习模式并重置答题状态。
  */
 function enterPractice() {
+  regenerateOptions()
   mode.value = 'practice'
   selectedIndex.value = null
   hasAnswered.value = false
@@ -213,7 +221,7 @@ watch(() => props.currentIndex, () => {
     <img :src="mascotCompanion" alt="小老鼠陪伴" class="mascot-companion" />
 
     <!-- ============ 学习模式 ============ -->
-    <div v-if="mode === 'learn'" class="learn-card">
+    <div v-if="currentItem && mode === 'learn'" class="learn-card">
       <!-- 大号字母（6rem，主色调） -->
       <h1 class="big-letter">{{ currentLetter }}</h1>
       <!-- 字母发音（如 /ef/） -->
@@ -232,7 +240,7 @@ watch(() => props.currentIndex, () => {
         <img
           v-if="currentItem.image"
           :src="currentItem.image"
-          :alt="currentItem.word"
+          :alt="currentItem.word || currentItem.emoji || '示例图片'"
           class="word-image"
         />
         <div v-else class="emoji">{{ currentItem.emoji }}</div>
@@ -254,7 +262,7 @@ watch(() => props.currentIndex, () => {
     </div>
 
     <!-- ============ 练习模式: 听音选字母 ============ -->
-    <div v-else class="practice-card">
+    <div v-else-if="currentItem && mode === 'practice'" class="practice-card">
       <h2 class="practice-question">听一听，选出发这个音的字母</h2>
       <p v-if="currentItem.sound" class="practice-hint">
         音标 /{{ currentItem.sound }}/
@@ -267,6 +275,8 @@ watch(() => props.currentIndex, () => {
           :key="index"
           :class="['option', getOptionClass(index)]"
           :disabled="hasAnswered"
+          :aria-label="`选项 ${index + 1}：字母 ${option}`"
+          :aria-pressed="selectedIndex === index"
           @click="selectOption(index)"
         >
           <span class="option-letter">{{ option }}</span>
@@ -279,7 +289,7 @@ watch(() => props.currentIndex, () => {
       </div>
 
       <!-- 答题反馈文字 -->
-      <div v-if="hasAnswered" class="feedback-area">
+      <div v-if="hasAnswered" class="feedback-area" aria-live="polite">
         <p :class="['feedback-text', isCorrect ? 'feedback-correct' : 'feedback-wrong']">
           {{ isCorrect ? '回答正确！太棒了！' : '答错了，正确答案是 ' + currentLetter }}
         </p>
