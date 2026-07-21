@@ -12,6 +12,7 @@
 import { ref, computed, watch } from 'vue'
 import StarBar from '../StarBar.vue'
 import AppButton from '../AppButton.vue'
+import { useTts } from '../../composables/useTts'
 import mascotCompanion from '../../assets/mascot/mascot-companion.jpg'
 
 /**
@@ -51,6 +52,27 @@ const emit = defineEmits({
 const selectedIndex = ref(null)
 // 是否已答题（选中后锁定选项）
 const hasAnswered = ref(false)
+
+// TTS 组合式函数,用于播放题目语音
+const { isPlaying: isQuestionPlaying, play: playQuestion } = useTts()
+
+/**
+ * 播放题目语音:将题目+选项拼接为完整文本播放。
+ * 答题后也播放正确答案,方便孩子对照学习。
+ */
+async function handlePlayQuestion() {
+  if (isQuestionPlaying.value) return
+  const question = props.currentItem?.question || ''
+  // 拼接选项,让语音完整朗读题目和所有选项
+  const options = props.currentItem?.options || []
+  const optionText = options.map((opt, i) => `${String.fromCharCode(65 + i)}, ${opt}`).join('。')
+  const fullText = optionText ? `${question}。${optionText}` : question
+  try {
+    await playQuestion(fullText, 'zh')
+  } catch (e) {
+    console.error('题目语音播放失败:', e)
+  }
+}
 
 /**
  * 当前题是否答对。
@@ -124,7 +146,26 @@ function getOptionClass(index) {
       <div v-if="currentItem.image" class="quiz-image-wrapper">
         <img :src="currentItem.image" :alt="currentItem.question" class="quiz-image" />
       </div>
-      <h1 class="quiz-question">{{ currentItem.question }}</h1>
+      <div class="question-row">
+        <h1 class="quiz-question">{{ currentItem.question }}</h1>
+        <!-- 语音播放按钮:点击朗读题目+选项 -->
+        <button
+          class="speak-btn"
+          :class="{ playing: isQuestionPlaying }"
+          :disabled="isQuestionPlaying"
+          @click="handlePlayQuestion"
+          aria-label="播放题目语音"
+        >
+          <svg v-if="!isQuestionPlaying" width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M11 5L6 9H2V15H6L11 19V5Z" fill="currentColor"/>
+            <path d="M15.5 8.5C16.5 9.5 17 11 17 12C17 13 16.5 14.5 15.5 15.5"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M18 6C19.5 7.5 20.5 9.5 20.5 12C20.5 14.5 19.5 16.5 18 18"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+          <span v-else class="loading-dot"></span>
+        </button>
+      </div>
 
       <!-- 选项列表 -->
       <div class="options">
@@ -189,6 +230,47 @@ function getOptionClass(index) {
 .quiz-image { width: 100%; max-width: 280px; height: 200px; object-fit: cover; border-radius: var(--radius-md); box-shadow: var(--shadow-soft); }
 
 .quiz-question { font-size: var(--text-lg); color: var(--text-primary); font-weight: var(--font-bold); margin-bottom: var(--space-5); text-align: center; line-height: 1.5; }
+
+/* 题目行: 题目文字 + 语音按钮 */
+.question-row { display: flex; align-items: flex-start; justify-content: center; gap: var(--space-2); margin-bottom: var(--space-5); }
+.question-row .quiz-question { margin-bottom: 0; flex: 1; }
+
+/* 语音播放按钮 */
+.speak-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--color-success);
+  color: white;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-bounce),
+              filter var(--duration-fast) var(--ease-smooth);
+  box-shadow: 0 2px 8px rgba(76, 217, 100, 0.3);
+}
+.speak-btn:not(:disabled):hover { filter: brightness(1.1); }
+.speak-btn:not(:disabled):active { transform: scale(0.92); }
+.speak-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.speak-btn.playing { background: var(--color-orange); }
+
+/* 加载动画小圆点 */
+.loading-dot {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: var(--radius-pill);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .loading-dot { animation: speakSpin 0.8s linear infinite; }
+  .speak-btn:not(.playing) svg { animation: speakPulse 1.5s ease-in-out infinite; }
+}
+@keyframes speakSpin { to { transform: rotate(360deg); } }
+@keyframes speakPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 
 .options { display: flex; flex-direction: column; gap: var(--space-3); }
 

@@ -4,7 +4,6 @@ import com.englishapp.common.Result;
 import com.englishapp.voice.VoiceService;
 import com.englishapp.voice.dto.ScoreResponse;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,7 +39,7 @@ public class VoiceController {
      * 文字转语音
      *
      * @param body 包含 text 字段(必填)和 lan 字段(可选,默认 "en")的 JSON
-     * @return 音频二进制流
+     * @return 音频二进制流;TTS 服务失败时返回 503
      */
     @PostMapping("/tts")
     public ResponseEntity<byte[]> textToSpeech(@RequestBody Map<String, String> body) {
@@ -48,8 +47,12 @@ public class VoiceController {
         // 默认英文,支持中文(zh)
         String lan = body.getOrDefault("lan", "en");
         byte[] audio = voiceService.textToSpeech(text, lan);
+        // 空音频说明 TTS 服务失败,返回 503 让前端识别错误而非创建无效 Audio
+        if (audio == null || audio.length == 0) {
+            return ResponseEntity.status(503).body(new byte[0]);
+        }
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                .header(HttpHeaders.CONTENT_TYPE, "audio/mpeg")
                 .body(audio);
     }
 

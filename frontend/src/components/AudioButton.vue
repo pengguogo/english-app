@@ -1,7 +1,8 @@
 <!--
   AudioButton.vue - 发音播放按钮组件
-  用途: 点击后先播放中文翻译,再播放英文单词/句子。面向儿童的英语学习场景。
-  修改: 2026-07-21 使用 isPlaying 替代 isLoading 做按钮禁用,避免连续点击音频叠加。
+  用途: 点击后播放语音。默认双语模式(先中文翻译再英文),也支持单语言模式。
+        双语模式面向英语学习,单语言模式面向数学/语文等纯中文题目。
+  修改: 2026-07-21 新增 lan 属性支持单语言播放;用 isPlaying 替代 isLoading 做按钮禁用。
   作者: english-app
   创建日期: 2026-07-20
 -->
@@ -10,35 +11,46 @@ import { useTts } from '../composables/useTts'
 
 /**
  * 组件 props:
- * @param {String} text - 需要播放发音的英文文本(必填)
- * @param {String} translation - 中文翻译文本(可选),传入时先播放中文再播放英文
+ * @param {String} text - 需要播放发音的文本(必填)
+ * @param {String} translation - 中文翻译文本(可选),双语模式下先播放中文再播放英文
+ * @param {String} lan - 语言模式:"en" 双语模式(默认), "zh" 纯中文模式(仅播放text)
  */
 const props = defineProps({
   text: { type: String, required: true },
-  translation: { type: String, default: '' }
+  translation: { type: String, default: '' },
+  lan: { type: String, default: 'en' }
 })
 
 /* 复用 TTS 组合式函数,获取播放状态与播放方法 */
 const { isPlaying, playAndWait } = useTts()
 
 /**
- * 点击播放:先播放中文翻译(如果有),播完后再播放英文。
- * 两个音频顺序播放,播放期间按钮显示"播放中..."并禁用。
- * 连续点击时 isPlaying 守卫直接返回,避免音频叠加。
+ * 点击播放:
+ * - 双语模式(lan="en"): 先播放中文翻译(如果有),播完后再播放英文。
+ * - 单语言模式(lan="zh"): 仅播放 text 文本(中文)。
+ * 播放期间按钮显示"播放中..."并禁用,连续点击时 isPlaying 守卫直接返回。
+ * finally 兜底确保 isPlaying 恢复,防止异常导致按钮永久置灰。
  */
 async function handlePlay() {
   // 播放中直接返回,避免连续点击导致音频叠加
   if (isPlaying.value) return
   try {
-    // 如果有中文翻译,先播放中文
-    if (props.translation) {
-      await playAndWait(props.translation, 'zh')
+    if (props.lan === 'zh') {
+      // 纯中文模式:仅播放 text
+      await playAndWait(props.text, 'zh')
+    } else {
+      // 双语模式:先播放中文翻译(如果有),再播放英文
+      if (props.translation) {
+        await playAndWait(props.translation, 'zh')
+      }
+      await playAndWait(props.text, 'en')
     }
-    // 再播放英文
-    await playAndWait(props.text, 'en')
   } catch (e) {
     console.error('TTS 播放失败:', e)
     alert('发音加载失败,请重试')
+  } finally {
+    // 兜底:确保 isPlaying 恢复,避免按钮永久置灰
+    isPlaying.value = false
   }
 }
 </script>
