@@ -19,6 +19,8 @@ public class Theme {
     private String iconUrl;
     private Integer sortOrder;
     private Boolean isLocked;
+    /** 所属学科 ID（外键，关联 subject 表） */
+    private Integer subjectId;
     private LocalDateTime createdAt;
 
     public Integer getId() {
@@ -59,6 +61,14 @@ public class Theme {
 
     public void setIsLocked(Boolean isLocked) {
         this.isLocked = isLocked;
+    }
+
+    public Integer getSubjectId() {
+        return subjectId;
+    }
+
+    public void setSubjectId(Integer subjectId) {
+        this.subjectId = subjectId;
     }
 
     public LocalDateTime getCreatedAt() {

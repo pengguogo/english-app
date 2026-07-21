@@ -5,5 +5,6 @@ public record ThemeDto(
     String name,
     String iconUrl,
     Integer sortOrder,
-    Boolean isLocked
+    Boolean isLocked,
+    Integer subjectId
 ) {}
