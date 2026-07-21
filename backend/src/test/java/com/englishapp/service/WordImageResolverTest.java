@@ -188,7 +188,7 @@ class WordImageResolverTest {
 
         // Assert:有 image 的被解析为完整 URL,空 image 不影响 JSON 结构
         assertNotNull(result);
-        assertTrue(result.contains("/images/words/fish.jpg"),
+        assertTrue(result.contains("\"image\":\"http://localhost:8080/images/words/fish.jpg\""),
                 "PHONICS item 的 image key 应被解析为完整 URL");
         assertTrue(result.contains("\"image\":\"\""),
                 "空 image 字段应原样保留为空字符串");
@@ -211,9 +211,15 @@ class WordImageResolverTest {
         // Act
         String result = resolver.resolveContent(content);
 
-        // Assert:不报错且原样返回,文本字段未被破坏
+        // Assert:不报错且原样返回,关键字段完整且不新增 image 字段
         assertNotNull(result, "DIALOGUE content 无 image 字段时不应报错");
-        assertTrue(result.contains("Hello"),
-                "对话文本应原样返回不被破坏");
+        assertTrue(result.contains("\"speaker\":\"Tom\""),
+                "speaker 字段应原样返回");
+        assertTrue(result.contains("\"text\":\"Hello, how are you?\""),
+                "text 字段应原样返回");
+        assertTrue(result.contains("\"type\":\"DIALOGUE\""),
+                "type 字段应原样返回");
+        assertFalse(result.contains("\"image\""),
+                "无 image 的 item 不应新增 image 字段");
     }
 }
