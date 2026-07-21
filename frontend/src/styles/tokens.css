@@ -91,4 +91,14 @@
   --gradient-primary: linear-gradient(135deg, #6B7CFF 0%, #8A96FF 100%);
   --gradient-warm: linear-gradient(135deg, #FFF3E0 0%, #FFF8E1 100%);
   --gradient-success: linear-gradient(135deg, #4CD964 0%, #5BDB73 100%);
+
+  /* ===== 学科主题色 ===== */
+  /* 英语: 蓝紫（复用主色） */
+  --subject-english: #6B7CFF;
+  /* 语文: 朱砂红 */
+  --subject-chinese: #FF7043;
+  /* 数学: 青绿 */
+  --subject-math: #26A69A;
+  /* 课外: 紫罗兰 */
+  --subject-extracurricular: #7E57C2;
 }
