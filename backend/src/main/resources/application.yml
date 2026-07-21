@@ -28,7 +28,7 @@ voice:
 app:
   word-image:
     # 图片访问基址:开发期为后端服务地址,生产期可改为 CDN 域名
-    base-url: ${WORD_IMAGE_BASE_URL:http://localhost:8080}
+    base-url: ${WORD_IMAGE_BASE_URL:}
     # 静态资源路径前缀,对应 static 目录下的子路径
     path-prefix: /images/words
     # 图片文件扩展名(统一 jpg)

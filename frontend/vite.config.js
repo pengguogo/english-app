@@ -32,6 +32,11 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true
+      },
+      // 图片静态资源代理到后端 8080,解决局域网手机访问时 localhost 不可达的问题
+      '/images': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
       }
     }
   }

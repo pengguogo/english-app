@@ -89,7 +89,7 @@ const progressPercent = computed(() => {
 
     <!-- 操作区: 朗读 + 翻页 -->
     <div class="actions">
-      <AudioButton :text="readAloudText" />
+      <AudioButton :text="readAloudText" lan="zh" />
       <!-- 上一步 / 下一步 / 完成阅读 -->
       <div class="action-row">
         <!-- 上一步按钮:第一页不显示 -->
