@@ -110,8 +110,8 @@ const progressPercent = computed(() => {
         <p class="dialogue-text">{{ currentItem.text }}</p>
         <p class="dialogue-translation">{{ currentItem.translation }}</p>
       </div>
-      <!-- NPC 发言: 右侧 + 角色标签 -->
-      <div v-else class="avatar-wrapper">
+      <!-- NPC 发言: 右侧 + 角色标签（独立 v-if，避免与上方 Mimi 的 v-if 被 bubble 隔断） -->
+      <div v-if="!isMimi" class="avatar-wrapper">
         <span class="speaker-badge">{{ currentItem.speaker }}</span>
       </div>
     </div>
