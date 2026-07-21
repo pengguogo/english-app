@@ -90,14 +90,12 @@ function getThemeIcon(id) {
           v-for="theme in themes"
           :key="theme.id"
           class="theme-card"
-          :class="{ locked: theme.isLocked }"
           :style="{ '--card-accent': subjectColor }"
-          @click="!theme.isLocked && router.push(`/theme/${theme.id}`)"
+          @click="router.push(`/theme/${theme.id}`)"
         >
           <div class="card-icon">{{ getThemeIcon(theme.id) }}</div>
           <h3 class="card-title">{{ theme.name }}</h3>
-          <p class="card-desc" v-if="theme.isLocked">待解锁</p>
-          <p class="card-desc" v-else>点击进入</p>
+          <p class="card-desc">点击进入</p>
         </div>
       </div>
     </section>
@@ -135,14 +133,9 @@ function getThemeIcon(id) {
               box-shadow var(--duration-fast) var(--ease-smooth);
 }
 
-.theme-card:not(.locked):hover {
+.theme-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
-}
-
-.theme-card.locked {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .card-icon {

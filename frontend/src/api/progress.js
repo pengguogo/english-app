@@ -39,3 +39,21 @@ export const getUnitProgress = (unitId) =>
  */
 export const completeLesson = (lessonId, stars, score) =>
   http.post(`/progress/lesson/${lessonId}/complete`, { stars, score })
+
+/**
+ * 获取已学课时列表(状态为 IN_PROGRESS 或 COMPLETED)。
+ * 用于"我学过的"页面展示历史学习记录,支持复习跳转。
+ *
+ * @return {Promise<Array>} 已学课时列表,每项包含课时名/类型/分数/星星/完成时间/所属层级等
+ */
+export const getLearnedLessons = () =>
+  http.get('/progress/learned', { params: { userId: 1 } })
+
+/**
+ * 获取学习统计数据(已学课时数/总星星/平均分/学科分布)。
+ * 用于"我学过的"页面顶部统计卡片与学科分布展示。
+ *
+ * @return {Promise<Object>} 统计对象 { learnedCount, totalStars, averageScore, subjectDistribution }
+ */
+export const getLearnedStats = () =>
+  http.get('/progress/learned/stats', { params: { userId: 1 } })

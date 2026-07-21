@@ -74,12 +74,15 @@ const props = defineProps({
  * 组件 Emits
  * @event recorded 录音完成，传递 WAV Blob
  * @event next 切换下一项
+ * @event prev 切换上一项
  */
 const emit = defineEmits({
   /** 录音完成，参数为 WAV Blob */
   recorded: null,
   /** 切换下一项 */
-  next: null
+  next: null,
+  /** 切换上一项 */
+  prev: null
 })
 
 /**
@@ -144,15 +147,26 @@ const progressPercent = computed(() => {
       <p class="feedback">{{ scoreMessage }}</p>
     </div>
 
-    <!-- 下一步 / 完成本课 -->
-    <AppButton
-      variant="primary"
-      size="lg"
-      block
-      @click="emit('next')"
-    >
-      {{ isLastItem ? '完成本课' : '下一步 →' }}
-    </AppButton>
+    <!-- 上一步 / 下一步 / 完成本课 -->
+    <div class="action-row">
+      <!-- 上一步按钮:第一项不显示 -->
+      <AppButton
+        v-if="currentIndex > 0"
+        variant="ghost"
+        size="md"
+        @click="emit('prev')"
+      >← 上一项</AppButton>
+      <span v-else class="action-placeholder"></span>
+      <!-- 下一步 / 完成本课 -->
+      <AppButton
+        variant="primary"
+        size="md"
+        class="action-next"
+        @click="emit('next')"
+      >
+        {{ isLastItem ? '完成本课' : '下一步 →' }}
+      </AppButton>
+    </div>
   </div>
 </template>
 
@@ -296,6 +310,24 @@ const progressPercent = computed(() => {
 .feedback {
   color: var(--text-secondary);
   font-size: var(--text-sm);
+}
+
+/* 按钮行:左右分布,上一项 + 下一项 */
+.action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* 占位符:第一项时保持下一项按钮居右 */
+.action-placeholder {
+  flex: 1;
+}
+
+/* 下一项按钮占据主要空间 */
+.action-next {
+  flex: 1;
 }
 
 .score-area.scoring {

@@ -2,11 +2,14 @@
   LessonView.vue - 课时学习页（分发器）
   用途: 加载课时详情，根据 lesson.type 分发到对应的模板组件。
         WORD → WordLesson, SENTENCE → SentenceLesson,
-        READING/QUIZ/CALCULATE → 占位（后续阶段实现）。
+        READING → ReadingLesson, QUIZ → QuizLesson,
+        CALCULATE → CalculateLesson, PHONICS → PhonicsLesson,
+        DIALOGUE → DialogueLesson。
         公共逻辑（加载、评分、完成提交）由本组件统一管理。
   作者: english-app
   创建日期: 2026-07-20
   修改: 2026-07-21 重构为按 type 分发的路由器
+       2026-07-21 新增 PHONICS/DIALOGUE 分发
 -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
@@ -14,6 +17,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getLessonById } from '../api/lesson'
 import { completeLesson } from '../api/progress'
 import { scorePronunciation } from '../api/voice'
+import { recordWrongAnswer } from '../api/wrongAnswer'
 import StarBar from '../components/StarBar.vue'
 import BackBar from '../components/BackBar.vue'
 import WordLesson from '../components/lesson-templates/WordLesson.vue'
@@ -22,6 +26,8 @@ import LessonComplete from '../components/lesson-templates/LessonComplete.vue'
 import ReadingLesson from '../components/lesson-templates/ReadingLesson.vue'
 import QuizLesson from '../components/lesson-templates/QuizLesson.vue'
 import CalculateLesson from '../components/lesson-templates/CalculateLesson.vue'
+import PhonicsLesson from '../components/lesson-templates/PhonicsLesson.vue'
+import DialogueLesson from '../components/lesson-templates/DialogueLesson.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -110,6 +116,10 @@ const lessonTemplate = computed(() => {
       return QuizLesson
     case 'CALCULATE':
       return CalculateLesson
+    case 'PHONICS':
+      return PhonicsLesson
+    case 'DIALOGUE':
+      return DialogueLesson
     default:
       // 其他未支持的课型
       return null
@@ -240,9 +250,10 @@ function updateBestScore(index, score) {
 /**
  * QUIZ/CALCULATE 答题回调：记录每题对错，计算得分。
  * 答对率 × 100 = 分数，映射到 bestScores 供结算使用。
- * @param {boolean} correct 是否答对
+ * 答错时静默上报错题到后端,失败不影响学习流程。
+ * @param {Object} payload 答题结果 { correct, userAnswer, correctAnswer }
  */
-function handleAnswered(correct) {
+function handleAnswered({ correct, userAnswer, correctAnswer }) {
   answerResults.value[currentIndex.value] = correct
   // 答对=100分，答错=0分，复用 bestScores 机制
   updateBestScore(currentIndex.value, correct ? 100 : 0)
@@ -250,6 +261,33 @@ function handleAnswered(correct) {
   currentScore.value = correct ? 100 : 0
   currentStars.value = scoreToStars(correct ? 100 : 0)
   scoreMessage.value = correct ? '回答正确！' : '答错了，再接再厉！'
+  // 答错时静默上报错题,便于错题集展示与复习
+  if (!correct) {
+    recordWrongAnswerSilently({ userAnswer, correctAnswer })
+  }
+}
+
+/**
+ * 静默上报错题到后端。
+ * 内部辅助函数,失败仅打日志,不抛出异常,不影响学习流程。
+ * @param {Object} extra 额外的答案信息 { userAnswer, correctAnswer }
+ */
+async function recordWrongAnswerSilently({ userAnswer, correctAnswer }) {
+  try {
+    await recordWrongAnswer({
+      lessonId: parseInt(route.params.lessonId),
+      lessonName: lesson.value?.name || '',
+      questionIndex: currentIndex.value,
+      questionType: lesson.value?.type,
+      // 题目快照,序列化为 JSON 字符串存储,便于错题集展示原题
+      questionSnapshot: JSON.stringify(currentItem.value),
+      userAnswer: String(userAnswer ?? ''),
+      correctAnswer: String(correctAnswer ?? '')
+    })
+  } catch (e) {
+    // 错题上报失败不影响学习流程,仅记录日志
+    console.error('记录错题失败:', e)
+  }
 }
 
 /**
@@ -270,6 +308,17 @@ function nextItem() {
     resetCurrentScoreState()
   } else {
     isComplete.value = true
+  }
+}
+
+/**
+ * 切换到上一个学习项。若已是第一项,则不做任何操作。
+ * 重置当前项的评分状态,确保回到上一题时展示干净的答题界面。
+ */
+function prevItem() {
+  if (currentIndex.value > 0) {
+    currentIndex.value--
+    resetCurrentScoreState()
   }
 }
 
@@ -339,6 +388,7 @@ async function finishLesson() {
         @recorded="handleRecorded"
         @answered="handleAnswered"
         @next="nextItem"
+        @prev="prevItem"
       />
 
       <!-- 未支持的课型:占位提示 -->

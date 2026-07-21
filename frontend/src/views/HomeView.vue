@@ -81,6 +81,43 @@ function getSubjectIcon(code) {
       </div>
     </header>
 
+    <!-- 快捷功能区 -->
+    <section class="quick-section">
+      <h2 class="section-title">快捷功能</h2>
+      <div class="quick-grid">
+        <!-- 错题集入口 -->
+        <div
+          class="quick-card"
+          :style="{ '--card-accent': 'var(--color-warning)' }"
+          @click="router.push('/wrong-answers')"
+        >
+          <div class="quick-left" :style="{ background: 'var(--color-warning)' }"></div>
+          <div class="quick-body">
+            <span class="quick-icon">📝</span>
+            <div class="quick-text">
+              <h3 class="quick-title">错题集</h3>
+              <p class="quick-sub">复习错题</p>
+            </div>
+          </div>
+        </div>
+        <!-- 我学过的入口 -->
+        <div
+          class="quick-card"
+          :style="{ '--card-accent': 'var(--color-primary)' }"
+          @click="router.push('/learned')"
+        >
+          <div class="quick-left" :style="{ background: 'var(--color-primary)' }"></div>
+          <div class="quick-body">
+            <span class="quick-icon">📚</span>
+            <div class="quick-text">
+              <h3 class="quick-title">我学过的</h3>
+              <p class="quick-sub">学习记录</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 学科选择区 -->
     <section class="subject-section">
       <h2 class="section-title">选择学科</h2>
@@ -102,16 +139,14 @@ function getSubjectIcon(code) {
           v-for="subject in subjects"
           :key="subject.id"
           class="subject-card"
-          :class="{ locked: subject.isLocked }"
           :style="{ '--card-accent': getSubjectColor(subject.code) }"
-          @click="!subject.isLocked && router.push(`/subject/${subject.id}`)"
+          @click="router.push(`/subject/${subject.id}`)"
         >
           <div class="card-icon" :style="{ background: getSubjectColor(subject.code) }">
             {{ getSubjectIcon(subject.code) }}
           </div>
           <h3 class="card-title">{{ subject.name }}</h3>
-          <p class="card-desc" v-if="subject.isLocked">待解锁</p>
-          <p class="card-desc" v-else>点击进入 →</p>
+          <p class="card-desc">点击进入 →</p>
         </div>
       </div>
     </section>
@@ -193,6 +228,79 @@ function getSubjectIcon(code) {
   margin-bottom: var(--space-4);
 }
 
+/* ===== 快捷功能区 ===== */
+.quick-section {
+  margin-bottom: var(--space-6);
+}
+
+/* 快捷卡片网格:两个并排 */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+/* 快捷卡片:白底圆角 + 左侧彩色竖条 */
+.quick-card {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: transform var(--duration-fast) var(--ease-bounce),
+              box-shadow var(--duration-fast) var(--ease-smooth);
+}
+
+.quick-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* 左侧彩色竖条 */
+.quick-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  flex-shrink: 0;
+}
+
+/* 主体内容 */
+.quick-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-left: var(--space-2);
+}
+
+.quick-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.quick-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quick-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+.quick-sub {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
 /* 学科卡片网格 */
 .subject-grid {
   display: grid;
@@ -213,14 +321,9 @@ function getSubjectIcon(code) {
               box-shadow var(--duration-fast) var(--ease-smooth);
 }
 
-.subject-card:not(.locked):hover {
+.subject-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
-}
-
-.subject-card.locked {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* 学科图标：彩色圆形背景 */

@@ -35,10 +35,13 @@ const props = defineProps({
 /**
  * 组件 Emits
  * @event next 切换下一项/完成
+ * @event prev 切换上一项
  */
 const emit = defineEmits({
   /** 切换下一篇或完成阅读 */
-  next: null
+  next: null,
+  /** 切换上一篇 */
+  prev: null
 })
 
 /**
@@ -87,14 +90,26 @@ const progressPercent = computed(() => {
     <!-- 操作区: 朗读 + 翻页 -->
     <div class="actions">
       <AudioButton :text="readAloudText" />
-      <AppButton
-        variant="primary"
-        size="lg"
-        block
-        @click="emit('next')"
-      >
-        {{ isLastItem ? '完成阅读' : '下一页 →' }}
-      </AppButton>
+      <!-- 上一步 / 下一步 / 完成阅读 -->
+      <div class="action-row">
+        <!-- 上一步按钮:第一页不显示 -->
+        <AppButton
+          v-if="currentIndex > 0"
+          variant="ghost"
+          size="md"
+          @click="emit('prev')"
+        >← 上一页</AppButton>
+        <span v-else class="action-placeholder"></span>
+        <!-- 下一页 / 完成阅读 -->
+        <AppButton
+          variant="primary"
+          size="md"
+          class="action-next"
+          @click="emit('next')"
+        >
+          {{ isLastItem ? '完成阅读' : '下一页 →' }}
+        </AppButton>
+      </div>
     </div>
   </div>
 </template>
@@ -129,6 +144,24 @@ const progressPercent = computed(() => {
 .reading-content { font-size: var(--text-base); color: var(--text-secondary); line-height: 1.8; text-align: justify; }
 
 .actions { display: flex; flex-direction: column; gap: var(--space-3); }
+
+/* 按钮行:左右分布,上一页 + 下一页 */
+.action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* 占位符:第一页时保持下一页按钮居右 */
+.action-placeholder {
+  flex: 1;
+}
+
+/* 下一页按钮占据主要空间 */
+.action-next {
+  flex: 1;
+}
 
 @media (max-width: 480px) {
   .mascot-companion { width: 64px; height: 64px; }

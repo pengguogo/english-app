@@ -1,6 +1,7 @@
 <!--
   AudioButton.vue - 发音播放按钮组件
   用途: 点击后先播放中文翻译,再播放英文单词/句子。面向儿童的英语学习场景。
+  修改: 2026-07-21 使用 isPlaying 替代 isLoading 做按钮禁用,避免连续点击音频叠加。
   作者: english-app
   创建日期: 2026-07-20
 -->
@@ -17,15 +18,17 @@ const props = defineProps({
   translation: { type: String, default: '' }
 })
 
-/* 复用 TTS 组合式函数,获取 loading 状态与播放方法 */
-const { isLoading, playAndWait } = useTts()
+/* 复用 TTS 组合式函数,获取播放状态与播放方法 */
+const { isPlaying, playAndWait } = useTts()
 
 /**
  * 点击播放:先播放中文翻译(如果有),播完后再播放英文。
  * 两个音频顺序播放,播放期间按钮显示"播放中..."并禁用。
+ * 连续点击时 isPlaying 守卫直接返回,避免音频叠加。
  */
 async function handlePlay() {
-  if (isLoading.value) return
+  // 播放中直接返回,避免连续点击导致音频叠加
+  if (isPlaying.value) return
   try {
     // 如果有中文翻译,先播放中文
     if (props.translation) {
@@ -43,8 +46,8 @@ async function handlePlay() {
 <template>
   <button
     class="audio-btn"
-    :class="{ loading: isLoading }"
-    :disabled="isLoading"
+    :class="{ loading: isPlaying }"
+    :disabled="isPlaying"
     @click="handlePlay"
   >
     <!-- 扬声器 SVG 图标 -->
@@ -56,7 +59,7 @@ async function handlePlay() {
             stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"
             class="wave wave-1"/>
     </svg>
-    <span>{{ isLoading ? '播放中...' : '听发音' }}</span>
+    <span>{{ isPlaying ? '播放中...' : '听发音' }}</span>
   </button>
 </template>
 

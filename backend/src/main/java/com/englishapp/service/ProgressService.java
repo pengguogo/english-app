@@ -2,6 +2,8 @@ package com.englishapp.service;
 
 import com.englishapp.dto.CompleteRequest;
 import com.englishapp.dto.CompleteResponse;
+import com.englishapp.dto.LearnedLessonDto;
+import com.englishapp.dto.LearnedStatsDto;
 import com.englishapp.dto.ProgressDto;
 import com.englishapp.dto.UnitProgressDto;
 
@@ -70,4 +72,27 @@ public interface ProgressService {
      * @return 该单元所有课时的进度列表(按课时 sortOrder 升序排列)
      */
     List<UnitProgressDto> getUnitProgress(Integer unitId, Integer userId);
+
+    /**
+     * 获取用户已学过的课时列表
+     * <p>
+     * 返回用户所有已完成(COMPLETED)的课时,包含课时→单元→主题→学科的完整层级信息,
+     * 以及每个课时的星星数、分数与完成时间,按完成时间降序排列。
+     * </p>
+     *
+     * @param userId 用户 ID(为 null 时使用默认用户)
+     * @return 已学课时 DTO 列表(按完成时间降序)
+     */
+    List<LearnedLessonDto> getLearnedLessons(Integer userId);
+
+    /**
+     * 获取用户已学课时的统计信息
+     * <p>
+     * 返回已学课时总数、累计星星数、平均分数,以及按学科和课时类型的分类统计。
+     * </p>
+     *
+     * @param userId 用户 ID(为 null 时使用默认用户)
+     * @return 已学课时统计 DTO
+     */
+    LearnedStatsDto getLearnedStats(Integer userId);
 }

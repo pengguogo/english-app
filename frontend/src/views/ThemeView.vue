@@ -1,6 +1,7 @@
 <!--
   ThemeView.vue - 单元列表页:展示某主题下的所有单元及学习进度
   用途: 场景 banner + 主题地图(单元节点) + 单元卡片列表。
+  修改: 2026-07-21 去掉锁定 UI,所有单元节点显示为可学状态(实线路径)。
   作者: english-app
   创建日期: 2026-07-20
 -->
@@ -64,13 +65,13 @@ function getSceneConfig(index) {
 }
 
 /**
- * 计算单元节点的状态: completed / active / locked。
+ * 计算单元节点的状态: completed / active。
+ * 去除锁定逻辑后,只区分"已完成"和"进行中(可学)"两种状态。
  * @param {Object} unit 单元对象
  * @param {number} index 索引
  * @return {string} 状态标识
  */
 function getNodeStatus(unit, index) {
-  if (unit.isLocked) return 'locked'
   if (unit.completedLessons === unit.totalLessons && unit.totalLessons > 0) return 'completed'
   return 'active'
 }
@@ -119,22 +120,21 @@ function getNodeStatus(unit, index) {
     </div>
 
     <template v-else>
-      <!-- 主题地图: 单元节点 + 虚线路径 -->
+      <!-- 主题地图: 单元节点 + 实线路径 -->
       <section class="map-section">
         <h2 class="section-title">学习地图</h2>
         <div class="map-container">
           <svg class="map-svg" viewBox="0 0 680 200" preserveAspectRatio="xMidYMid meet">
-            <!-- 节点间连接路径 -->
+            <!-- 节点间连接路径(全部使用实线,表示均可学习) -->
             <path
               v-for="(unit, index) in units.slice(0, -1)"
               :key="`path-${index}`"
               :d="`M ${140 + index * 210} 100 Q ${245 + index * 210} 80 ${350 + index * 210} 100`"
-              :stroke="getNodeStatus(units[index + 1], index + 1) === 'locked' ? 'var(--border-light)' : 'var(--color-primary)'"
+              stroke="var(--color-primary)"
               :stroke-width="3"
-              :stroke-dasharray="getNodeStatus(units[index + 1], index + 1) === 'locked' ? '6 6' : '0'"
               fill="none"
               stroke-linecap="round"
-              :opacity="getNodeStatus(units[index + 1], index + 1) === 'locked' ? 0.4 : 0.5"
+              opacity="0.5"
             />
 
             <!-- 单元节点 -->
@@ -142,8 +142,8 @@ function getNodeStatus(unit, index) {
               v-for="(unit, index) in units"
               :key="`node-${unit.id}`"
               :class="['map-node', getNodeStatus(unit, index)]"
-              @click="!unit.isLocked && router.push(`/unit/${unit.id}`)"
-              :style="{ cursor: unit.isLocked ? 'not-allowed' : 'pointer' }"
+              @click="router.push(`/unit/${unit.id}`)"
+              style="cursor: pointer;"
             >
               <!-- 外圈光晕 -->
               <circle
@@ -151,17 +151,16 @@ function getNodeStatus(unit, index) {
                 cy="100"
                 r="44"
                 :fill="getSceneConfig(index).color"
-                :opacity="getNodeStatus(unit, index) === 'locked' ? 0.08 : 0.15"
+                opacity="0.15"
               />
               <!-- 节点主体 -->
               <circle
                 :cx="100 + index * 210"
                 cy="100"
                 r="36"
-                :fill="getNodeStatus(unit, index) === 'locked' ? 'var(--bg-muted)' : 'var(--bg-card)'"
-                :stroke="getNodeStatus(unit, index) === 'locked' ? 'var(--border-light)' : getSceneConfig(index).color"
+                fill="var(--bg-card)"
+                :stroke="getSceneConfig(index).color"
                 :stroke-width="2.5"
-                :stroke-dasharray="getNodeStatus(unit, index) === 'locked' ? '4 4' : '0'"
               />
               <!-- 场景图标 -->
               <text
@@ -169,7 +168,6 @@ function getNodeStatus(unit, index) {
                 y="108"
                 font-size="28"
                 text-anchor="middle"
-                :opacity="getNodeStatus(unit, index) === 'locked' ? 0.5 : 1"
               >{{ getSceneConfig(index).icon }}</text>
               <!-- 节点标签 -->
               <text
@@ -180,14 +178,14 @@ function getNodeStatus(unit, index) {
                 fill="var(--text-secondary)"
                 font-weight="500"
               >{{ unit.name }}</text>
-              <!-- 进度/状态文字 -->
+              <!-- 进度文字 -->
               <text
                 :x="100 + index * 210"
                 y="176"
                 text-anchor="middle"
                 font-size="10"
                 fill="var(--text-tertiary)"
-              >{{ unit.isLocked ? '🔒 待解锁' : `${unit.completedLessons}/${unit.totalLessons} 课` }}</text>
+              >{{ unit.completedLessons }}/{{ unit.totalLessons }} 课</text>
 
               <!-- 状态徽章 -->
               <g v-if="getNodeStatus(unit, index) === 'completed'">
@@ -215,10 +213,6 @@ function getNodeStatus(unit, index) {
               <span class="legend-dot" style="background: var(--color-accent)"></span>
               <span>进行中</span>
             </div>
-            <div class="legend-item">
-              <span class="legend-dot" style="background: var(--text-tertiary)"></span>
-              <span>未解锁</span>
-            </div>
           </div>
         </div>
       </section>
@@ -231,8 +225,7 @@ function getNodeStatus(unit, index) {
             v-for="(unit, index) in units"
             :key="unit.id"
             class="unit-card"
-            :class="{ locked: unit.isLocked }"
-            @click="!unit.isLocked && router.push(`/unit/${unit.id}`)"
+            @click="router.push(`/unit/${unit.id}`)"
           >
             <!-- 左侧彩色竖条 -->
             <div class="unit-stripe" :style="{ background: getSceneConfig(index).color }"></div>
@@ -246,8 +239,7 @@ function getNodeStatus(unit, index) {
                   </p>
                 </div>
                 <div class="unit-status">
-                  <span v-if="unit.isLocked" class="lock-icon">🔒</span>
-                  <span v-else-if="unit.completedLessons === unit.totalLessons" class="done-icon">✓</span>
+                  <span v-if="unit.completedLessons === unit.totalLessons" class="done-icon">✓</span>
                 </div>
               </div>
               <!-- 进度条 -->
@@ -428,14 +420,9 @@ function getNodeStatus(unit, index) {
               box-shadow var(--duration-fast) var(--ease-smooth);
 }
 
-.unit-card:not(.locked):hover {
+.unit-card:hover {
   transform: translateX(4px);
   box-shadow: var(--shadow-hover);
-}
-
-.unit-card.locked {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* 左侧彩色竖条 */

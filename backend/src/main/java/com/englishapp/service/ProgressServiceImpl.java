@@ -5,6 +5,10 @@ import com.englishapp.domain.UserProgress;
 import com.englishapp.domain.enums.ProgressStatus;
 import com.englishapp.dto.CompleteRequest;
 import com.englishapp.dto.CompleteResponse;
+import com.englishapp.dto.LearnedLessonDto;
+import com.englishapp.dto.LearnedStatsDto;
+import com.englishapp.dto.LearnedStatsDto.SubjectCount;
+import com.englishapp.dto.LearnedStatsDto.TypeCount;
 import com.englishapp.dto.ProgressDto;
 import com.englishapp.dto.UnitProgressDto;
 import com.englishapp.repository.LessonRepository;
@@ -25,9 +29,9 @@ import java.util.stream.Collectors;
  * 核心设计要点:
  * <ul>
  *     <li>枚举适配:由于 {@link ProgressStatus} 不含 {@code UNLOCKED},统一使用
- *         {@code IN_PROGRESS} 表示"已解锁/可学习"语义</li>
+ *         {@code IN_PROGRESS} 表示"可学习"语义</li>
  *     <li>取最高分:重复完成同一课时时,保留历史最高分与最高星数</li>
- *     <li>顺序解锁:仅在同单元内按 sortOrder 顺序解锁下一课时</li>
+ *     <li>已取消锁定机制:无进度记录的课时统一返回 {@code IN_PROGRESS},用户可自由学习</li>
  * </ul>
  * </p>
  *
@@ -57,6 +61,10 @@ public class ProgressServiceImpl implements ProgressService {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * 已取消锁定机制:无进度记录时统一返回 {@code IN_PROGRESS}(可学习),
+     * 不再区分首课与其余课时。
+     * </p>
      */
     @Override
     public ProgressDto getLessonProgress(Integer lessonId, Integer userId) {
@@ -69,20 +77,16 @@ public class ProgressServiceImpl implements ProgressService {
             return new ProgressDto(lessonId, up.getStatus().name(),
                     up.getStars(), up.getScore());
         }
-        // 无记录时:某单元下 sortOrder 最小的课时返回 IN_PROGRESS(可学习),其余 LOCKED
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new IllegalArgumentException("课时不存在: " + lessonId));
-        List<Lesson> unitLessons = lessonRepository
-                .findByUnitIdOrderBySortOrderAsc(lesson.getUnitId());
-        boolean isFirst = unitLessons.stream()
-                .mapToInt(Lesson::getSortOrder).min().orElse(0) == lesson.getSortOrder();
-        // 注意:枚举无 UNLOCKED,用 IN_PROGRESS 表示"可学习/已解锁"
-        String status = isFirst ? ProgressStatus.IN_PROGRESS.name() : ProgressStatus.LOCKED.name();
-        return new ProgressDto(lessonId, status, 0, 0);
+        // 已取消锁定机制:无记录时统一返回 IN_PROGRESS(可学习)
+        return new ProgressDto(lessonId, ProgressStatus.IN_PROGRESS.name(), 0, 0);
     }
 
     /**
      * {@inheritDoc}
+     * <p>
+     * 已取消锁定机制:本方法仅负责记录最高分、标记 COMPLETED 并返回
+     * {@code CompleteResponse(null, false)},不再解锁下一课时。
+     * </p>
      */
     @Override
     @Transactional
@@ -108,59 +112,20 @@ public class ProgressServiceImpl implements ProgressService {
         progress.setStatus(ProgressStatus.COMPLETED);
         progress.setStars(bestStars);
         progress.setScore(bestScore);
+        // 记录完成时间,便于"我学过的"列表按时间排序展示
+        progress.setCompletedAt(java.time.LocalDateTime.now());
         userProgressRepository.save(progress);
 
-        // 解锁下一课时(同单元内 sortOrder 更大的下一课)
-        Lesson current = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new IllegalArgumentException("课时不存在"));
-        List<Lesson> unitLessons = lessonRepository
-                .findByUnitIdOrderBySortOrderAsc(current.getUnitId());
-        Lesson nextLesson = unitLessons.stream()
-                .filter(l -> l.getSortOrder() > current.getSortOrder())
-                .findFirst()
-                .orElse(null);
-
-        if (nextLesson != null) {
-            unlockLesson(nextLesson.getId(), uid);
-            return new CompleteResponse(nextLesson.getId(), true);
-        }
-        // 已是本单元最后一课,无下一课可解锁
+        // 已取消锁定机制:不再解锁下一课时,统一返回无下一课
         return new CompleteResponse(null, false);
     }
 
     /**
-     * 解锁指定课时
-     * <p>
-     * 解锁语义:若记录不存在则创建为 {@code IN_PROGRESS};若已存在且为 {@code LOCKED} 则改为
-     * {@code IN_PROGRESS};若已是 {@code IN_PROGRESS} 或 {@code COMPLETED} 则不重复处理。
-     * </p>
-     *
-     * @param lessonId 课时 ID
-     * @param userId   用户 ID
-     */
-    private void unlockLesson(Integer lessonId, Integer userId) {
-        Optional<UserProgress> existing = userProgressRepository
-                .findByUserIdAndLessonId(userId, lessonId);
-        if (existing.isEmpty()) {
-            UserProgress up = new UserProgress();
-            up.setUserId(userId);
-            up.setLessonId(lessonId);
-            // 枚举无 UNLOCKED,用 IN_PROGRESS 表示"已解锁/可学习"
-            up.setStatus(ProgressStatus.IN_PROGRESS);
-            up.setStars(0);
-            up.setScore(0);
-            userProgressRepository.save(up);
-        } else {
-            UserProgress up = existing.get();
-            if (up.getStatus() == ProgressStatus.LOCKED) {
-                up.setStatus(ProgressStatus.IN_PROGRESS);
-                userProgressRepository.save(up);
-            }
-        }
-    }
-
-    /**
      * {@inheritDoc}
+     * <p>
+     * 已取消锁定机制:无进度记录的课时统一返回 {@code IN_PROGRESS}(可学习),
+     * 不再区分首课与其余课时。
+     * </p>
      */
     @Override
     public List<UnitProgressDto> getUnitProgress(Integer unitId, Integer userId) {
@@ -180,11 +145,7 @@ public class ProgressServiceImpl implements ProgressService {
         Map<Integer, UserProgress> progressMap = progressList.stream()
                 .collect(Collectors.toMap(UserProgress::getLessonId, Function.identity()));
 
-        // 首课 sortOrder:无进度记录时,首课默认 IN_PROGRESS,其余 LOCKED
-        int firstSortOrder = unitLessons.stream()
-                .mapToInt(Lesson::getSortOrder).min().orElse(0);
-
-        // 遍历所有课时,有记录用记录状态,无记录按首课规则推断
+        // 遍历所有课时,有记录用记录状态,无记录统一返回 IN_PROGRESS(已取消锁定机制)
         return unitLessons.stream()
                 .map(lesson -> {
                     UserProgress up = progressMap.get(lesson.getId());
@@ -192,12 +153,60 @@ public class ProgressServiceImpl implements ProgressService {
                         return new UnitProgressDto(lesson.getId(),
                                 up.getStatus().name(), up.getStars(), up.getScore());
                     }
-                    // 无记录:首课可学(IN_PROGRESS),其余锁定(LOCKED)
-                    String status = lesson.getSortOrder() == firstSortOrder
-                            ? ProgressStatus.IN_PROGRESS.name()
-                            : ProgressStatus.LOCKED.name();
-                    return new UnitProgressDto(lesson.getId(), status, 0, 0);
+                    // 已取消锁定机制:无记录统一返回 IN_PROGRESS(可学习)
+                    return new UnitProgressDto(lesson.getId(),
+                            ProgressStatus.IN_PROGRESS.name(), 0, 0);
                 })
                 .toList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<LearnedLessonDto> getLearnedLessons(Integer userId) {
+        // 未指定用户时使用默认用户,便于匿名/调试场景
+        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
+        return userProgressRepository.findLearnedLessonsByUserId(uid);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LearnedStatsDto getLearnedStats(Integer userId) {
+        // 未指定用户时使用默认用户,便于匿名/调试场景
+        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
+
+        // 汇总数据:已学总数、累计星星、平均分数
+        Long totalLearned = userProgressRepository.countCompletedByUserId(uid);
+        Integer totalStars = userProgressRepository.sumStarsByUserId(uid);
+        Double avgScore = userProgressRepository.avgScoreByUserId(uid);
+        // 平均分取整
+        Integer averageScore = avgScore != null ? avgScore.intValue() : 0;
+
+        // 按学科与课时类型分组统计:从已学课时列表中手动 groupBy
+        List<LearnedLessonDto> lessons = userProgressRepository.findLearnedLessonsByUserId(uid);
+
+        // 按学科分组:(subjectId, subjectName) → count
+        Map<Integer, List<LearnedLessonDto>> bySubjectMap = lessons.stream()
+                .collect(Collectors.groupingBy(LearnedLessonDto::subjectId));
+        List<SubjectCount> bySubject = bySubjectMap.entrySet().stream()
+                .map(e -> {
+                    // 取该学科下第一条记录的 subjectName(同一学科名称相同)
+                    String subjectName = e.getValue().get(0).subjectName();
+                    return new SubjectCount(e.getKey(), subjectName, (long) e.getValue().size());
+                })
+                .toList();
+
+        // 按课时类型分组:lessonType.name() → count
+        // 使用 .name() 将 LessonType 枚举转为字符串,便于前端展示
+        Map<String, Long> byTypeMap = lessons.stream()
+                .collect(Collectors.groupingBy(dto -> dto.lessonType().name(), Collectors.counting()));
+        List<TypeCount> byType = byTypeMap.entrySet().stream()
+                .map(e -> new TypeCount(e.getKey(), e.getValue()))
+                .toList();
+
+        return new LearnedStatsDto(totalLearned, totalStars, averageScore, bySubject, byType);
     }
 }

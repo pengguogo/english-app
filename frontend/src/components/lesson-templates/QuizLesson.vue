@@ -36,12 +36,15 @@ const props = defineProps({
  * 组件 Emits
  * @event answered 答题完成，上报是否正确
  * @event next 切换下一题/完成
+ * @event prev 切换上一题
  */
 const emit = defineEmits({
   /** 答题完成，参数为是否答对 */
   answered: null,
   /** 切换下一题或完成 */
-  next: null
+  next: null,
+  /** 切换上一题 */
+  prev: null
 })
 
 // 选中的选项索引（null 表示未选）
@@ -82,7 +85,10 @@ function selectOption(index) {
   selectedIndex.value = index
   hasAnswered.value = true
   const correct = index === props.currentItem?.answer
-  emit('answered', correct)
+  // 上报答题结果,同时携带用户答案与正确答案,便于父组件记录错题
+  const userAnswer = props.currentItem?.options?.[index] ?? ''
+  const correctAnswer = props.currentItem?.options?.[props.currentItem.answer] ?? ''
+  emit('answered', { correct, userAnswer, correctAnswer })
 }
 
 /**
@@ -144,16 +150,26 @@ function getOptionClass(index) {
       </div>
     </div>
 
-    <!-- 下一题/完成按钮（答题后显示） -->
-    <AppButton
-      v-if="hasAnswered"
-      variant="primary"
-      size="lg"
-      block
-      @click="emit('next')"
-    >
-      {{ isLastItem ? '完成答题' : '下一题 →' }}
-    </AppButton>
+    <!-- 上一题/下一题按钮(答题后显示) -->
+    <div v-if="hasAnswered" class="action-row">
+      <!-- 上一题按钮:第一题不显示 -->
+      <AppButton
+        v-if="currentIndex > 0"
+        variant="ghost"
+        size="md"
+        @click="emit('prev')"
+      >← 上一题</AppButton>
+      <span v-else class="action-placeholder"></span>
+      <!-- 下一题/完成按钮 -->
+      <AppButton
+        variant="primary"
+        size="md"
+        class="action-next"
+        @click="emit('next')"
+      >
+        {{ isLastItem ? '完成答题' : '下一题 →' }}
+      </AppButton>
+    </div>
   </div>
 </template>
 
@@ -196,6 +212,24 @@ function getOptionClass(index) {
 .feedback-area { margin-top: var(--space-4); padding: var(--space-3); border-radius: var(--radius-md); text-align: center; }
 .feedback-correct { color: var(--color-success); font-weight: var(--font-bold); }
 .feedback-wrong { color: var(--color-warning); font-weight: var(--font-bold); }
+
+/* 按钮行:左右分布,上一题 + 下一题 */
+.action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* 占位符:第一题时保持下一题按钮居右 */
+.action-placeholder {
+  flex: 1;
+}
+
+/* 下一题按钮占据主要空间 */
+.action-next {
+  flex: 1;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .option-correct { animation: correctPulse var(--duration-normal) var(--ease-bounce); }
