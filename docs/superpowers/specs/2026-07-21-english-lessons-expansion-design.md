@@ -148,7 +148,11 @@
 ### 设计原则
 
 - **渐进式**：PHONICS/DIALOGUE 每主题仅 1 课试点，验证模式后再扩大
-- **复用现有图片**：PHONICS 用已有单词图（apple/banana/car...），DIALOGUE 用吉祥物 Mimi + 主题角色
+- **图片策略（优先级）**：
+  1. **优先用动画片原版图片**：从网络获取汪汪队立大功/小砾工程家族的官方角色图、场景图，保存到 `backend/src/main/resources/static/images/paw-patrol/` 和 `backend/src/main/resources/static/images/rubble-crew/`
+  2. **次选用现有图片**：已下载的 6 只原班狗狗图（`paw-patrol/chase.jpg` 等）继续使用
+  3. **最后用 AI 生成**：网络找不到的图片（如特定场景、反派角色），用 AI 图像生成工具创建，风格统一为扁平卡通
+  4. **兜底用 emoji**：实在无图的角色/场景用 emoji 顶替，确保功能可用
 - **主题内逻辑**：每个主题的 PHONICS 字母从该主题词汇中提取（如水果主题学 F/B/G），形成知识闭环
 
 ## 数据模型
