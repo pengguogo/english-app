@@ -17,7 +17,7 @@ import mascotCompanion from '../../assets/mascot/mascot-companion.jpg'
 
 /**
  * 组件 Props
- * @property {Object} currentItem 当前学习项 { letter, letterSound, phonetic, tip, image, emoji, word, wordPhonetic, translation, distractors }
+ * @property {Object} currentItem 当前学习项 { letter, pronunciation, sound, tip, image, emoji, word, phonetic, translation, distractors }
  * @property {number} currentIndex 当前索引（从0开始）
  * @property {number} totalItems 总项数
  * @property {number} currentScore 当前项评分（null 表示未评分）
@@ -217,12 +217,12 @@ watch(() => props.currentIndex, () => {
       <!-- 大号字母（6rem，主色调） -->
       <h1 class="big-letter">{{ currentLetter }}</h1>
       <!-- 字母发音（如 /ef/） -->
-      <p v-if="currentItem.letterSound" class="letter-sound">
-        /{{ currentItem.letterSound }}/
+      <p v-if="currentItem.pronunciation" class="letter-sound">
+        /{{ currentItem.pronunciation }}/
       </p>
       <!-- 音标（如 /f/） -->
-      <p v-if="currentItem.phonetic" class="phonetic">
-        音标 /{{ currentItem.phonetic }}/
+      <p v-if="currentItem.sound" class="phonetic">
+        音标 /{{ currentItem.sound }}/
       </p>
       <!-- 发音提示 -->
       <p v-if="currentItem.tip" class="tip">{{ currentItem.tip }}</p>
@@ -241,8 +241,8 @@ watch(() => props.currentIndex, () => {
       <!-- 示例单词 + 音标 + 翻译 -->
       <div class="word-info">
         <h2 class="word">{{ currentItem.word }}</h2>
-        <p v-if="currentItem.wordPhonetic" class="word-phonetic">
-          /{{ currentItem.wordPhonetic }}/
+        <p v-if="currentItem.phonetic" class="word-phonetic">
+          /{{ currentItem.phonetic }}/
         </p>
         <p class="translation">{{ currentItem.translation }}</p>
       </div>
@@ -256,8 +256,8 @@ watch(() => props.currentIndex, () => {
     <!-- ============ 练习模式: 听音选字母 ============ -->
     <div v-else class="practice-card">
       <h2 class="practice-question">听一听，选出发这个音的字母</h2>
-      <p v-if="currentItem.phonetic" class="practice-hint">
-        音标 /{{ currentItem.phonetic }}/
+      <p v-if="currentItem.sound" class="practice-hint">
+        音标 /{{ currentItem.sound }}/
       </p>
 
       <!-- 选项列表（3 选 1，随机排序） -->
@@ -313,13 +313,13 @@ watch(() => props.currentIndex, () => {
       <!-- 中间按钮:学习模式显示"去练习"，练习模式显示"返回学习" -->
       <AppButton
         v-if="mode === 'learn'"
-        variant="ghost"
+        variant="warning"
         size="md"
         @click="enterPractice"
       >去练习</AppButton>
       <AppButton
         v-else
-        variant="ghost"
+        variant="warning"
         size="md"
         @click="backToLearn"
       >返回学习</AppButton>
