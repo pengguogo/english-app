@@ -21,6 +21,7 @@ import SentenceLesson from '../components/lesson-templates/SentenceLesson.vue'
 import LessonComplete from '../components/lesson-templates/LessonComplete.vue'
 import ReadingLesson from '../components/lesson-templates/ReadingLesson.vue'
 import QuizLesson from '../components/lesson-templates/QuizLesson.vue'
+import CalculateLesson from '../components/lesson-templates/CalculateLesson.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -107,8 +108,10 @@ const lessonTemplate = computed(() => {
       return ReadingLesson
     case 'QUIZ':
       return QuizLesson
+    case 'CALCULATE':
+      return CalculateLesson
     default:
-      // CALCULATE 等后续阶段实现
+      // 其他未支持的课型
       return null
   }
 })
