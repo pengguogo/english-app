@@ -41,6 +41,7 @@ Thumbs.db
 
 # ===== Trae =====
 .trae/
+.superpowers/
 
 # ===== Logs =====
 *.log
