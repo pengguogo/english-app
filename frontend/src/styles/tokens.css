@@ -45,6 +45,9 @@
   --bg-card: #FFFFFF;
   --bg-muted: #F5F5F7;
 
+  /** 主色背景上的文字色（白色） */
+  --text-on-primary: #FFFFFF;
+
   /* ===== 边框 ===== */
   --border-light: #E8E8EC;
   --border-muted: #F0F0F2;

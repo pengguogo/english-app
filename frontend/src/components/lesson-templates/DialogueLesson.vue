@@ -111,7 +111,7 @@ const progressPercent = computed(() => {
         <p class="dialogue-translation">{{ currentItem.translation }}</p>
       </div>
       <!-- NPC 发言: 右侧 + 角色标签 -->
-      <div v-if="!isMimi" class="avatar-wrapper npc">
+      <div v-else class="avatar-wrapper">
         <span class="speaker-badge">{{ currentItem.speaker }}</span>
       </div>
     </div>
@@ -230,7 +230,7 @@ const progressPercent = computed(() => {
 .speaker-badge {
   padding: var(--space-1) var(--space-2);
   background: var(--color-primary);
-  color: white;
+  color: var(--text-on-primary);
   border-radius: var(--radius-pill);
   font-size: var(--text-xs);
   font-weight: var(--font-bold);
@@ -246,7 +246,7 @@ const progressPercent = computed(() => {
 }
 .npc-side .bubble {
   background: var(--color-primary);
-  color: white;
+  color: var(--text-on-primary);
 }
 .dialogue-text {
   font-size: var(--text-lg);
