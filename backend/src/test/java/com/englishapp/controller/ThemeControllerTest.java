@@ -39,6 +39,6 @@ class ThemeControllerTest {
     void shouldReturnThemes() throws Exception {
         mockMvc.perform(get("/api/v1/themes"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("水果乐园"));
+                .andExpect(jsonPath("$.data[0].name").value("水果乐园"));
     }
 }
