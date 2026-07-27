@@ -12,9 +12,11 @@ const hasCerts = fs.existsSync(certFile) && fs.existsSync(keyFile)
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  // 前端产物放入独立子目录，避免 emptyOutDir 清空后端托管的课程图片
+  base: '/app/',
   build: {
     // 构建产物输出到 Spring Boot 静态资源目录,实现单 JAR 部署
-    outDir: '../backend/src/main/resources/static',
+    outDir: '../backend/src/main/resources/static/app',
     // 构建前清空输出目录,避免残留旧文件
     emptyOutDir: true
   },

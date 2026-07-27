@@ -51,7 +51,7 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/").setViewName("forward:/index.html");
+        registry.addViewController("/").setViewName("forward:/app/index.html");
     }
 
     /**
@@ -70,7 +70,7 @@ public class WebConfig implements WebMvcConfigurer {
                         if (resourcePath.startsWith("api/") || requested.isReadable()) {
                             return requested;
                         }
-                        return new ClassPathResource("/static/index.html");
+                        return new ClassPathResource("/static/app/index.html");
                     }
                 });
     }

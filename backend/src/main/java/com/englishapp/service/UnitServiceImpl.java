@@ -18,9 +18,8 @@ import java.util.List;
  * 为前端提供带进度统计的单元列表查询能力。
  * </p>
  * <p>
- * 注意:已取消单元锁定机制,所有单元均不锁定,用户可自由选择任意单元学习。
- * 保留 {@link #computeLocked(int, List, List)} 方法仅为保持接口稳定,
- * 但其始终返回 false。
+ * 单元锁定状态根据用户进度动态计算:首单元永远可学,后续单元仅在
+ * 前一单元的所有课时均已完成时解锁。
  * </p>
  *
  * @author englishapp
@@ -80,7 +79,7 @@ public class UnitServiceImpl implements UnitService {
                     uid, unit.getId(), ProgressStatus.COMPLETED));
         }
 
-        // 按 sortOrder 顺序遍历,统一通过 computeLocked 计算锁定状态(已取消锁定机制,恒为 false)
+        // 按 sortOrder 顺序遍历,动态计算锁定状态
         List<UnitDto> result = new ArrayList<>(units.size());
         for (int i = 0; i < units.size(); i++) {
             Unit unit = units.get(i);
@@ -94,17 +93,20 @@ public class UnitServiceImpl implements UnitService {
     /**
      * 根据索引与进度统计动态计算单元是否锁定。
      * <p>
-     * 注意:已取消锁定机制,所有单元均不锁定,此方法始终返回 false。
-     * 保留方法签名以维持接口稳定,参数仅为兼容现有调用方。
+     * 首单元永远可学;后续单元需前一单元存在课时且全部完成才解锁。
      * </p>
      *
-     * @param index      单元在排序列表中的索引(已不再使用)
-     * @param totals     各单元课时总数列表(已不再使用)
-     * @param completeds 各单元已完成课时数列表(已不再使用)
-     * @return 始终返回 false,表示不锁定
+     * @param index      单元在排序列表中的索引
+     * @param totals     各单元课时总数列表
+     * @param completeds 各单元已完成课时数列表
+     * @return true 表示锁定,false 表示可学
      */
     private boolean computeLocked(int index, List<Integer> totals, List<Integer> completeds) {
-        // 已取消锁定机制:所有单元均不锁定,用户可自由学习
-        return false;
+        if (index == 0) {
+            return false;
+        }
+        int previousTotal = totals.get(index - 1);
+        int previousCompleted = completeds.get(index - 1);
+        return !(previousTotal > 0 && previousCompleted >= previousTotal);
     }
 }
