@@ -82,14 +82,13 @@ class ProgressServiceImplTest {
     }
 
     /**
-     * 非首课无进度记录时应返回 LOCKED
+     * 非首课无进度记录时也应返回 IN_PROGRESS
      * <p>
-     * 验证:当用户访问非首课(sortOrder 非最小)且无进度记录时,
-     * 系统应返回 LOCKED 状态,表示该课时尚未解锁。
+     * 验证:取消锁定后,无进度记录的任意课时都可以直接学习。
      * </p>
      */
     @Test
-    void should_returnLocked_when_nonFirstLessonAndNoProgress() {
+    void should_returnInProgress_when_nonFirstLessonAndNoProgress() {
         // Arrange:lesson(sortOrder=2)为非首课,lesson2(sortOrder=1)为首课
         Lesson lesson = new Lesson();
         lesson.setId(3);
@@ -111,8 +110,8 @@ class ProgressServiceImplTest {
         // Act
         ProgressDto dto = progressService.getLessonProgress(3, 1);
 
-        // Assert:非首课应返回 LOCKED
-        assertEquals("LOCKED", dto.getStatus());
+        // Assert:非首课也应返回 IN_PROGRESS
+        assertEquals("IN_PROGRESS", dto.getStatus());
         assertEquals(0, dto.getStars());
         assertEquals(0, dto.getScore());
     }
@@ -147,14 +146,13 @@ class ProgressServiceImplTest {
     }
 
     /**
-     * 完成课时应解锁同单元下一课时
+     * 完成课时不再执行下一课解锁
      * <p>
-     * 验证:完成当前课时后,系统应将状态置为 COMPLETED,
-     * 并解锁同单元 sortOrder 更大的下一课时,返回下一课 ID 与解锁标识。
+     * 验证:所有课时默认可学,完成当前课时只更新成绩和完成状态。
      * </p>
      */
     @Test
-    void should_unlockNextLesson_when_completeCurrent() {
+    void should_notUnlockNextLesson_when_completeCurrent() {
         // Arrange:构造当前课时与下一课时
         Lesson current = new Lesson();
         current.setId(2);
@@ -190,9 +188,9 @@ class ProgressServiceImplTest {
         // Act
         CompleteResponse response = progressService.completeLesson(2, request, 1);
 
-        // Assert:应返回下一课 ID 并标记为已解锁
-        assertEquals(3, response.getNextLessonId());
-        assertTrue(response.getUnlocked());
+        // Assert:取消锁定后不再返回下一课解锁信息
+        assertNull(response.getNextLessonId());
+        assertFalse(response.getUnlocked());
         // 当前课时状态应更新为 COMPLETED
         verify(userProgressRepository).save(existing);
         assertEquals(ProgressStatus.COMPLETED, existing.getStatus());
@@ -285,7 +283,7 @@ class ProgressServiceImplTest {
      * 批量查询单元进度时应正确合并已有记录与默认状态
      * <p>
      * 验证:当用户已完成首课、解锁第二课、第三课无记录时,
-     * getUnitProgress 应返回三条记录,状态依次为 COMPLETED / IN_PROGRESS / LOCKED。
+     * getUnitProgress 应返回三条记录,无记录课时默认为 IN_PROGRESS。
      * </p>
      */
     @Test
@@ -329,23 +327,22 @@ class ProgressServiceImplTest {
         // Act
         List<UnitProgressDto> result = progressService.getUnitProgress(4, 1);
 
-        // Assert:三条记录,状态依次为 COMPLETED / IN_PROGRESS / LOCKED
+        // Assert:第三课无记录,但取消锁定后仍可学习
         assertEquals(3, result.size());
         assertEquals("COMPLETED", result.get(0).status());
         assertEquals(3, result.get(0).stars());
         assertEquals("IN_PROGRESS", result.get(1).status());
-        assertEquals("LOCKED", result.get(2).status());
+        assertEquals("IN_PROGRESS", result.get(2).status());
     }
 
     /**
-     * 全新单元无任何进度记录时首课应可学、其余锁定
+     * 全新单元无任何进度记录时所有课时均可学
      * <p>
-     * 验证:当用户从未学习某单元时,getUnitProgress 应将首课(sortOrder 最小)
-     * 返回为 IN_PROGRESS,其余课时返回 LOCKED。
+     * 验证:取消锁定后,无进度记录的所有课时都返回 IN_PROGRESS。
      * </p>
      */
     @Test
-    void should_returnFirstInProgress_when_noProgressRecords() {
+    void should_returnAllInProgress_when_noProgressRecords() {
         // Arrange:单元5 有两节课,用户无任何进度记录
         Lesson lesson1 = new Lesson();
         lesson1.setId(20);
@@ -365,10 +362,10 @@ class ProgressServiceImplTest {
         // Act
         List<UnitProgressDto> result = progressService.getUnitProgress(5, 1);
 
-        // Assert:首课 IN_PROGRESS,第二课 LOCKED
+        // Assert:所有课时均为 IN_PROGRESS
         assertEquals(2, result.size());
         assertEquals("IN_PROGRESS", result.get(0).status());
-        assertEquals("LOCKED", result.get(1).status());
+        assertEquals("IN_PROGRESS", result.get(1).status());
     }
 
     /**

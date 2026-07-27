@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  *     <li>枚举适配:由于 {@link ProgressStatus} 不含 {@code UNLOCKED},统一使用
  *         {@code IN_PROGRESS} 表示"可学习"语义</li>
  *     <li>取最高分:重复完成同一课时时,保留历史最高分与最高星数</li>
- *     <li>顺序解锁:仅在同单元内按 sortOrder 顺序解锁下一课时</li>
+ *     <li>已取消锁定机制:无进度记录的课时统一返回 {@code IN_PROGRESS},用户可自由学习</li>
  * </ul>
  * </p>
  *
@@ -61,6 +61,10 @@ public class ProgressServiceImpl implements ProgressService {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * 已取消锁定机制:无进度记录时统一返回 {@code IN_PROGRESS}(可学习),
+     * 不再区分首课与其余课时。
+     * </p>
      */
     @Override
     public ProgressDto getLessonProgress(Integer lessonId, Integer userId) {
@@ -73,22 +77,16 @@ public class ProgressServiceImpl implements ProgressService {
             return new ProgressDto(lessonId, up.getStatus().name(),
                     up.getStars(), up.getScore());
         }
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new IllegalArgumentException("课时不存在: " + lessonId));
-        List<Lesson> unitLessons = lessonRepository
-                .findByUnitIdOrderBySortOrderAsc(lesson.getUnitId());
-        boolean isFirst = unitLessons.stream()
-                .mapToInt(Lesson::getSortOrder)
-                .min()
-                .orElse(0) == lesson.getSortOrder();
-        String status = isFirst
-                ? ProgressStatus.IN_PROGRESS.name()
-                : ProgressStatus.LOCKED.name();
-        return new ProgressDto(lessonId, status, 0, 0);
+        // 已取消锁定机制:无记录时统一返回 IN_PROGRESS(可学习)
+        return new ProgressDto(lessonId, ProgressStatus.IN_PROGRESS.name(), 0, 0);
     }
 
     /**
      * {@inheritDoc}
+     * <p>
+     * 已取消锁定机制:本方法仅负责记录最高分、标记 COMPLETED 并返回
+     * {@code CompleteResponse(null, false)},不再解锁下一课时。
+     * </p>
      */
     @Override
     @Transactional
@@ -118,40 +116,16 @@ public class ProgressServiceImpl implements ProgressService {
         progress.setCompletedAt(java.time.LocalDateTime.now());
         userProgressRepository.save(progress);
 
-        Lesson current = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new IllegalArgumentException("课时不存在: " + lessonId));
-        Lesson nextLesson = lessonRepository
-                .findByUnitIdOrderBySortOrderAsc(current.getUnitId()).stream()
-                .filter(lesson -> lesson.getSortOrder() > current.getSortOrder())
-                .findFirst()
-                .orElse(null);
-        if (nextLesson != null) {
-            unlockLesson(nextLesson.getId(), uid);
-            return new CompleteResponse(nextLesson.getId(), true);
-        }
+        // 已取消锁定机制:不再解锁下一课时,统一返回无下一课
         return new CompleteResponse(null, false);
-    }
-
-    private void unlockLesson(Integer lessonId, Integer userId) {
-        Optional<UserProgress> existing = userProgressRepository
-                .findByUserIdAndLessonId(userId, lessonId);
-        if (existing.isEmpty()) {
-            UserProgress progress = new UserProgress();
-            progress.setUserId(userId);
-            progress.setLessonId(lessonId);
-            progress.setStatus(ProgressStatus.IN_PROGRESS);
-            progress.setStars(0);
-            progress.setScore(0);
-            userProgressRepository.save(progress);
-        } else if (existing.get().getStatus() == ProgressStatus.LOCKED) {
-            UserProgress progress = existing.get();
-            progress.setStatus(ProgressStatus.IN_PROGRESS);
-            userProgressRepository.save(progress);
-        }
     }
 
     /**
      * {@inheritDoc}
+     * <p>
+     * 已取消锁定机制:无进度记录的课时统一返回 {@code IN_PROGRESS}(可学习),
+     * 不再区分首课与其余课时。
+     * </p>
      */
     @Override
     public List<UnitProgressDto> getUnitProgress(Integer unitId, Integer userId) {
@@ -171,11 +145,7 @@ public class ProgressServiceImpl implements ProgressService {
         Map<Integer, UserProgress> progressMap = progressList.stream()
                 .collect(Collectors.toMap(UserProgress::getLessonId, Function.identity()));
 
-        int firstSortOrder = unitLessons.stream()
-                .mapToInt(Lesson::getSortOrder)
-                .min()
-                .orElse(0);
-
+        // 遍历所有课时,有记录用记录状态,无记录统一返回 IN_PROGRESS(已取消锁定机制)
         return unitLessons.stream()
                 .map(lesson -> {
                     UserProgress up = progressMap.get(lesson.getId());
@@ -183,11 +153,9 @@ public class ProgressServiceImpl implements ProgressService {
                         return new UnitProgressDto(lesson.getId(),
                                 up.getStatus().name(), up.getStars(), up.getScore());
                     }
-                    String status = lesson.getSortOrder() == firstSortOrder
-                            ? ProgressStatus.IN_PROGRESS.name()
-                            : ProgressStatus.LOCKED.name();
+                    // 已取消锁定机制:无记录统一返回 IN_PROGRESS(可学习)
                     return new UnitProgressDto(lesson.getId(),
-                            status, 0, 0);
+                            ProgressStatus.IN_PROGRESS.name(), 0, 0);
                 })
                 .toList();
     }

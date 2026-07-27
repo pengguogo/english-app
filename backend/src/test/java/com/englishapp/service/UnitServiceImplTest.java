@@ -20,8 +20,8 @@ import static org.mockito.Mockito.*;
 /**
  * UnitServiceImpl 单元测试
  * <p>
- * 重点验证单元锁定状态的动态计算逻辑:不依赖数据库静态 is_locked 字段,
- * 而是根据用户进度实时推断——首单元永远可学,后续单元需前一单元全部完成才解锁。
+ * 重点验证取消单元锁定后,所有单元均可自由进入,
+ * 同时仍正确返回每个单元的学习进度。
  * </p>
  *
  * @author englishapp
@@ -81,10 +81,10 @@ class UnitServiceImplTest {
         // Act
         List<UnitDto> result = unitService.getUnitsByTheme(2, 1);
 
-        // Assert:首单元应解锁(不锁定),第二单元应锁定
+        // Assert:取消锁定后两个单元均可学习
         assertEquals(2, result.size());
         assertFalse(result.get(0).getIsLocked(), "首单元应解锁");
-        assertTrue(result.get(1).getIsLocked(), "第二单元未达解锁条件应锁定");
+        assertFalse(result.get(1).getIsLocked(), "第二单元也应可学习");
     }
 
     /**
@@ -119,13 +119,13 @@ class UnitServiceImplTest {
     }
 
     /**
-     * 前一单元部分完成时,后一单元应保持锁定
+     * 前一单元部分完成时,后一单元仍可学习
      * <p>
-     * 验证:第一单元 4 课时仅完成 3 课时(未全部完成),第二单元应保持锁定。
+     * 验证:取消锁定后,学习进度不再限制单元入口。
      * </p>
      */
     @Test
-    void should_keepNextUnitLocked_when_previousUnitPartiallyCompleted() {
+    void should_keepNextUnitAvailable_when_previousUnitPartiallyCompleted() {
         // Arrange
         Unit u1 = makeUnit(4, 2, "陆地交通", 1);
         Unit u2 = makeUnit(5, 2, "空中交通", 2);
@@ -142,9 +142,9 @@ class UnitServiceImplTest {
         // Act
         List<UnitDto> result = unitService.getUnitsByTheme(2, 1);
 
-        // Assert:第一单元未全部完成,第二单元应锁定
+        // Assert:第一单元未全部完成,第二单元仍可学习
         assertFalse(result.get(0).getIsLocked());
-        assertTrue(result.get(1).getIsLocked(), "前一单元未全部完成时,第二单元应保持锁定");
+        assertFalse(result.get(1).getIsLocked(), "前一单元未完成也不应锁定第二单元");
     }
 
     /**
@@ -184,13 +184,13 @@ class UnitServiceImplTest {
     }
 
     /**
-     * 中间单元未完成时,第三个单元应保持锁定
+     * 中间单元未完成时,第三个单元仍可学习
      * <p>
-     * 验证:第一单元完成、第二单元未全部完成时,第三单元应锁定(不能跳过)。
+     * 验证:取消锁定后,用户可以跳过未完成单元。
      * </p>
      */
     @Test
-    void should_keepThirdUnitLocked_when_middleUnitNotCompleted() {
+    void should_keepThirdUnitAvailable_when_middleUnitNotCompleted() {
         // Arrange
         Unit u1 = makeUnit(4, 2, "陆地交通", 1);
         Unit u2 = makeUnit(5, 2, "空中交通", 2);
@@ -211,10 +211,10 @@ class UnitServiceImplTest {
         // Act
         List<UnitDto> result = unitService.getUnitsByTheme(2, 1);
 
-        // Assert:第二单元可学但未完成,第三单元应锁定
+        // Assert:第二单元未完成,第三单元仍可学习
         assertFalse(result.get(0).getIsLocked());
         assertFalse(result.get(1).getIsLocked(), "第一单元完成后第二单元应可学");
-        assertTrue(result.get(2).getIsLocked(), "第二单元未全部完成时第三单元应锁定");
+        assertFalse(result.get(2).getIsLocked(), "第二单元未完成也不应锁定第三单元");
     }
 
     /**

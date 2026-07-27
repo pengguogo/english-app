@@ -78,8 +78,6 @@ function goBack() {
 }
 
 function openUnit(unit) {
-  if (unit.isLocked) return
-
   const query = {
     themeId: String(themeId.value),
     themeName: themeVisual.value.title
@@ -160,8 +158,6 @@ function openUnit(unit) {
             v-for="(unit, index) in units"
             :key="unit.id"
             class="unit-card"
-            :class="{ locked: unit.isLocked }"
-            :aria-disabled="unit.isLocked"
             @click="openUnit(unit)"
           >
             <!-- 左侧彩色竖条 -->
@@ -177,7 +173,6 @@ function openUnit(unit) {
                 </div>
                 <div class="unit-status">
                   <span v-if="unit.completedLessons === unit.totalLessons" class="done-icon">✓</span>
-                  <span v-else-if="unit.isLocked" class="lock-icon" aria-label="尚未解锁">🔒</span>
                 </div>
               </div>
               <!-- 进度条 -->
@@ -419,16 +414,6 @@ function openUnit(unit) {
   box-shadow: var(--shadow-hover);
 }
 
-.unit-card.locked {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.unit-card.locked:hover {
-  transform: none;
-  box-shadow: var(--shadow-card);
-}
-
 /* 左侧彩色竖条 */
 .unit-stripe {
   width: 6px;
@@ -482,10 +467,6 @@ function openUnit(unit) {
 .done-icon {
   color: var(--color-success);
   font-weight: var(--font-bold);
-}
-
-.lock-icon {
-  filter: grayscale(1);
 }
 
 /* 进度条 */
