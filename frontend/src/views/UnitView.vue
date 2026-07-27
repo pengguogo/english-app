@@ -20,6 +20,10 @@ const lessons = ref([])
 const progressMap = ref(new Map())
 const isLoading = ref(true)
 const errorMsg = ref('')
+const themeId = Number(route.query.themeId || 0)
+const themeName = String(route.query.themeName || '')
+const subjectId = Number(route.query.subjectId || 0)
+const subjectName = String(route.query.subjectName || '')
 
 onMounted(async () => {
   const unitId = route.params.unitId
@@ -49,7 +53,13 @@ onMounted(async () => {
  */
 function getTypeTag(type) {
   if (type === 'WORD') return { text: '单词课', class: 'tag-word' }
-  return { text: '句型课', class: 'tag-sentence' }
+  if (type === 'SENTENCE') return { text: '句型课', class: 'tag-sentence' }
+  if (type === 'READING') return { text: '阅读课', class: 'tag-reading' }
+  if (type === 'QUIZ') return { text: '问答课', class: 'tag-quiz' }
+  if (type === 'CALCULATE') return { text: '计算课', class: 'tag-calculate' }
+  if (type === 'PHONICS') return { text: '自然拼读', class: 'tag-phonics' }
+  if (type === 'DIALOGUE') return { text: '对话课', class: 'tag-dialogue' }
+  return { text: '课程', class: 'tag-default' }
 }
 
 /**
@@ -97,11 +107,35 @@ function isCompleted(lesson) {
 function getStars(lesson) {
   return getProgress(lesson)?.stars || 0
 }
+
+function goBack() {
+  if (themeId) {
+    const query = {}
+    if (subjectId) query.subjectId = String(subjectId)
+    if (subjectName) query.subjectName = subjectName
+    if (themeName) query.themeName = themeName
+    router.push({ path: `/theme/${themeId}`, query })
+    return
+  }
+  router.push('/')
+}
+
+function openLesson(lesson) {
+  const query = { unitId: String(route.params.unitId) }
+  if (themeId) query.themeId = String(themeId)
+  if (themeName) query.themeName = themeName
+  if (subjectId) query.subjectId = String(subjectId)
+  if (subjectName) query.subjectName = subjectName
+  router.push({
+    path: `/lesson/${lesson.id}`,
+    query
+  })
+}
 </script>
 
 <template>
   <div class="unit-view">
-    <BackBar title="课时列表" @back="router.back()" />
+    <BackBar title="课时列表" @back="goBack" />
 
     <!-- 加载中 -->
     <div v-if="isLoading" class="state-tip">
@@ -124,7 +158,7 @@ function getStars(lesson) {
           current: isCurrent(lesson),
           completed: isCompleted(lesson)
         }"
-        @click="router.push(`/lesson/${lesson.id}`)"
+        @click="openLesson(lesson)"
       >
         <!-- 左侧缩略图 -->
         <div
@@ -272,6 +306,36 @@ function getStars(lesson) {
 .type-tag.tag-sentence {
   background: rgba(255, 152, 0, 0.12);
   color: var(--color-orange);
+}
+
+.type-tag.tag-reading {
+  background: rgba(76, 217, 100, 0.12);
+  color: var(--color-success);
+}
+
+.type-tag.tag-quiz {
+  background: rgba(255, 107, 107, 0.12);
+  color: var(--color-danger);
+}
+
+.type-tag.tag-calculate {
+  background: rgba(255, 184, 77, 0.16);
+  color: #b26a00;
+}
+
+.type-tag.tag-phonics {
+  background: rgba(0, 191, 255, 0.12);
+  color: var(--color-sky);
+}
+
+.type-tag.tag-dialogue {
+  background: rgba(168, 85, 247, 0.12);
+  color: #7c3aed;
+}
+
+.type-tag.tag-default {
+  background: var(--bg-muted);
+  color: var(--text-secondary);
 }
 
 /* 右侧状态图标 */

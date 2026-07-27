@@ -54,17 +54,32 @@ onMounted(async () => {
 
 /**
  * 根据主题 ID 返回对应的 emoji 图标。
- * @param {number} id 主题 ID
+ * @param {Object} theme 主题对象
  * @return {string} emoji 字符
  */
-function getThemeIcon(id) {
-  return getThemeConfig(id).emoji
+function getThemeIcon(theme) {
+  return getThemeConfig(theme.id, theme.name).emoji
+}
+
+function goBack() {
+  router.push('/')
+}
+
+function openTheme(theme) {
+  router.push({
+    path: `/theme/${theme.id}`,
+    query: {
+      subjectId: String(subjectId),
+      subjectName,
+      themeName: theme.name
+    }
+  })
 }
 </script>
 
 <template>
   <div class="subject-page">
-    <BackBar :title="subjectName + '学习'" @back="router.back()" />
+    <BackBar :title="subjectName + '学习'" @back="goBack" />
 
     <!-- 主题选择区 -->
     <section class="theme-section">
@@ -91,9 +106,9 @@ function getThemeIcon(id) {
           :key="theme.id"
           class="theme-card"
           :style="{ '--card-accent': subjectColor }"
-          @click="router.push(`/theme/${theme.id}`)"
+          @click="openTheme(theme)"
         >
-          <div class="card-icon">{{ getThemeIcon(theme.id) }}</div>
+          <div class="card-icon">{{ getThemeIcon(theme) }}</div>
           <h3 class="card-title">{{ theme.name }}</h3>
           <p class="card-desc">点击进入</p>
         </div>

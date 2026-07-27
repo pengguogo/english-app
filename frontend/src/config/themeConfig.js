@@ -85,15 +85,55 @@ const defaultConfig = {
 }
 
 /**
+ * 根据主题名称推断更贴近内容的默认视觉信息。
+ * @param {string} themeName 主题名称
+ * @return {{emoji: string, description: string}} 推断结果
+ */
+function inferThemeMeta(themeName = '') {
+  const name = String(themeName || '')
+  const matchers = [
+    { keywords: ['海洋', '海底'], emoji: '🌊' },
+    { keywords: ['恐龙'], emoji: '🦖' },
+    { keywords: ['宇宙', '太空', '星球'], emoji: '🚀' },
+    { keywords: ['天气', '四季'], emoji: '☀️' },
+    { keywords: ['动物', '昆虫'], emoji: '🐾' },
+    { keywords: ['植物', '森林', '树木', '花'], emoji: '🌿' },
+    { keywords: ['人体', '身体'], emoji: '🧍' },
+    { keywords: ['科学', '实验'], emoji: '🔬' },
+    { keywords: ['职业'], emoji: '👩‍🚒' },
+    { keywords: ['建筑', '城市'], emoji: '🏙️' },
+    { keywords: ['节日'], emoji: '🎉' },
+    { keywords: ['中国', '世界', '国家', '地理'], emoji: '🗺️' },
+    { keywords: ['英语', '单词'], emoji: '🔤' }
+  ]
+
+  const matched = matchers.find(item => item.keywords.some(keyword => name.includes(keyword)))
+  return {
+    emoji: matched?.emoji || defaultConfig.emoji,
+    description: name ? `一起来探索${name}的有趣内容` : defaultConfig.description
+  }
+}
+
+/**
  * 根据主题 ID 获取视觉配置。
  * themeId 可能为数字或字符串(来自路由参数),统一转为数字匹配。
  * 未命中时返回兜底配置,避免渲染异常。
  *
  * @param {number|string} themeId 主题 ID
+ * @param {string} fallbackName 主题名称兜底
  * @return {ThemeVisualConfig} 主题视觉配置
  */
-export function getThemeConfig(themeId) {
-  return themeConfig[Number(themeId)] || defaultConfig
+export function getThemeConfig(themeId, fallbackName = '') {
+  const config = themeConfig[Number(themeId)]
+  if (config) return config
+
+  const inferred = inferThemeMeta(fallbackName)
+  return {
+    ...defaultConfig,
+    emoji: inferred.emoji,
+    title: fallbackName || defaultConfig.title,
+    description: inferred.description
+  }
 }
 
 export default themeConfig

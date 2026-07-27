@@ -28,6 +28,10 @@ onMounted(async () => {
   await Promise.all([loadStats(), loadLearnedLessons()])
 })
 
+function goBack() {
+  router.push('/')
+}
+
 /**
  * 加载学习统计数据。
  * 失败时降级为默认零值,不影响列表展示。
@@ -62,7 +66,16 @@ async function loadLearnedLessons() {
  * @param {Object} lesson 课时对象
  */
 function reviewLesson(lesson) {
-  router.push(`/lesson/${lesson.lessonId}`)
+  router.push({
+    path: `/lesson/${lesson.lessonId}`,
+    query: {
+      unitId: String(lesson.unitId),
+      themeId: String(lesson.themeId),
+      themeName: lesson.themeName,
+      subjectId: String(lesson.subjectId),
+      subjectName: lesson.subjectName
+    }
+  })
 }
 
 /**
@@ -111,7 +124,7 @@ const subjectDistribution = computed(() => {
 
 <template>
   <div class="learned-view">
-    <BackBar title="我学过的" @back="router.back()" />
+    <BackBar title="我学过的" @back="goBack" />
 
     <!-- 顶部统计卡片行 -->
     <div class="stats-row">

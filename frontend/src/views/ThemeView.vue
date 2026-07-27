@@ -1,7 +1,7 @@
 <!--
   ThemeView.vue - 单元列表页:展示某主题下的所有单元及学习进度
-  用途: 场景 banner + 主题地图(单元节点) + 单元卡片列表。
-  修改: 2026-07-21 去掉锁定 UI,所有单元节点显示为可学状态(实线路径)。
+  用途: 场景 banner + 单元卡片列表。
+  修改: 2026-07-25 直接移除学习地图，保留更直接的单元列表入口。
   作者: english-app
   创建日期: 2026-07-20
 -->
@@ -36,9 +36,13 @@ const router = useRouter()
 const units = ref([])
 const isLoading = ref(true)
 const errorMsg = ref('')
+const themeId = computed(() => Number(route.params.themeId))
+const subjectId = computed(() => Number(route.query.subjectId || 0))
+const subjectName = computed(() => String(route.query.subjectName || ''))
+const themeName = computed(() => String(route.query.themeName || ''))
 
 // 当前主题视觉配置:按路由 themeId 动态读取,避免硬编码某一主题内容
-const themeVisual = computed(() => getThemeConfig(route.params.themeId))
+const themeVisual = computed(() => getThemeConfig(themeId.value, themeName.value))
 
 onMounted(async () => {
   const themeId = route.params.themeId
@@ -61,25 +65,34 @@ onMounted(async () => {
  */
 function getSceneConfig(index) {
   const scenes = themeVisual.value.scenes
-  return scenes[index] || scenes[0]
+  return scenes[index % scenes.length] || scenes[0]
 }
 
-/**
- * 计算单元节点的状态: completed / active。
- * 去除锁定逻辑后,只区分"已完成"和"进行中(可学)"两种状态。
- * @param {Object} unit 单元对象
- * @param {number} index 索引
- * @return {string} 状态标识
- */
-function getNodeStatus(unit, index) {
-  if (unit.completedLessons === unit.totalLessons && unit.totalLessons > 0) return 'completed'
-  return 'active'
+function goBack() {
+  if (subjectId.value) {
+    router.push(`/subject/${subjectId.value}`)
+    return
+  }
+  router.push('/')
+}
+
+function openUnit(unit) {
+  const query = {
+    themeId: String(themeId.value),
+    themeName: themeVisual.value.title
+  }
+  if (subjectId.value) query.subjectId = String(subjectId.value)
+  if (subjectName.value) query.subjectName = subjectName.value
+  router.push({
+    path: `/unit/${unit.id}`,
+    query
+  })
 }
 </script>
 
 <template>
   <div class="theme-view">
-    <BackBar :title="themeVisual.title" @back="router.push('/')" />
+    <BackBar :title="themeVisual.title" @back="goBack" />
 
     <!-- 场景 banner -->
     <div class="scene-banner">
@@ -120,112 +133,14 @@ function getNodeStatus(unit, index) {
     </div>
 
     <template v-else>
-      <!-- 主题地图: 单元节点 + 实线路径 -->
-      <section class="map-section">
-        <h2 class="section-title">学习地图</h2>
-        <div class="map-container">
-          <svg class="map-svg" viewBox="0 0 680 200" preserveAspectRatio="xMidYMid meet">
-            <!-- 节点间连接路径(全部使用实线,表示均可学习) -->
-            <path
-              v-for="(unit, index) in units.slice(0, -1)"
-              :key="`path-${index}`"
-              :d="`M ${140 + index * 210} 100 Q ${245 + index * 210} 80 ${350 + index * 210} 100`"
-              stroke="var(--color-primary)"
-              :stroke-width="3"
-              fill="none"
-              stroke-linecap="round"
-              opacity="0.5"
-            />
-
-            <!-- 单元节点 -->
-            <g
-              v-for="(unit, index) in units"
-              :key="`node-${unit.id}`"
-              :class="['map-node', getNodeStatus(unit, index)]"
-              @click="router.push(`/unit/${unit.id}`)"
-              style="cursor: pointer;"
-            >
-              <!-- 外圈光晕 -->
-              <circle
-                :cx="100 + index * 210"
-                cy="100"
-                r="44"
-                :fill="getSceneConfig(index).color"
-                opacity="0.15"
-              />
-              <!-- 节点主体 -->
-              <circle
-                :cx="100 + index * 210"
-                cy="100"
-                r="36"
-                fill="var(--bg-card)"
-                :stroke="getSceneConfig(index).color"
-                :stroke-width="2.5"
-              />
-              <!-- 场景图标 -->
-              <text
-                :x="100 + index * 210"
-                y="108"
-                font-size="28"
-                text-anchor="middle"
-              >{{ getSceneConfig(index).icon }}</text>
-              <!-- 节点标签 -->
-              <text
-                :x="100 + index * 210"
-                y="160"
-                text-anchor="middle"
-                font-size="12"
-                fill="var(--text-secondary)"
-                font-weight="500"
-              >{{ unit.name }}</text>
-              <!-- 进度文字 -->
-              <text
-                :x="100 + index * 210"
-                y="176"
-                text-anchor="middle"
-                font-size="10"
-                fill="var(--text-tertiary)"
-              >{{ unit.completedLessons }}/{{ unit.totalLessons }} 课</text>
-
-              <!-- 状态徽章 -->
-              <g v-if="getNodeStatus(unit, index) === 'completed'">
-                <circle :cx="132 + index * 210" cy="68" r="12" fill="var(--color-success)" />
-                <text :x="132 + index * 210" y="73" font-size="14" text-anchor="middle" fill="white" font-weight="bold">✓</text>
-              </g>
-              <g v-else-if="getNodeStatus(unit, index) === 'active'">
-                <circle :cx="132 + index * 210" cy="68" r="12" fill="var(--color-accent)" />
-                <text :x="132 + index * 210" y="73" font-size="14" text-anchor="middle">▶</text>
-              </g>
-            </g>
-
-            <!-- 装饰星星 -->
-            <text x="220" y="50" font-size="16" opacity="0.4">⭐</text>
-            <text x="430" y="40" font-size="14" opacity="0.3">✨</text>
-          </svg>
-
-          <!-- 地图图例 -->
-          <div class="map-legend">
-            <div class="legend-item">
-              <span class="legend-dot" style="background: var(--color-success)"></span>
-              <span>已完成</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-dot" style="background: var(--color-accent)"></span>
-              <span>进行中</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 单元详细列表 -->
       <section class="unit-list-section">
-        <h2 class="section-title">单元列表</h2>
+        <h2 class="section-title">选择单元</h2>
         <div class="unit-list">
           <div
             v-for="(unit, index) in units"
             :key="unit.id"
             class="unit-card"
-            @click="router.push(`/unit/${unit.id}`)"
+            @click="openUnit(unit)"
           >
             <!-- 左侧彩色竖条 -->
             <div class="unit-stripe" :style="{ background: getSceneConfig(index).color }"></div>
@@ -291,14 +206,6 @@ function getNodeStatus(unit, index) {
 }
 
 /* ===== 主题地图 ===== */
-.map-section {
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  margin-bottom: var(--space-6);
-  box-shadow: var(--shadow-card);
-}
-
 /* ===== 汪汪队角色介绍 ===== */
 .characters-section {
   margin-bottom: var(--space-6);
@@ -358,44 +265,6 @@ function getNodeStatus(unit, index) {
   font-weight: var(--font-bold);
   color: var(--text-primary);
   margin-bottom: var(--space-4);
-}
-
-.map-container {
-  width: 100%;
-}
-
-.map-svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.map-node {
-  transition: transform var(--duration-fast) var(--ease-bounce);
-}
-
-.map-legend {
-  display: flex;
-  gap: var(--space-4);
-  justify-content: center;
-  margin-top: var(--space-4);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--border-light);
-  flex-wrap: wrap;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-}
-
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-pill);
 }
 
 /* ===== 单元列表 ===== */
@@ -524,8 +393,4 @@ function getNodeStatus(unit, index) {
   to { transform: rotate(360deg); }
 }
 
-/* ===== 响应式 ===== */
-@media (max-width: 480px) {
-  .map-svg { min-height: 280px; }
-}
 </style>

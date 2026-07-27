@@ -322,6 +322,25 @@ function prevItem() {
   }
 }
 
+function goBack() {
+  const unitId = Number(route.query.unitId || lesson.value?.unitId || 0)
+  if (!unitId) {
+    router.push('/')
+    return
+  }
+
+  const query = {}
+  if (route.query.themeId) query.themeId = String(route.query.themeId)
+  if (route.query.themeName) query.themeName = String(route.query.themeName)
+  if (route.query.subjectId) query.subjectId = String(route.query.subjectId)
+  if (route.query.subjectName) query.subjectName = String(route.query.subjectName)
+
+  router.push({
+    path: `/unit/${unitId}`,
+    query
+  })
+}
+
 /**
  * 完成课时:提交进度并导航回单元列表页。
  */
@@ -334,7 +353,15 @@ async function finishLesson() {
       totalStars.value,
       totalBestScore.value
     )
-    router.push(`/unit/${lesson.value.unitId}`)
+    const query = {}
+    if (route.query.themeId) query.themeId = String(route.query.themeId)
+    if (route.query.themeName) query.themeName = String(route.query.themeName)
+    if (route.query.subjectId) query.subjectId = String(route.query.subjectId)
+    if (route.query.subjectName) query.subjectName = String(route.query.subjectName)
+    router.push({
+      path: `/unit/${lesson.value.unitId}`,
+      query
+    })
   } catch (e) {
     console.error('保存进度失败:', e)
     alert('保存失败,请重试')
@@ -347,7 +374,7 @@ async function finishLesson() {
 <template>
   <div class="lesson-view">
     <!-- 顶部栏 -->
-    <BackBar @back="router.back()">
+    <BackBar @back="goBack">
       <template #right>
         <StarBar :stars="isComplete ? totalStars : currentStars" size="sm" />
       </template>

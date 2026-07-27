@@ -35,6 +35,10 @@ onMounted(async () => {
   await Promise.all([loadStats(), loadWrongAnswers()])
 })
 
+function goBack() {
+  router.push('/')
+}
+
 /**
  * 加载错题统计数据。
  * 失败时降级为零值,不影响列表展示。
@@ -143,7 +147,7 @@ function getTypeText(type) {
 
 <template>
   <div class="wrong-answers-view">
-    <BackBar title="错题集" @back="router.back()" />
+    <BackBar title="错题集" @back="goBack" />
 
     <!-- 顶部统计卡片行 -->
     <div class="stats-row">
