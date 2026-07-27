@@ -100,6 +100,13 @@ const progressPercent = computed(() => {
   if (props.totalItems === 0) return 0
   return Math.round(((props.currentIndex + 1) / props.totalItems) * 100)
 })
+
+/**
+ * 汪汪队素材多为透明底角色立绘，需要完整展示身体，不能按普通照片裁切。
+ */
+const isPawPatrolImage = computed(() => {
+  return String(props.currentItem?.image || '').includes('/paw-patrol/')
+})
 </script>
 
 <template>
@@ -120,7 +127,12 @@ const progressPercent = computed(() => {
     <!-- 学习项卡片: 图片/emoji + 英文 + 音标 + 中文释义 -->
     <div class="item-card">
       <div v-if="currentItem.image" class="word-image-wrapper">
-        <img :src="currentItem.image" :alt="currentItem.word" class="word-image" />
+        <img
+          :src="currentItem.image"
+          :alt="currentItem.word"
+          class="word-image"
+          :class="{ 'word-image--character': isPawPatrolImage }"
+        />
       </div>
       <div v-else class="emoji">{{ currentItem.emoji }}</div>
       <h1 class="word">{{ currentText }}</h1>
@@ -242,6 +254,14 @@ const progressPercent = computed(() => {
   object-fit: cover;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
+}
+
+.word-image--character {
+  width: min(100%, 240px);
+  height: 240px;
+  padding: var(--space-2);
+  object-fit: contain;
+  background: var(--bg-muted);
 }
 
 .word {

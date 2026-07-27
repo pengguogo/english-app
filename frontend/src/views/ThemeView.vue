@@ -12,6 +12,7 @@ import { getUnitsByTheme } from '../api/unit'
 import { getThemeConfig } from '../config/themeConfig'
 import BackBar from '../components/BackBar.vue'
 // 汪汪队角色图片(仅主题 3 使用)
+import pawPatrolHero from '../assets/paw-patrol/rescue-team-hero.jpg'
 import ryderImg from '../assets/paw-patrol/ryder.jpg'
 import chaseImg from '../assets/paw-patrol/chase.jpg'
 import marshallImg from '../assets/paw-patrol/marshall.jpg'
@@ -95,16 +96,33 @@ function openUnit(unit) {
     <BackBar :title="themeVisual.title" @back="goBack" />
 
     <!-- 场景 banner -->
-    <div class="scene-banner">
+    <div
+      class="scene-banner"
+      :class="{ 'paw-patrol-banner': themeId === 3 }"
+    >
+      <img
+        v-if="themeId === 3"
+        :src="pawPatrolHero"
+        alt=""
+        class="banner-art"
+      />
       <div class="banner-content">
+        <span v-if="themeId === 3" class="banner-kicker">RESCUE ENGLISH</span>
         <h1>{{ themeVisual.emoji }} {{ themeVisual.title }}</h1>
         <p>{{ themeVisual.description }}</p>
+        <span v-if="themeId === 3" class="banner-slogan">Learn · Play · Grow!</span>
       </div>
     </div>
 
     <!-- 汪汪队角色介绍(仅主题 3 显示) -->
     <section v-if="Number(route.params.themeId) === 3" class="characters-section">
-      <h2 class="section-title">🐶 汪汪队成员</h2>
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">MEET THE TEAM</span>
+          <h2 class="section-title">🐾 汪汪队成员</h2>
+        </div>
+        <span class="section-hint">认识伙伴，勇敢开口</span>
+      </div>
       <div class="characters-grid">
         <div
           v-for="char in pawPatrolCharacters"
@@ -193,16 +211,79 @@ function openUnit(unit) {
   overflow: hidden;
 }
 
+.banner-art {
+  display: none;
+}
+
 .banner-content h1 {
-  color: white;
+  color: var(--text-on-primary);
   font-size: var(--text-xl);
   font-weight: var(--font-bold);
   margin-bottom: var(--space-2);
 }
 
 .banner-content p {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-on-primary-muted);
   font-size: var(--text-base);
+}
+
+.paw-patrol-banner {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  padding: clamp(var(--space-5), 5vw, 56px);
+  background: var(--paw-banner-fallback);
+  isolation: isolate;
+}
+
+.paw-patrol-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--paw-banner-overlay);
+}
+
+.paw-patrol-banner .banner-art {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.paw-patrol-banner .banner-content {
+  width: min(46%, 440px);
+  text-shadow: var(--shadow-text);
+}
+
+.paw-patrol-banner .banner-content h1 {
+  font-size: clamp(var(--text-xl), 4vw, 46px);
+  line-height: 1.12;
+}
+
+.banner-kicker,
+.section-eyebrow {
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  letter-spacing: 0.14em;
+}
+
+.banner-slogan {
+  display: inline-flex;
+  margin-top: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  color: var(--text-on-primary);
+  background: var(--paw-badge-bg);
+  border: 1px solid var(--paw-badge-border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  box-shadow: var(--shadow-soft);
 }
 
 /* ===== 主题地图 ===== */
@@ -211,9 +292,26 @@ function openUnit(unit) {
   margin-bottom: var(--space-6);
 }
 
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.section-heading .section-title {
+  margin: var(--space-1) 0 0;
+}
+
+.section-hint {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
 .characters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
   gap: var(--space-3);
 }
 
@@ -223,6 +321,7 @@ function openUnit(unit) {
   overflow: hidden;
   box-shadow: var(--shadow-card);
   text-align: center;
+  border: 1px solid var(--border-light);
   transition: transform var(--duration-fast) var(--ease-bounce);
 }
 
@@ -232,16 +331,37 @@ function openUnit(unit) {
 
 .character-img {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
+  object-position: center 22%;
   display: block;
 }
 
 .character-info {
-  padding: var(--space-2);
+  position: relative;
+  padding: var(--space-3) var(--space-2);
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.character-info::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--space-3);
+  right: var(--space-3);
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+}
+
+.character-card:nth-child(3n + 2) .character-info::before {
+  background: var(--color-warning);
+}
+
+.character-card:nth-child(3n) .character-info::before {
+  background: var(--color-accent);
 }
 
 .character-name {
@@ -386,6 +506,35 @@ function openUnit(unit) {
 @media (prefers-reduced-motion: no-preference) {
   .loading-dot {
     animation: spin 0.8s linear infinite;
+  }
+}
+
+@media (max-width: 640px) {
+  .paw-patrol-banner {
+    min-height: 360px;
+    align-items: flex-start;
+  }
+
+  .paw-patrol-banner .banner-art {
+    object-position: 60% center;
+  }
+
+  .paw-patrol-banner::after {
+    background: var(--paw-banner-overlay-mobile);
+  }
+
+  .paw-patrol-banner .banner-content {
+    width: 78%;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .characters-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

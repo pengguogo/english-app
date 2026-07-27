@@ -47,6 +47,7 @@
 
   /** 主色背景上的文字色（白色） */
   --text-on-primary: #FFFFFF;
+  --text-on-primary-muted: rgba(255, 255, 255, 0.9);
 
   /* ===== 边框 ===== */
   --border-light: #E8E8EC;
@@ -62,6 +63,7 @@
   --shadow-card: 0 4px 16px rgba(107, 124, 255, 0.08);
   --shadow-hover: 0 8px 24px rgba(107, 124, 255, 0.15);
   --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-text: 0 2px 10px rgba(10, 56, 108, 0.34);
 
   /* ===== 间距令牌(8 倍数体系) ===== */
   --space-1: 4px;
@@ -98,6 +100,13 @@
   --gradient-primary: linear-gradient(135deg, #6B7CFF 0%, #8A96FF 100%);
   --gradient-warm: linear-gradient(135deg, #FFF3E0 0%, #FFF8E1 100%);
   --gradient-success: linear-gradient(135deg, #4CD964 0%, #5BDB73 100%);
+
+  /* ===== 汪汪队主题视觉 ===== */
+  --paw-banner-fallback: #36B7EA;
+  --paw-banner-overlay: linear-gradient(90deg, rgba(6, 67, 126, 0.72) 0%, rgba(6, 67, 126, 0.35) 35%, rgba(6, 67, 126, 0) 62%);
+  --paw-banner-overlay-mobile: linear-gradient(180deg, rgba(6, 67, 126, 0.76) 0%, rgba(6, 67, 126, 0.28) 52%, rgba(6, 67, 126, 0) 78%);
+  --paw-badge-bg: rgba(0, 91, 173, 0.72);
+  --paw-badge-border: rgba(255, 255, 255, 0.42);
 
   /* ===== 学科主题色 ===== */
   /* 英语: 蓝紫（复用主色） */
