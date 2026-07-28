@@ -15,11 +15,13 @@ import {
   getWrongAnswerStats,
   resolveWrongAnswer
 } from '../api/wrongAnswer'
+import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
 import AppButton from '../components/AppButton.vue'
 import mascotCompanion from '../assets/mascot/mascot-companion.jpg'
 
 const router = useRouter()
+const { safeBack } = useSafeBack()
 
 // 错题列表
 const wrongAnswers = ref([])
@@ -36,7 +38,7 @@ onMounted(async () => {
 })
 
 function goBack() {
-  router.push('/')
+  safeBack('/')
 }
 
 /**

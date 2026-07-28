@@ -18,6 +18,7 @@ import { getLessonById } from '../api/lesson'
 import { completeLesson } from '../api/progress'
 import { scorePronunciation } from '../api/voice'
 import { recordWrongAnswer } from '../api/wrongAnswer'
+import { useSafeBack } from '../composables/useSafeBack'
 import StarBar from '../components/StarBar.vue'
 import BackBar from '../components/BackBar.vue'
 import WordLesson from '../components/lesson-templates/WordLesson.vue'
@@ -31,6 +32,7 @@ import DialogueLesson from '../components/lesson-templates/DialogueLesson.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { safeBack } = useSafeBack()
 
 // ===== 页面状态 =====
 const lesson = ref(null)
@@ -123,6 +125,13 @@ const lessonTemplate = computed(() => {
     default:
       // 其他未支持的课型
       return null
+  }
+})
+
+const lessonTemplateProps = computed(() => {
+  if (lesson.value?.type !== 'READING') return {}
+  return {
+    continuousPlayback: Number(route.query.subjectId) === 4
   }
 })
 
@@ -323,26 +332,20 @@ function prevItem() {
 }
 
 function goBack() {
-  const unitId = Number(route.query.unitId || lesson.value?.unitId || 0)
-  if (!unitId) {
-    router.push('/')
-    return
-  }
+  safeBack(buildThemeFallback())
+}
 
+function buildThemeFallback() {
+  if (!route.query.themeId) return { path: '/' }
   const query = {}
-  if (route.query.themeId) query.themeId = String(route.query.themeId)
   if (route.query.themeName) query.themeName = String(route.query.themeName)
   if (route.query.subjectId) query.subjectId = String(route.query.subjectId)
   if (route.query.subjectName) query.subjectName = String(route.query.subjectName)
-
-  router.push({
-    path: `/unit/${unitId}`,
-    query
-  })
+  return { path: `/theme/${route.query.themeId}`, query }
 }
 
 /**
- * 完成课时:提交进度并导航回单元列表页。
+ * 完成课时:提交进度并返回主题学习页。
  */
 async function finishLesson() {
   if (isSubmitting.value) return
@@ -358,10 +361,10 @@ async function finishLesson() {
     if (route.query.themeName) query.themeName = String(route.query.themeName)
     if (route.query.subjectId) query.subjectId = String(route.query.subjectId)
     if (route.query.subjectName) query.subjectName = String(route.query.subjectName)
-    router.push({
-      path: `/unit/${lesson.value.unitId}`,
-      query
-    })
+    const destination = route.query.themeId
+      ? { path: `/theme/${route.query.themeId}`, query }
+      : { path: '/' }
+    router.replace(destination)
   } catch (e) {
     console.error('保存进度失败:', e)
     alert('保存失败,请重试')
@@ -412,6 +415,7 @@ async function finishLesson() {
         :score-message="scoreMessage"
         :is-scoring="isScoring"
         :is-last-item="isLastItem"
+        v-bind="lessonTemplateProps"
         @recorded="handleRecorded"
         @answered="handleAnswered"
         @next="nextItem"

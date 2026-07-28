@@ -1,6 +1,6 @@
 <!--
   ReadingLesson.vue - READING 类型课时模板
-  用途: 图文翻页阅读，展示标题+正文+配图，支持朗读全文和翻页。
+  用途: 图文翻页阅读，展示标题+正文+配图，支持连续朗读和自动翻页。
         适用于语文寓言故事、课外火车科普阅读。
   作者: english-app
   创建日期: 2026-07-21
@@ -9,7 +9,8 @@
 /**
  * @description READING 类型课时学习模板，图文展示+翻页阅读+朗读功能。
  */
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
+import { useTts } from '../../composables/useTts'
 import AudioButton from '../AudioButton.vue'
 import AppButton from '../AppButton.vue'
 import mascotCompanion from '../../assets/mascot/mascot-companion.jpg'
@@ -29,7 +30,9 @@ const props = defineProps({
   /** 总项数 */
   totalItems: { type: Number, default: 0 },
   /** 是否最后一项 */
-  isLastItem: { type: Boolean, default: false }
+  isLastItem: { type: Boolean, default: false },
+  /** 是否启用课外知识连续朗读 */
+  continuousPlayback: { type: Boolean, default: false }
 })
 
 /**
@@ -61,6 +64,39 @@ const progressPercent = computed(() => {
   if (props.totalItems === 0) return 0
   return Math.round(((props.currentIndex + 1) / props.totalItems) * 100)
 })
+
+const isContinuousPlaying = ref(false)
+const playbackSession = ref(0)
+const { playAndWait, stop } = useTts()
+
+async function playContinuously() {
+  if (isContinuousPlaying.value) return
+  isContinuousPlaying.value = true
+  const session = ++playbackSession.value
+
+  try {
+    while (session === playbackSession.value) {
+      await playAndWait(readAloudText.value, 'zh')
+      if (session !== playbackSession.value || props.isLastItem) break
+      emit('next')
+      await nextTick()
+    }
+  } catch (e) {
+    if (session === playbackSession.value) {
+      console.error('连续朗读失败:', e)
+      alert('朗读加载失败,请重试')
+    }
+  } finally {
+    if (session === playbackSession.value) {
+      isContinuousPlaying.value = false
+    }
+  }
+}
+
+onBeforeUnmount(() => {
+  playbackSession.value++
+  stop()
+})
 </script>
 
 <template>
@@ -89,7 +125,15 @@ const progressPercent = computed(() => {
 
     <!-- 操作区: 朗读 + 翻页 -->
     <div class="actions">
-      <AudioButton :text="readAloudText" lan="zh" />
+      <button
+        v-if="continuousPlayback"
+        class="continuous-play-btn"
+        :disabled="isContinuousPlaying"
+        @click="playContinuously"
+      >
+        {{ isContinuousPlaying ? '连续播放中…' : '▶ 连续朗读' }}
+      </button>
+      <AudioButton v-else :text="readAloudText" lan="zh" />
       <!-- 上一步 / 下一步 / 完成阅读 -->
       <div class="action-row">
         <!-- 上一步按钮:第一页不显示 -->
@@ -97,6 +141,7 @@ const progressPercent = computed(() => {
           v-if="currentIndex > 0"
           variant="ghost"
           size="md"
+          :disabled="isContinuousPlaying"
           @click="emit('prev')"
         >← 上一页</AppButton>
         <span v-else class="action-placeholder"></span>
@@ -105,6 +150,7 @@ const progressPercent = computed(() => {
           variant="primary"
           size="md"
           class="action-next"
+          :disabled="isContinuousPlaying"
           @click="emit('next')"
         >
           {{ isLastItem ? '完成阅读' : '下一页 →' }}
@@ -144,6 +190,21 @@ const progressPercent = computed(() => {
 .reading-content { font-size: var(--text-base); color: var(--text-secondary); line-height: 1.8; text-align: justify; }
 
 .actions { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.continuous-play-btn {
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--color-success);
+  color: var(--text-on-primary);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  box-shadow: var(--shadow-soft);
+}
+
+.continuous-play-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
 
 /* 按钮行:左右分布,上一页 + 下一页 */
 .action-row {

@@ -13,10 +13,12 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getThemesBySubject } from '../api/subject'
 import { getThemeConfig } from '../config/themeConfig'
+import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
 
 const router = useRouter()
 const route = useRoute()
+const { safeBack } = useSafeBack()
 const themes = ref([])
 const isLoading = ref(true)
 const errorMsg = ref('')
@@ -62,7 +64,7 @@ function getThemeIcon(theme) {
 }
 
 function goBack() {
-  router.push('/')
+  safeBack('/')
 }
 
 function openTheme(theme) {

@@ -11,11 +11,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getLearnedLessons, getLearnedStats } from '../api/progress'
+import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
 import StarBar from '../components/StarBar.vue'
 import mascotCompanion from '../assets/mascot/mascot-companion.jpg'
 
 const router = useRouter()
+const { safeBack } = useSafeBack()
 
 // 已学课时列表
 const learnedLessons = ref([])
@@ -29,7 +31,7 @@ onMounted(async () => {
 })
 
 function goBack() {
-  router.push('/')
+  safeBack('/')
 }
 
 /**

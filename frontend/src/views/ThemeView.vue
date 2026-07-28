@@ -1,6 +1,6 @@
 <!--
-  ThemeView.vue - 单元列表页:展示某主题下的所有单元及学习进度
-  用途: 场景 banner + 单元卡片列表。
+  ThemeView.vue - 主题学习页:按单元分组展示课时与学习进度
+  用途: 场景 banner + 单元分组课时列表。
   修改: 2026-07-25 直接移除学习地图，保留更直接的单元列表入口。
   作者: english-app
   创建日期: 2026-07-20
@@ -9,8 +9,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getUnitsByTheme } from '../api/unit'
+import { getLessonsByUnit } from '../api/lesson'
+import { getUnitProgress } from '../api/progress'
 import { getThemeConfig } from '../config/themeConfig'
+import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
+import StarBar from '../components/StarBar.vue'
 // 汪汪队角色图片(仅主题 3 使用)
 import pawPatrolHero from '../assets/paw-patrol/rescue-team-hero.jpg'
 import ryderImg from '../assets/paw-patrol/ryder.jpg'
@@ -34,6 +38,7 @@ const pawPatrolCharacters = [
 
 const route = useRoute()
 const router = useRouter()
+const { safeBack } = useSafeBack()
 const units = ref([])
 const isLoading = ref(true)
 const errorMsg = ref('')
@@ -48,7 +53,21 @@ const themeVisual = computed(() => getThemeConfig(themeId.value, themeName.value
 onMounted(async () => {
   const themeId = route.params.themeId
   try {
-    units.value = await getUnitsByTheme(themeId)
+    const unitList = await getUnitsByTheme(themeId)
+    units.value = await Promise.all(unitList.map(async (unit) => {
+      const [lessons, progressList] = await Promise.all([
+        getLessonsByUnit(unit.id),
+        getUnitProgress(unit.id).catch(() => [])
+      ])
+      const progressMap = new Map(progressList.map(progress => [progress.lessonId, progress]))
+      return {
+        ...unit,
+        lessons: lessons.map(lesson => ({
+          ...lesson,
+          progress: progressMap.get(lesson.id)
+        }))
+      }
+    }))
   } catch (e) {
     errorMsg.value = '加载失败,请返回重试'
     console.error('加载单元失败:', e)
@@ -70,24 +89,35 @@ function getSceneConfig(index) {
 }
 
 function goBack() {
-  if (subjectId.value) {
-    router.push(`/subject/${subjectId.value}`)
-    return
-  }
-  router.push('/')
+  const fallback = subjectId.value ? `/subject/${subjectId.value}` : '/'
+  safeBack(fallback)
 }
 
-function openUnit(unit) {
+function openLesson(unit, lesson) {
   const query = {
+    unitId: String(unit.id),
     themeId: String(themeId.value),
     themeName: themeVisual.value.title
   }
   if (subjectId.value) query.subjectId = String(subjectId.value)
   if (subjectName.value) query.subjectName = subjectName.value
   router.push({
-    path: `/unit/${unit.id}`,
+    path: `/lesson/${lesson.id}`,
     query
   })
+}
+
+function getTypeText(type) {
+  const labels = {
+    WORD: '认知',
+    SENTENCE: '句型',
+    READING: '阅读',
+    QUIZ: '问答',
+    CALCULATE: '计算',
+    PHONICS: '拼读',
+    DIALOGUE: '对话'
+  }
+  return labels[type] || '课程'
 }
 </script>
 
@@ -152,13 +182,12 @@ function openUnit(unit) {
 
     <template v-else>
       <section class="unit-list-section">
-        <h2 class="section-title">选择单元</h2>
+        <h2 class="section-title">开始学习</h2>
         <div class="unit-list">
-          <div
+          <section
             v-for="(unit, index) in units"
             :key="unit.id"
             class="unit-card"
-            @click="openUnit(unit)"
           >
             <!-- 左侧彩色竖条 -->
             <div class="unit-stripe" :style="{ background: getSceneConfig(index).color }"></div>
@@ -171,9 +200,7 @@ function openUnit(unit) {
                     已完成 {{ unit.completedLessons }} / {{ unit.totalLessons }} 课
                   </p>
                 </div>
-                <div class="unit-status">
-                  <span v-if="unit.completedLessons === unit.totalLessons" class="done-icon">✓</span>
-                </div>
+                <span v-if="unit.completedLessons === unit.totalLessons" class="done-icon">✓</span>
               </div>
               <!-- 进度条 -->
               <div class="progress-bar">
@@ -185,8 +212,30 @@ function openUnit(unit) {
                   }"
                 ></div>
               </div>
+              <div class="lesson-list">
+                <button
+                  v-for="(lesson, lessonIndex) in unit.lessons"
+                  :key="lesson.id"
+                  class="lesson-card"
+                  @click="openLesson(unit, lesson)"
+                >
+                  <span class="lesson-order">{{ lessonIndex + 1 }}</span>
+                  <span class="lesson-info">
+                    <strong>{{ lesson.name }}</strong>
+                    <small>{{ getTypeText(lesson.type) }}</small>
+                  </span>
+                  <StarBar
+                    v-if="lesson.progress?.status === 'COMPLETED'"
+                    :stars="lesson.progress.stars || 0"
+                    size="sm"
+                  />
+                  <span v-else class="lesson-action">
+                    {{ lesson.progress?.status === 'IN_PROGRESS' ? '继续' : '开始' }} →
+                  </span>
+                </button>
+              </div>
             </div>
-          </div>
+          </section>
         </div>
       </section>
     </template>
@@ -404,14 +453,6 @@ function openUnit(unit) {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease-bounce),
-              box-shadow var(--duration-fast) var(--ease-smooth);
-}
-
-.unit-card:hover {
-  transform: translateX(4px);
-  box-shadow: var(--shadow-hover);
 }
 
 /* 左侧彩色竖条 */
@@ -460,10 +501,6 @@ function openUnit(unit) {
   color: var(--text-tertiary);
 }
 
-.unit-status {
-  font-size: 1.5rem;
-}
-
 .done-icon {
   color: var(--color-success);
   font-weight: var(--font-bold);
@@ -481,6 +518,69 @@ function openUnit(unit) {
   height: 100%;
   border-radius: var(--radius-pill);
   transition: width var(--duration-slow) var(--ease-smooth);
+}
+
+.lesson-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.lesson-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-muted);
+  color: var(--text-primary);
+  text-align: left;
+  transition: transform var(--duration-fast) var(--ease-bounce),
+              background var(--duration-fast) var(--ease-smooth);
+}
+
+.lesson-card:hover {
+  transform: translateX(4px);
+  background: var(--border-muted);
+}
+
+.lesson-order {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--text-on-primary);
+  font-weight: var(--font-bold);
+}
+
+.lesson-info {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.lesson-info strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lesson-info small {
+  color: var(--text-tertiary);
+}
+
+.lesson-action {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
 }
 
 /* ===== 状态提示 ===== */

@@ -10,11 +10,13 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getLessonsByUnit } from '../api/lesson'
 import { getUnitProgress } from '../api/progress'
+import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
 import StarBar from '../components/StarBar.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { safeBack } = useSafeBack()
 const lessons = ref([])
 // 课时进度映射: lessonId → { status, stars, score }
 const progressMap = ref(new Map())
@@ -114,10 +116,10 @@ function goBack() {
     if (subjectId) query.subjectId = String(subjectId)
     if (subjectName) query.subjectName = subjectName
     if (themeName) query.themeName = themeName
-    router.push({ path: `/theme/${themeId}`, query })
+    safeBack({ path: `/theme/${themeId}`, query })
     return
   }
-  router.push('/')
+  safeBack('/')
 }
 
 function openLesson(lesson) {
