@@ -29,6 +29,10 @@ export function useTts() {
   const isPlaying = ref(false)
   // 当前正在播放的 Audio 对象引用,用于停止播放
   let currentAudio = null
+  // 当前等待播放完成任务的结束回调,用于主动停止时立即解除等待
+  let finishCurrentPlayback = null
+  // 播放任务版本号,用于取消仍在请求 TTS 的旧任务
+  let playbackVersion = 0
 
   /**
    * 释放之前创建的 ObjectURL,避免内存泄漏。
@@ -45,6 +49,8 @@ export function useTts() {
    * 调用 Audio.pause() 并置空引用,不影响 isPlaying 外部状态(由调用方管理)。
    */
   function stop() {
+    playbackVersion++
+    const finish = finishCurrentPlayback
     if (currentAudio) {
       // 暂停播放并清理事件,避免 onended 再次触发状态变更
       try {
@@ -57,6 +63,11 @@ export function useTts() {
       currentAudio.onended = null
       currentAudio.onerror = null
       currentAudio = null
+    }
+    if (finish) {
+      finish()
+    } else {
+      isPlaying.value = false
     }
   }
 
@@ -74,10 +85,12 @@ export function useTts() {
     if (isPlaying.value) {
       stop()
     }
+    const version = ++playbackVersion
     isPlaying.value = true
     isLoading.value = true
     try {
       const blob = await textToSpeech(text, lan)
+      if (version !== playbackVersion) return
       // 校验 blob:空 blob 说明后端 TTS 失败,直接抛错避免创建无效 Audio
       if (!blob || blob.size === 0) {
         throw new Error('语音合成返回空数据,可能服务暂时不可用')
@@ -96,6 +109,7 @@ export function useTts() {
       }
       await currentAudio.play()
     } catch (e) {
+      if (version !== playbackVersion) return
       console.error('TTS 播放失败:', e)
       isPlaying.value = false
       currentAudio = null
@@ -120,9 +134,11 @@ export function useTts() {
     if (isPlaying.value) {
       stop()
     }
+    const version = ++playbackVersion
     isPlaying.value = true
     try {
       const blob = await textToSpeech(text, lan)
+      if (version !== playbackVersion) return
       // 校验 blob:空 blob 说明后端 TTS 失败,直接抛错避免创建无效 Audio
       if (!blob || blob.size === 0) {
         throw new Error('语音合成返回空数据,可能服务暂时不可用')
@@ -140,6 +156,7 @@ export function useTts() {
           if (settled) return
           settled = true
           if (timeoutId) clearTimeout(timeoutId)
+          finishCurrentPlayback = null
           isPlaying.value = false
           currentAudio = null
           resolve()
@@ -150,6 +167,7 @@ export function useTts() {
           if (settled) return
           settled = true
           if (timeoutId) clearTimeout(timeoutId)
+          finishCurrentPlayback = null
           isPlaying.value = false
           currentAudio = null
           reject(e)
@@ -157,6 +175,7 @@ export function useTts() {
 
         currentAudio.onended = finish
         currentAudio.onerror = fail
+        finishCurrentPlayback = finish
 
         // 默认 30 秒兜底超时,防止 onended/onerror 均不触发时永久卡死
         timeoutId = setTimeout(finish, 30000)
@@ -175,6 +194,7 @@ export function useTts() {
         currentAudio.play().catch(fail)
       })
     } catch (e) {
+      if (version !== playbackVersion) return
       console.error('TTS 播放失败:', e)
       isPlaying.value = false
       currentAudio = null

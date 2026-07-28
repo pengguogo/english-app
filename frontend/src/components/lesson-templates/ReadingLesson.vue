@@ -77,7 +77,7 @@ async function playContinuously() {
   try {
     while (session === playbackSession.value) {
       await playAndWait(readAloudText.value, 'zh')
-      if (session !== playbackSession.value || props.isLastItem) break
+      if (!isContinuousPlaying.value || session !== playbackSession.value || props.isLastItem) break
       emit('next')
       await nextTick()
     }
@@ -93,9 +93,22 @@ async function playContinuously() {
   }
 }
 
-onBeforeUnmount(() => {
+function stopContinuousPlayback() {
   playbackSession.value++
+  isContinuousPlaying.value = false
   stop()
+}
+
+function toggleContinuousPlayback() {
+  if (isContinuousPlaying.value) {
+    stopContinuousPlayback()
+    return
+  }
+  playContinuously()
+}
+
+onBeforeUnmount(() => {
+  stopContinuousPlayback()
 })
 </script>
 
@@ -128,10 +141,10 @@ onBeforeUnmount(() => {
       <button
         v-if="continuousPlayback"
         class="continuous-play-btn"
-        :disabled="isContinuousPlaying"
-        @click="playContinuously"
+        :class="{ 'is-playing': isContinuousPlaying }"
+        @click="toggleContinuousPlayback"
       >
-        {{ isContinuousPlaying ? '连续播放中…' : '▶ 连续朗读' }}
+        {{ isContinuousPlaying ? '■ 停止朗读' : '▶ 连续朗读' }}
       </button>
       <AudioButton v-else :text="readAloudText" lan="zh" />
       <!-- 上一步 / 下一步 / 完成阅读 -->
@@ -201,9 +214,8 @@ onBeforeUnmount(() => {
   box-shadow: var(--shadow-soft);
 }
 
-.continuous-play-btn:disabled {
-  opacity: 0.7;
-  cursor: wait;
+.continuous-play-btn.is-playing {
+  background: var(--color-warning);
 }
 
 /* 按钮行:左右分布,上一页 + 下一页 */
