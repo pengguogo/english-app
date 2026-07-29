@@ -9,7 +9,7 @@
 /**
  * @description READING 类型课时学习模板，图文展示+翻页阅读+朗读功能。
  */
-import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useTts } from '../../composables/useTts'
 import AudioButton from '../AudioButton.vue'
 import AppButton from '../AppButton.vue'
@@ -32,7 +32,11 @@ const props = defineProps({
   /** 是否最后一项 */
   isLastItem: { type: Boolean, default: false },
   /** 是否启用课外知识连续朗读 */
-  continuousPlayback: { type: Boolean, default: false }
+  continuousPlayback: { type: Boolean, default: false },
+  /** 是否由上一课时自动续播 */
+  autoStartContinuous: { type: Boolean, default: false },
+  /** 是否正在保存进度并查找下一节阅读课 */
+  isContinuousAdvancing: { type: Boolean, default: false }
 })
 
 /**
@@ -44,7 +48,11 @@ const emit = defineEmits({
   /** 切换下一篇或完成阅读 */
   next: null,
   /** 切换上一篇 */
-  prev: null
+  prev: null,
+  /** 当前课时朗读完毕,请求继续下一节阅读课 */
+  continuousFinished: null,
+  /** 用户主动停止跨课时连续朗读 */
+  continuousStopped: null
 })
 
 /**
@@ -77,7 +85,11 @@ async function playContinuously() {
   try {
     while (session === playbackSession.value) {
       await playAndWait(readAloudText.value, 'zh')
-      if (!isContinuousPlaying.value || session !== playbackSession.value || props.isLastItem) break
+      if (!isContinuousPlaying.value || session !== playbackSession.value) break
+      if (props.isLastItem) {
+        emit('continuousFinished')
+        break
+      }
       emit('next')
       await nextTick()
     }
@@ -102,10 +114,17 @@ function stopContinuousPlayback() {
 function toggleContinuousPlayback() {
   if (isContinuousPlaying.value) {
     stopContinuousPlayback()
+    emit('continuousStopped')
     return
   }
   playContinuously()
 }
+
+onMounted(() => {
+  if (props.continuousPlayback && props.autoStartContinuous) {
+    playContinuously()
+  }
+})
 
 onBeforeUnmount(() => {
   stopContinuousPlayback()
@@ -142,9 +161,14 @@ onBeforeUnmount(() => {
         v-if="continuousPlayback"
         class="continuous-play-btn"
         :class="{ 'is-playing': isContinuousPlaying }"
+        :disabled="isContinuousAdvancing"
         @click="toggleContinuousPlayback"
       >
-        {{ isContinuousPlaying ? '■ 停止朗读' : '▶ 连续朗读' }}
+        {{
+          isContinuousAdvancing
+            ? '正在切换下一课…'
+            : isContinuousPlaying ? '■ 停止朗读' : '▶ 连续朗读'
+        }}
       </button>
       <AudioButton v-else :text="readAloudText" lan="zh" />
       <!-- 上一步 / 下一步 / 完成阅读 -->
@@ -216,6 +240,11 @@ onBeforeUnmount(() => {
 
 .continuous-play-btn.is-playing {
   background: var(--color-warning);
+}
+
+.continuous-play-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 /* 按钮行:左右分布,上一页 + 下一页 */

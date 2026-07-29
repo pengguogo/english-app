@@ -12,9 +12,10 @@
        2026-07-21 新增 PHONICS/DIALOGUE 分发
 -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getLessonById } from '../api/lesson'
+import { getLessonById, getLessonsByUnit } from '../api/lesson'
+import { getUnitsByTheme } from '../api/unit'
 import { completeLesson } from '../api/progress'
 import { scorePronunciation } from '../api/voice'
 import { recordWrongAnswer } from '../api/wrongAnswer'
@@ -29,6 +30,7 @@ import QuizLesson from '../components/lesson-templates/QuizLesson.vue'
 import CalculateLesson from '../components/lesson-templates/CalculateLesson.vue'
 import PhonicsLesson from '../components/lesson-templates/PhonicsLesson.vue'
 import DialogueLesson from '../components/lesson-templates/DialogueLesson.vue'
+import { findNextReadingLesson } from '../utils/continuousPlayback'
 
 const route = useRoute()
 const router = useRouter()
@@ -46,6 +48,8 @@ const scoreMessage = ref('')
 const isScoring = ref(false)
 const isComplete = ref(false)
 const isSubmitting = ref(false)
+const isProgressSaved = ref(false)
+let lessonLoadVersion = 0
 
 // 记录每个学习项的历史最佳分
 const bestScores = ref([])
@@ -131,13 +135,16 @@ const lessonTemplate = computed(() => {
 const lessonTemplateProps = computed(() => {
   if (lesson.value?.type !== 'READING') return {}
   return {
-    continuousPlayback: Number(route.query.subjectId) === 4
+    continuousPlayback: Number(route.query.subjectId) === 4,
+    autoStartContinuous: route.query.continuous === '1',
+    isContinuousAdvancing: isSubmitting.value
   }
 })
 
 // ===== 生命周期 =====
 
 onMounted(loadLesson)
+watch(() => route.params.lessonId, loadLesson)
 
 // ===== 业务方法 =====
 
@@ -206,8 +213,16 @@ function normalizeContent(raw) {
  * 加载课时详情并解析 content。
  */
 async function loadLesson() {
+  const version = ++lessonLoadVersion
+  isLoading.value = true
+  errorMsg.value = ''
+  currentIndex.value = 0
+  isComplete.value = false
+  isProgressSaved.value = false
+  resetCurrentScoreState()
   try {
     const data = await getLessonById(route.params.lessonId)
+    if (version !== lessonLoadVersion) return
     if (typeof data.content === 'string') {
       data.content = normalizeContent(JSON.parse(data.content))
     } else if (data.content && typeof data.content === 'object') {
@@ -216,10 +231,13 @@ async function loadLesson() {
     lesson.value = data
     bestScores.value = new Array(totalItems.value).fill(0)
   } catch (e) {
+    if (version !== lessonLoadVersion) return
     errorMsg.value = '加载课时失败,请返回重试'
     console.error('加载课时失败:', e)
   } finally {
-    isLoading.value = false
+    if (version === lessonLoadVersion) {
+      isLoading.value = false
+    }
   }
 }
 
@@ -331,6 +349,65 @@ function prevItem() {
   }
 }
 
+/**
+ * 当前阅读课朗读完毕后保存进度,并继续主题内下一节阅读课。
+ * 自动播放只跨课时和单元,不会跨越当前主题。
+ */
+async function advanceContinuousPlayback() {
+  if (isSubmitting.value || !lesson.value) return
+  const sourceLessonId = Number(lesson.value.id)
+  const sourceUnitId = Number(lesson.value.unitId)
+  isSubmitting.value = true
+
+  try {
+    await completeLesson(sourceLessonId, totalStars.value, totalBestScore.value)
+    if (Number(route.params.lessonId) !== sourceLessonId) return
+    isProgressSaved.value = true
+
+    const themeId = Number(route.query.themeId || 0)
+    const units = themeId
+      ? await getUnitsByTheme(themeId)
+      : [{ id: sourceUnitId }]
+    const next = await findNextReadingLesson(
+      sourceLessonId,
+      sourceUnitId,
+      units,
+      getLessonsByUnit
+    )
+    if (Number(route.params.lessonId) !== sourceLessonId) return
+
+    if (!next) {
+      isComplete.value = true
+      clearContinuousQuery()
+      return
+    }
+
+    await router.replace({
+      path: `/lesson/${next.lesson.id}`,
+      query: {
+        ...route.query,
+        unitId: String(next.unitId),
+        continuous: '1'
+      }
+    })
+  } catch (e) {
+    console.error('自动进入下一节阅读课失败:', e)
+    alert('自动播放下一课失败,请重试')
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+/**
+ * 用户主动停止时移除自动续播标记,避免刷新后意外继续播放。
+ */
+function clearContinuousQuery() {
+  if (!route.query.continuous) return
+  const query = { ...route.query }
+  delete query.continuous
+  router.replace({ query })
+}
+
 function goBack() {
   safeBack(buildThemeFallback())
 }
@@ -351,11 +428,13 @@ async function finishLesson() {
   if (isSubmitting.value) return
   isSubmitting.value = true
   try {
-    await completeLesson(
-      route.params.lessonId,
-      totalStars.value,
-      totalBestScore.value
-    )
+    if (!isProgressSaved.value) {
+      await completeLesson(
+        route.params.lessonId,
+        totalStars.value,
+        totalBestScore.value
+      )
+    }
     const query = {}
     if (route.query.themeId) query.themeId = String(route.query.themeId)
     if (route.query.themeName) query.themeName = String(route.query.themeName)
@@ -407,6 +486,7 @@ async function finishLesson() {
       <component
         v-else-if="lessonTemplate && currentItem"
         :is="lessonTemplate"
+        :key="lesson.id"
         :current-item="currentItem"
         :current-index="currentIndex"
         :total-items="totalItems"
@@ -420,6 +500,8 @@ async function finishLesson() {
         @answered="handleAnswered"
         @next="nextItem"
         @prev="prevItem"
+        @continuous-finished="advanceContinuousPlayback"
+        @continuous-stopped="clearContinuousQuery"
       />
 
       <!-- 未支持的课型:占位提示 -->
