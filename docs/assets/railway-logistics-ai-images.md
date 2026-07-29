@@ -29,10 +29,7 @@
 | `railway-logistics-06.jpg` | 调度员排列进路，绿色信号开放，电力货运列车驶上干线 |
 | `railway-logistics-07.jpg` | 列车穿越山谷桥梁，远程平台同步监测位置和冷藏温度 |
 | `railway-logistics-08.jpg` | 夜间铁路枢纽进行解编和再编组，车辆接续下一段路线 |
-| `railway-logistics-09.jpg` | 临时占位：复用第 4 页换装图，表示终到站反向换装到末端配送卡车 |
-| `railway-logistics-10.jpg` | 临时占位：复用第 1 页全链路总览图，表示签收后回看完整运输闭环 |
+| `railway-logistics-09.jpg` | 海滨终到站将冷藏集装箱从铁路平车换装到末端配送卡车 |
+| `railway-logistics-10.jpg` | 门店验收苹果并电子签收，空冷藏箱启程回运形成运输闭环 |
 
 章节封面 `frontend/src/assets/units/unit-101.webp` 由第 1 页插图居中裁切并缩放生成。
-
-第 9、10 页因内置图片服务网络异常暂用同章相关画面占位，图片 key、JPG 文件和
-页面展示链路均已完整。后续生成独立场景图时可保持 key 不变并替换对应 JPG。
