@@ -12,6 +12,7 @@ import { getUnitsByTheme } from '../api/unit'
 import { getLessonsByUnit } from '../api/lesson'
 import { getUnitProgress } from '../api/progress'
 import { getThemeConfig } from '../config/themeConfig'
+import { getUnitImage } from '../config/unitImages'
 import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
 import StarBar from '../components/StarBar.vue'
@@ -193,7 +194,13 @@ function getTypeText(type) {
             <div class="unit-stripe" :style="{ background: getSceneConfig(index).color }"></div>
             <div class="unit-body">
               <div class="unit-header">
-                <div class="unit-icon">{{ getSceneConfig(index).icon }}</div>
+                <img
+                  v-if="getUnitImage(unit.id)"
+                  :src="getUnitImage(unit.id)"
+                  :alt="unit.name"
+                  class="unit-image"
+                />
+                <div v-else class="unit-icon">{{ getSceneConfig(index).icon }}</div>
                 <div class="unit-info">
                   <h3>{{ unit.name }}</h3>
                   <p class="unit-progress-text">
@@ -483,6 +490,15 @@ function getTypeText(type) {
   background: var(--bg-muted);
   border-radius: var(--radius-md);
   flex-shrink: 0;
+}
+
+.unit-image {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
 }
 
 .unit-info {

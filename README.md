@@ -158,15 +158,27 @@ Vite 开发服务器运行在 `http://localhost:5173`,自动将 `/api` 请求代
 ### 生产构建(单 JAR 部署)
 
 ```bash
-# 1. 构建前端,产物自动写入 backend/src/main/resources/static/
-cd frontend && npm run build
+# 1. 后端测试（必须使用 Java 17）
+cd backend
+export JAVA_HOME=/Users/dawn/Library/Java/JavaVirtualMachines/corretto-17.0.13/Contents/Home
+export PATH="$JAVA_HOME/bin:$PATH"
+mvn test
 
-# 2. 打包后端
-cd ../backend && ./mvnw clean package -DskipTests
+# 2. 构建前端,产物自动写入 backend/src/main/resources/static/app/
+cd ../frontend
+npm ci
+npm run build
 
-# 3. 一个 JAR 启动,浏览器访问 http://localhost:8080
+# 3. 打包后端
+cd ../backend
+mvn clean package
+
+# 4. 一个 JAR 启动,浏览器访问 http://localhost:8080/app/
 java -jar target/english-app-backend-1.0.0.jar
 ```
+
+正式交付不得跳过测试。完整的构建门禁、课程 JSON、Flyway 和配图规范见
+[`docs/project-build-rules.md`](docs/project-build-rules.md)。
 
 ### 验证
 
@@ -346,6 +358,11 @@ wrong_answer (错题)        ← V17 新增
 
 `WordImageResolver` 负责将 `lesson.content` 中 item 的 `image` 字段(纯 key,如 `chase` 或 `paw-patrol/chase`)改写为完整 URL。数据库只存纯 key,迁移云存储时仅需修改 `WordImageProperties` 配置,无需改动数据。仅在课时**详情**接口解析,列表接口不解析以减少开销。
 
+新增或修改课程时，配图是强制交付物：支持图片的课型中，每个 `items[]` 都必须有
+非空 `image`，图片文件与素材来源记录须和 Flyway 迁移同批提交，emoji 不可替代图片。
+`DIALOGUE` 新内容须先补齐场景图展示能力。详细验收规则见
+[`docs/project-build-rules.md`](docs/project-build-rules.md)。
+
 ### 前端状态管理
 
 - **Pinia `progress` store**:缓存进度树,减少请求
@@ -359,7 +376,9 @@ wrong_answer (错题)        ← V17 新增
 
 ### 单 JAR 部署
 
-Vue 构建产物通过 `vite.config.js` 直接输出到 `backend/src/main/resources/static/`,`WebConfig` 配置 Vue Router history 模式 fallback:非 `/api` 请求统一返回 `index.html`,生产环境无 CORS 问题。
+Vue 构建产物通过 `vite.config.js` 直接输出到 `backend/src/main/resources/static/app/`，
+课程图片保留在 `backend/src/main/resources/static/images/`。`WebConfig` 配置 Vue Router
+history 模式 fallback：非 `/api` 请求统一返回 `app/index.html`，生产环境无 CORS 问题。
 
 ### 云迁移准备
 

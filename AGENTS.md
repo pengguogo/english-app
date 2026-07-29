@@ -19,6 +19,17 @@
 
 > 必须显式指定 JAVA_HOME 为 Corretto 17，否则报 `无效的标记: --release`
 
+## 构建与课程内容
+- 项目构建、课程内容和图片交付必须遵守
+  [`docs/project-build-rules.md`](docs/project-build-rules.md)
+- 正式交付顺序：后端测试 → `npm ci` → 前端构建 → Maven 完整打包；完成前不得使用
+  `-DskipTests` 代替验收
+- 前端生成物仅写入 `backend/src/main/resources/static/app/`，禁止手工修改
+- 新增或修改课程必须通过新 Flyway 迁移交付，禁止修改已提交迁移或只改
+  `backend/english.db`
+- **新增或修改课程的每个可视学习项必须配图**；`image` 不得为空，emoji 不能替代图片
+- 图片文件、课程迁移和素材来源记录必须同批提交；合并前必须验证图片 URL 和课程页面
+
 ## 提交署名
 AI 提交 MUST 包含：
 ```
