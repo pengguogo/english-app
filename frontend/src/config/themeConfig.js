@@ -69,6 +69,16 @@ const themeConfig = {
       { icon: '🔧', color: 'var(--color-primary)', label: '工程工具' },
       { icon: '🐕', color: 'var(--color-accent)', label: '工程家族' }
     ]
+  },
+  // 主题 48:系统自然拼读(2 单元:字母音 / CVC 词族)
+  48: {
+    emoji: '🔤',
+    title: '系统自然拼读',
+    description: '从字母音到 CVC 和简单词族，建立自主拼读能力',
+    scenes: [
+      { icon: '🔊', color: 'var(--color-primary)', label: '字母音热身' },
+      { icon: '🧩', color: 'var(--color-accent)', label: 'CVC 词族' }
+    ]
   }
 }
 

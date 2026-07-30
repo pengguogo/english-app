@@ -222,4 +222,24 @@ class WordImageResolverTest {
         assertFalse(result.contains("\"image\""),
                 "无 image 的 item 不应新增 image 字段");
     }
+
+    /**
+     * 图片选择题的题目图和选项图都应解析为完整 URL。
+     */
+    @Test
+    @DisplayName("QUIZ 类型:改写题目图和对象选项图")
+    void should_resolveQuizOptionImages_when_optionsContainObjects() {
+        // Arrange
+        String content = "{\"type\":\"QUIZ\",\"items\":[{" +
+                "\"question\":\"听音选图\",\"image\":\"pet/puppy\",\"options\":[" +
+                "{\"text\":\"小狗\",\"image\":\"pet/puppy\"}," +
+                "{\"text\":\"小猫\",\"image\":\"pet/kitten\"}],\"answer\":0}]}";
+
+        // Act
+        String result = resolver.resolveContent(content);
+
+        // Assert
+        assertTrue(result.contains("http://localhost:8080/images/pet/puppy.jpg"));
+        assertTrue(result.contains("http://localhost:8080/images/pet/kitten.jpg"));
+    }
 }

@@ -12,7 +12,7 @@
        2026-07-21 新增 PHONICS/DIALOGUE 分发
 -->
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getLessonById, getLessonsByUnit } from '../api/lesson'
 import { getUnitsByTheme } from '../api/unit'
@@ -20,6 +20,7 @@ import { completeLesson } from '../api/progress'
 import { scorePronunciation } from '../api/voice'
 import { recordWrongAnswer } from '../api/wrongAnswer'
 import { useSafeBack } from '../composables/useSafeBack'
+import { stopActiveTts } from '../composables/useTts'
 import StarBar from '../components/StarBar.vue'
 import BackBar from '../components/BackBar.vue'
 import WordLesson from '../components/lesson-templates/WordLesson.vue'
@@ -145,6 +146,7 @@ const lessonTemplateProps = computed(() => {
 
 onMounted(loadLesson)
 watch(() => route.params.lessonId, loadLesson)
+onBeforeUnmount(stopActiveTts)
 
 // ===== 业务方法 =====
 
@@ -204,7 +206,15 @@ function normalizeContent(raw) {
       items.push({ sentence: s, emoji: '💬', phonetic: '', translation: '' })
     })
   } else if (Array.isArray(raw.items)) {
-    raw.items.forEach((it) => items.push(it))
+    const phonicsMeta = raw.type === 'PHONICS'
+      ? {
+          letter: raw.letter,
+          pronunciation: raw.pronunciation,
+          sound: raw.sound,
+          tip: raw.tip
+        }
+      : {}
+    raw.items.forEach((it) => items.push({ ...phonicsMeta, ...it }))
   }
   return { items }
 }
@@ -213,6 +223,7 @@ function normalizeContent(raw) {
  * 加载课时详情并解析 content。
  */
 async function loadLesson() {
+  stopActiveTts()
   const version = ++lessonLoadVersion
   isLoading.value = true
   errorMsg.value = ''
@@ -330,6 +341,7 @@ function resetCurrentScoreState() {
  * 切换到下一个学习项。若已是最后一项，则进入完成结算页。
  */
 function nextItem() {
+  stopActiveTts()
   if (currentIndex.value < totalItems.value - 1) {
     currentIndex.value++
     resetCurrentScoreState()
@@ -343,6 +355,7 @@ function nextItem() {
  * 重置当前项的评分状态,确保回到上一题时展示干净的答题界面。
  */
 function prevItem() {
+  stopActiveTts()
   if (currentIndex.value > 0) {
     currentIndex.value--
     resetCurrentScoreState()

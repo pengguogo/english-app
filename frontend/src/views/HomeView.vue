@@ -74,8 +74,8 @@ function getSubjectIcon(code) {
       <span class="decor star c3">✨</span>
       <div class="header-content">
         <div class="greeting">
-          <h1>嗨，小朋友！</h1>
-          <p>今天想学什么呢？🎈</p>
+          <h1>Mimi 启蒙乐园</h1>
+          <p>每天 15 分钟，陪孩子快乐成长 🎈</p>
         </div>
         <img :src="mascotWelcome" alt="小老鼠 Mimi" class="mascot" />
       </div>

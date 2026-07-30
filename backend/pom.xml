@@ -12,7 +12,8 @@
     <groupId>com.englishapp</groupId>
     <artifactId>english-app-backend</artifactId>
     <version>1.0.0</version>
-    <name>english-app-backend</name>
+    <name>Mimi 启蒙乐园</name>
+    <description>面向 4-6 岁儿童的多学科启蒙学习应用</description>
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -69,5 +70,4 @@
         </plugins>
     </build>
 </project>
-
 

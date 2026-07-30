@@ -7,6 +7,7 @@
   创建日期: 2026-07-20
 -->
 <script setup>
+import { onBeforeUnmount, watch } from 'vue'
 import { useTts } from '../composables/useTts'
 
 /**
@@ -22,7 +23,18 @@ const props = defineProps({
 })
 
 /* 复用 TTS 组合式函数,获取播放状态与播放方法 */
-const { isPlaying, playAndWait } = useTts()
+const { isPlaying, playAndWait, stop } = useTts()
+let playbackSequence = 0
+
+watch(() => props.text, () => {
+  playbackSequence++
+  stop()
+})
+
+onBeforeUnmount(() => {
+  playbackSequence++
+  stop()
+})
 
 /**
  * 点击播放:
@@ -34,6 +46,7 @@ const { isPlaying, playAndWait } = useTts()
 async function handlePlay() {
   // 播放中直接返回,避免连续点击导致音频叠加
   if (isPlaying.value) return
+  const sequence = ++playbackSequence
   try {
     if (props.lan === 'zh') {
       // 纯中文模式:仅播放 text
@@ -43,6 +56,7 @@ async function handlePlay() {
       if (props.translation) {
         await playAndWait(props.translation, 'zh')
       }
+      if (sequence !== playbackSequence) return
       await playAndWait(props.text, 'en')
     }
   } catch (e) {

@@ -11,6 +11,13 @@
 import { ref } from 'vue'
 import { textToSpeech } from '../api/voice'
 
+let activeStop = null
+
+/** 停止页面中当前活跃的 TTS 播放。 */
+export function stopActiveTts() {
+  activeStop?.()
+}
+
 /**
  * TTS 组合式函数。
  * @return {{audioUrl: import('vue').Ref<string|null>,
@@ -69,6 +76,12 @@ export function useTts() {
     } else {
       isPlaying.value = false
     }
+    if (activeStop === stop) activeStop = null
+  }
+
+  function claimPlayback() {
+    activeStop?.()
+    activeStop = stop
   }
 
   /**
@@ -81,10 +94,7 @@ export function useTts() {
    * @throws {Error} 当 blob 为空或播放失败时抛出
    */
   async function play(text, lan = 'en') {
-    // 如果正在播放,先停止上一个音频,避免叠加
-    if (isPlaying.value) {
-      stop()
-    }
+    claimPlayback()
     const version = ++playbackVersion
     isPlaying.value = true
     isLoading.value = true
@@ -102,10 +112,12 @@ export function useTts() {
       currentAudio.onended = () => {
         isPlaying.value = false
         currentAudio = null
+        if (activeStop === stop) activeStop = null
       }
       currentAudio.onerror = () => {
         isPlaying.value = false
         currentAudio = null
+        if (activeStop === stop) activeStop = null
       }
       await currentAudio.play()
     } catch (e) {
@@ -130,10 +142,7 @@ export function useTts() {
    * @throws {Error} 当 blob 为空或播放失败时抛出
    */
   async function playAndWait(text, lan = 'en') {
-    // 如果正在播放,先停止上一个音频,避免叠加
-    if (isPlaying.value) {
-      stop()
-    }
+    claimPlayback()
     const version = ++playbackVersion
     isPlaying.value = true
     try {
@@ -159,6 +168,7 @@ export function useTts() {
           finishCurrentPlayback = null
           isPlaying.value = false
           currentAudio = null
+          if (activeStop === stop) activeStop = null
           resolve()
         }
 
@@ -170,6 +180,7 @@ export function useTts() {
           finishCurrentPlayback = null
           isPlaying.value = false
           currentAudio = null
+          if (activeStop === stop) activeStop = null
           reject(e)
         }
 

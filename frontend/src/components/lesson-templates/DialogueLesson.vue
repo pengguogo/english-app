@@ -99,6 +99,14 @@ const progressPercent = computed(() => {
     <!-- 小老鼠陪伴插画（右上角） -->
     <img :src="mascotCompanion" alt="小老鼠陪伴" class="mascot-companion" />
 
+    <!-- 当前对话场景图 -->
+    <img
+      v-if="currentItem?.image"
+      :src="currentItem.image"
+      :alt="currentItem.scene || '对话场景'"
+      class="scene-image"
+    />
+
     <!-- 对话气泡: Mimi 左侧，NPC 右侧 -->
     <div v-if="currentItem" class="dialogue-card" :class="{ 'mimi-side': isMimi, 'npc-side': !isMimi }">
       <!-- Mimi 发言: 左侧 + 头像 -->
@@ -196,6 +204,15 @@ const progressPercent = computed(() => {
   border-radius: var(--radius-md);
   z-index: 1;
   opacity: 0.9;
+}
+
+.scene-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-5);
 }
 
 /* 对话气泡卡片 */

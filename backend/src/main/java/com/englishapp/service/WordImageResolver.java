@@ -32,6 +32,9 @@ public class WordImageResolver {
     /** item 中图片 key 的字段名 */
     private static final String IMAGE_FIELD = "image";
 
+    /** 选择题选项数组字段名 */
+    private static final String OPTIONS_FIELD = "options";
+
     private final WordImageProperties properties;
 
     /** JSON 序列化/反序列化器,Spring Boot 默认已配置,这里复用单例 */
@@ -77,13 +80,15 @@ public class WordImageResolver {
                 if (!(itemNode instanceof ObjectNode item)) {
                     continue;
                 }
-                JsonNode imageNode = item.get(IMAGE_FIELD);
-                // image 字段缺失或为空,跳过
-                if (imageNode == null || imageNode.isNull() || imageNode.asText().isBlank()) {
-                    continue;
+                resolveImageField(item);
+                JsonNode optionsNode = item.get(OPTIONS_FIELD);
+                if (optionsNode != null && optionsNode.isArray()) {
+                    for (JsonNode optionNode : optionsNode) {
+                        if (optionNode instanceof ObjectNode option) {
+                            resolveImageField(option);
+                        }
+                    }
                 }
-                String key = imageNode.asText();
-                item.put(IMAGE_FIELD, resolveUrl(key));
             }
             return objectMapper.writeValueAsString(root);
         } catch (JsonProcessingException e) {
@@ -91,6 +96,19 @@ public class WordImageResolver {
             log.error("解析 lesson content 失败,返回原始 content", e);
             return content;
         }
+    }
+
+    /**
+     * 将单个对象的 image key 改写为完整 URL。
+     *
+     * @param node 学习项或图片选项
+     */
+    private void resolveImageField(ObjectNode node) {
+        JsonNode imageNode = node.get(IMAGE_FIELD);
+        if (imageNode == null || imageNode.isNull() || imageNode.asText().isBlank()) {
+            return;
+        }
+        node.put(IMAGE_FIELD, resolveUrl(imageNode.asText()));
     }
 
     /**

@@ -56,6 +56,22 @@ const hasAnswered = ref(false)
 // TTS 组合式函数,用于播放题目语音
 const { isPlaying: isQuestionPlaying, play: playQuestion } = useTts()
 
+function optionText(option) {
+  return typeof option === 'object' && option !== null
+    ? option.text || ''
+    : String(option ?? '')
+}
+
+function optionImage(option) {
+  return typeof option === 'object' && option !== null
+    ? option.image || ''
+    : ''
+}
+
+function shouldShowOptionText(option) {
+  return typeof option !== 'object' || option === null || option.showText !== false
+}
+
 /**
  * 播放题目语音:将题目+选项拼接为完整文本播放。
  * 答题后也播放正确答案,方便孩子对照学习。
@@ -63,12 +79,15 @@ const { isPlaying: isQuestionPlaying, play: playQuestion } = useTts()
 async function handlePlayQuestion() {
   if (isQuestionPlaying.value) return
   const question = props.currentItem?.question || ''
-  // 拼接选项,让语音完整朗读题目和所有选项
   const options = props.currentItem?.options || []
-  const optionText = options.map((opt, i) => `${String.fromCharCode(65 + i)}, ${opt}`).join('。')
-  const fullText = optionText ? `${question}。${optionText}` : question
+  const optionsText = options
+    .map((option, index) => `${String.fromCharCode(65 + index)}, ${optionText(option)}`)
+    .join('。')
+  const fullText = props.currentItem?.audioText ||
+    (optionsText ? `${question}。${optionsText}` : question)
+  const language = props.currentItem?.audioLanguage || 'zh'
   try {
-    await playQuestion(fullText, 'zh')
+    await playQuestion(fullText, language)
   } catch (e) {
     console.error('题目语音播放失败:', e)
   }
@@ -108,8 +127,8 @@ function selectOption(index) {
   hasAnswered.value = true
   const correct = index === props.currentItem?.answer
   // 上报答题结果,同时携带用户答案与正确答案,便于父组件记录错题
-  const userAnswer = props.currentItem?.options?.[index] ?? ''
-  const correctAnswer = props.currentItem?.options?.[props.currentItem.answer] ?? ''
+  const userAnswer = optionText(props.currentItem?.options?.[index])
+  const correctAnswer = optionText(props.currentItem?.options?.[props.currentItem.answer])
   emit('answered', { correct, userAnswer, correctAnswer })
 }
 
@@ -175,9 +194,16 @@ function getOptionClass(index) {
           :class="['option', getOptionClass(index)]"
           :disabled="hasAnswered"
           @click="selectOption(index)"
+          :aria-label="optionText(option)"
         >
           <span class="option-label">{{ String.fromCharCode(65 + index) }}</span>
-          <span class="option-text">{{ option }}</span>
+          <img
+            v-if="optionImage(option)"
+            :src="optionImage(option)"
+            :alt="optionText(option)"
+            class="option-image"
+          />
+          <span v-if="shouldShowOptionText(option)" class="option-text">{{ optionText(option) }}</span>
           <span v-if="hasAnswered && index === currentItem.answer" class="option-icon">✓</span>
           <span v-if="hasAnswered && index === selectedIndex && !isCorrect" class="option-icon">✗</span>
         </button>
@@ -186,7 +212,7 @@ function getOptionClass(index) {
       <!-- 答题反馈 -->
       <div v-if="hasAnswered" class="feedback-area">
         <p :class="['feedback-text', isCorrect ? 'feedback-correct' : 'feedback-wrong']">
-          {{ isCorrect ? '回答正确！太棒了！' : '答错了，正确答案是 ' + String.fromCharCode(65 + currentItem.answer) + '：' + currentItem.options[currentItem.answer] }}
+          {{ isCorrect ? '回答正确！太棒了！' : '答错了，正确答案是 ' + String.fromCharCode(65 + currentItem.answer) + '：' + optionText(currentItem.options[currentItem.answer]) }}
         </p>
       </div>
     </div>
@@ -286,6 +312,13 @@ function getOptionClass(index) {
 .option-wrong .option-label { background: var(--color-warning); }
 
 .option-text { flex: 1; color: var(--text-primary); }
+.option-image {
+  width: 88px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-soft);
+}
 
 .option-icon { font-size: 1.2rem; font-weight: bold; }
 .option-correct .option-icon { color: var(--color-success); }

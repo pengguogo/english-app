@@ -151,13 +151,13 @@ private fun WelcomeHeader() {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "嗨,小朋友!",
+                    text = "Mimi 启蒙乐园",
                     color = Color.White,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "今天一起学英语吧 🎈",
+                    text = "每天 15 分钟，陪孩子快乐成长 🎈",
                     color = Color.White.copy(alpha = 0.9f),
                     fontSize = 16.sp,
                     modifier = Modifier.padding(top = 4.dp)
