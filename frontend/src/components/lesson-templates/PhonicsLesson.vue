@@ -13,7 +13,7 @@ import { ref, computed, watch } from 'vue'
 import StarBar from '../StarBar.vue'
 import AudioButton from '../AudioButton.vue'
 import AppButton from '../AppButton.vue'
-import mascotCompanion from '../../assets/mascot/mascot-companion.jpg'
+import MimiMascot from '../MimiMascot.vue'
 
 /**
  * 组件 Props
@@ -218,7 +218,7 @@ watch(() => props.currentIndex, () => {
     </div>
 
     <!-- 小老鼠陪伴插画（右上角） -->
-    <img :src="mascotCompanion" alt="小老鼠陪伴" class="mascot-companion" />
+    <MimiMascot variant="companion" size="md" class="mascot-companion" />
 
     <!-- ============ 学习模式 ============ -->
     <div v-if="currentItem && mode === 'learn'" class="learn-card">
@@ -381,10 +381,6 @@ watch(() => props.currentIndex, () => {
   position: absolute;
   top: 0;
   right: 0;
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  border-radius: var(--radius-md);
   z-index: 1;
   opacity: 0.9;
 }
@@ -635,7 +631,6 @@ watch(() => props.currentIndex, () => {
 
 /* 响应式: 手机 <480px 缩小字号和图片 */
 @media (max-width: 480px) {
-  .mascot-companion { width: 64px; height: 64px; }
   .big-letter { font-size: 4.5rem; }
   .word-image { width: 140px; height: 140px; }
   .emoji { font-size: 4rem; }

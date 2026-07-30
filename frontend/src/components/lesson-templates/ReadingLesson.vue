@@ -13,7 +13,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useTts } from '../../composables/useTts'
 import AudioButton from '../AudioButton.vue'
 import AppButton from '../AppButton.vue'
-import mascotCompanion from '../../assets/mascot/mascot-companion.jpg'
+import MimiMascot from '../MimiMascot.vue'
 
 /**
  * 组件 Props
@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- 小老鼠陪伴插画 -->
-    <img :src="mascotCompanion" alt="小老鼠陪伴" class="mascot-companion" />
+    <MimiMascot variant="companion" size="md" class="mascot-companion" />
 
     <!-- 阅读卡片: 配图 + 标题 + 正文 -->
     <div class="reading-card">
@@ -209,7 +209,7 @@ onBeforeUnmount(() => {
 .progress-bar { height: 8px; background: var(--bg-card); border-radius: var(--radius-pill); overflow: hidden; box-shadow: var(--shadow-soft); }
 .progress-fill { height: 100%; background: var(--gradient-primary); border-radius: var(--radius-pill); transition: width var(--duration-slow) var(--ease-smooth); }
 
-.mascot-companion { position: absolute; top: 0; right: 0; width: 80px; height: 80px; object-fit: contain; border-radius: var(--radius-md); z-index: 1; opacity: 0.9; }
+.mascot-companion { position: absolute; top: 0; right: 0; z-index: 1; opacity: 0.9; }
 
 .reading-card {
   background: var(--bg-card);
@@ -266,7 +266,6 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 480px) {
-  .mascot-companion { width: 64px; height: 64px; }
   .reading-image { height: 180px; }
 }
 </style>

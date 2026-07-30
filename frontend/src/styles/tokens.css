@@ -96,6 +96,17 @@
   --duration-normal: 250ms;
   --duration-slow: 300ms;
 
+  /* ===== 吉祥物 Mimi 视觉令牌 ===== */
+  /* 贴纸描边与柔光：用于让 jpg 也更“像贴纸” */
+  --mascot-outline: rgba(255, 255, 255, 0.95);
+  --mascot-outline-soft: rgba(255, 255, 255, 0.65);
+  --mascot-glow: rgba(255, 217, 61, 0.35);
+
+  /* 吉祥物动效（更慢更柔，避免喧宾夺主） */
+  --duration-mascot-float: 3200ms;
+  --duration-mascot-breathe: 2400ms;
+  --duration-mascot-celebrate: 900ms;
+
   /* ===== 渐变令牌 ===== */
   --gradient-primary: linear-gradient(135deg, #6B7CFF 0%, #8A96FF 100%);
   --gradient-warm: linear-gradient(135deg, #FFF3E0 0%, #FFF8E1 100%);

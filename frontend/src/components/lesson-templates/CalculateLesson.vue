@@ -12,7 +12,7 @@
 import { ref, computed, watch } from 'vue'
 import AppButton from '../AppButton.vue'
 import { useTts } from '../../composables/useTts'
-import mascotCompanion from '../../assets/mascot/mascot-companion.jpg'
+import MimiMascot from '../MimiMascot.vue'
 
 /**
  * 组件 Props
@@ -167,7 +167,7 @@ function submitAnswer() {
     </div>
 
     <!-- 小老鼠陪伴插画 -->
-    <img :src="mascotCompanion" alt="小老鼠陪伴" class="mascot-companion" />
+    <MimiMascot variant="companion" size="md" class="mascot-companion" />
 
     <!-- 题目卡片 -->
     <div class="calc-card">
@@ -266,7 +266,7 @@ function submitAnswer() {
 .progress-bar { height: 8px; background: var(--bg-card); border-radius: var(--radius-pill); overflow: hidden; box-shadow: var(--shadow-soft); }
 .progress-fill { height: 100%; background: var(--gradient-primary); border-radius: var(--radius-pill); transition: width var(--duration-slow) var(--ease-smooth); }
 
-.mascot-companion { position: absolute; top: 0; right: 0; width: 80px; height: 80px; object-fit: contain; border-radius: var(--radius-md); z-index: 1; opacity: 0.9; }
+.mascot-companion { position: absolute; top: 0; right: 0; z-index: 1; opacity: 0.9; }
 
 .calc-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: var(--space-6); margin-bottom: var(--space-6); box-shadow: var(--shadow-card); }
 
@@ -365,7 +365,6 @@ function submitAnswer() {
 @keyframes wrongShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 
 @media (max-width: 480px) {
-  .mascot-companion { width: 64px; height: 64px; }
   .key-btn { height: 48px; }
 }
 </style>
