@@ -43,6 +43,9 @@ Thumbs.db
 .trae/
 .superpowers/
 
+# ===== Git Worktrees (local) =====
+.worktrees/
+
 # ===== Logs =====
 *.log
 logs/
