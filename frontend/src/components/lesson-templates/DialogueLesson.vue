@@ -13,7 +13,7 @@ import StarBar from '../StarBar.vue'
 import AudioButton from '../AudioButton.vue'
 import RecordButton from '../RecordButton.vue'
 import AppButton from '../AppButton.vue'
-import mascotCompanion from '../../assets/mascot/mascot-companion.jpg'
+import MimiMascot from '../MimiMascot.vue'
 
 /**
  * 组件 Props
@@ -97,7 +97,7 @@ const progressPercent = computed(() => {
     </div>
 
     <!-- 小老鼠陪伴插画（右上角） -->
-    <img :src="mascotCompanion" alt="小老鼠陪伴" class="mascot-companion" />
+    <MimiMascot variant="companion" size="md" class="mascot-companion" />
 
     <!-- 当前对话场景图 -->
     <img
@@ -111,7 +111,7 @@ const progressPercent = computed(() => {
     <div v-if="currentItem" class="dialogue-card" :class="{ 'mimi-side': isMimi, 'npc-side': !isMimi }">
       <!-- Mimi 发言: 左侧 + 头像 -->
       <div v-if="isMimi" class="avatar-wrapper">
-        <img :src="mascotCompanion" alt="Mimi 头像" class="avatar" />
+        <MimiMascot variant="avatar" size="sm" :hasSticker="false" class="avatar" />
         <span class="speaker-name">Mimi</span>
       </div>
       <div class="bubble" aria-live="polite">
@@ -198,10 +198,6 @@ const progressPercent = computed(() => {
   position: absolute;
   top: 0;
   right: 0;
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  border-radius: var(--radius-md);
   z-index: 1;
   opacity: 0.9;
 }
@@ -234,10 +230,7 @@ const progressPercent = computed(() => {
   flex-shrink: 0;
 }
 .avatar {
-  width: 56px;
-  height: 56px;
   border-radius: var(--radius-pill);
-  object-fit: cover;
   box-shadow: var(--shadow-soft);
 }
 .speaker-name {
@@ -361,8 +354,6 @@ const progressPercent = computed(() => {
 
 /* 响应式: 手机 <480px */
 @media (max-width: 480px) {
-  .mascot-companion { width: 64px; height: 64px; }
-  .avatar { width: 48px; height: 48px; }
   .bubble { max-width: 75%; padding: var(--space-3) var(--space-4); }
   .dialogue-text { font-size: var(--text-base); }
 }

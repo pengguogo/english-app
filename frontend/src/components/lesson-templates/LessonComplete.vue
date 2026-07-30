@@ -11,7 +11,7 @@
  */
 import StarBar from '../StarBar.vue'
 import AppButton from '../AppButton.vue'
-import mascotCelebrate from '../../assets/mascot/mascot-celebrate.jpg'
+import MimiMascot from '../MimiMascot.vue'
 
 /**
  * 组件 Props
@@ -56,7 +56,7 @@ const emit = defineEmits({
 <template>
   <div class="complete-area">
     <!-- 小老鼠庆祝插画（主视觉） -->
-    <img :src="mascotCelebrate" alt="小老鼠庆祝" class="mascot-celebrate" />
+    <MimiMascot variant="celebrate" size="lg" />
 
     <h2>太棒了!</h2>
     <p class="complete-lesson-name">你完成了《{{ lessonName }}》</p>
@@ -91,35 +91,6 @@ const emit = defineEmits({
   gap: var(--space-3);
 }
 
-/* 小老鼠庆祝插画: 主视觉 */
-.mascot-celebrate {
-  width: 160px;
-  height: 160px;
-  object-fit: contain;
-  border-radius: var(--radius-md);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .mascot-celebrate {
-    animation: celebrateBounce var(--duration-slow) var(--ease-bounce) both;
-  }
-}
-
-@keyframes celebrateBounce {
-  0% {
-    transform: scale(0) rotate(-180deg);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(1.15) rotate(10deg);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) rotate(0);
-    opacity: 1;
-  }
-}
-
 .complete-area h2 {
   font-size: var(--text-xl);
   color: var(--color-orange);
@@ -136,8 +107,5 @@ const emit = defineEmits({
   font-size: var(--text-sm);
 }
 
-/* 响应式: 手机端缩小吉祥物 */
-@media (max-width: 480px) {
-  .mascot-celebrate { width: 128px; height: 128px; }
-}
+/* 吉祥物的尺寸与动效已由 MimiMascot 统一管理 */
 </style>

@@ -14,7 +14,7 @@ import StarBar from '../StarBar.vue'
 import AudioButton from '../AudioButton.vue'
 import RecordButton from '../RecordButton.vue'
 import AppButton from '../AppButton.vue'
-import mascotCompanion from '../../assets/mascot/mascot-companion.jpg'
+import MimiMascot from '../MimiMascot.vue'
 
 /**
  * 组件 Props
@@ -122,7 +122,7 @@ const isPawPatrolImage = computed(() => {
     </div>
 
     <!-- 小老鼠陪伴插画（右上角） -->
-    <img :src="mascotCompanion" alt="小老鼠陪伴" class="mascot-companion" />
+    <MimiMascot variant="companion" size="md" class="mascot-companion" />
 
     <!-- 学习项卡片: 图片/emoji + 英文 + 音标 + 中文释义 -->
     <div class="item-card">
@@ -221,10 +221,6 @@ const isPawPatrolImage = computed(() => {
   position: absolute;
   top: 0;
   right: 0;
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  border-radius: var(--radius-md);
   z-index: 1;
   opacity: 0.9;
 }
@@ -373,7 +369,6 @@ const isPawPatrolImage = computed(() => {
 
 /* 响应式 */
 @media (max-width: 480px) {
-  .mascot-companion { width: 64px; height: 64px; }
   .word { font-size: 2rem; }
   .emoji { font-size: 4rem; }
 }

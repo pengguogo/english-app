@@ -14,7 +14,7 @@ import StarBar from '../StarBar.vue'
 import AudioButton from '../AudioButton.vue'
 import RecordButton from '../RecordButton.vue'
 import AppButton from '../AppButton.vue'
-import mascotCompanion from '../../assets/mascot/mascot-companion.jpg'
+import MimiMascot from '../MimiMascot.vue'
 
 /**
  * 组件 Props
@@ -77,7 +77,7 @@ const progressPercent = computed(() => {
     </div>
 
     <!-- 小老鼠陪伴插画 -->
-    <img :src="mascotCompanion" alt="小老鼠陪伴" class="mascot-companion" />
+    <MimiMascot variant="companion" size="md" class="mascot-companion" />
 
     <!-- 句型卡片 -->
     <div class="item-card">
@@ -143,7 +143,7 @@ const progressPercent = computed(() => {
 .progress-bar { height: 8px; background: var(--bg-card); border-radius: var(--radius-pill); overflow: hidden; box-shadow: var(--shadow-soft); }
 .progress-fill { height: 100%; background: var(--gradient-primary); border-radius: var(--radius-pill); transition: width var(--duration-slow) var(--ease-smooth); }
 
-.mascot-companion { position: absolute; top: 0; right: 0; width: 80px; height: 80px; object-fit: contain; border-radius: var(--radius-md); z-index: 1; opacity: 0.9; }
+.mascot-companion { position: absolute; top: 0; right: 0; z-index: 1; opacity: 0.9; }
 
 .item-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: var(--space-8) var(--space-6); text-align: center; margin-bottom: var(--space-6); box-shadow: var(--shadow-card); }
 .emoji { font-size: 5rem; margin-bottom: var(--space-4); }
@@ -197,7 +197,6 @@ const progressPercent = computed(() => {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 480px) {
-  .mascot-companion { width: 64px; height: 64px; }
   .sentence-text { font-size: 1.5rem; }
   .emoji { font-size: 4rem; }
 }

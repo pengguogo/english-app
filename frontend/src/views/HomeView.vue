@@ -12,7 +12,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getSubjects } from '../api/subject'
-import mascotWelcome from '../assets/mascot/mascot-welcome.jpg'
+import MimiMascot from '../components/MimiMascot.vue'
 
 const router = useRouter()
 const subjects = ref([])
@@ -77,7 +77,7 @@ function getSubjectIcon(code) {
           <h1>Mimi 启蒙乐园</h1>
           <p>每天 15 分钟，陪孩子快乐成长 🎈</p>
         </div>
-        <img :src="mascotWelcome" alt="小老鼠 Mimi" class="mascot" />
+        <MimiMascot variant="welcome" size="lg" />
       </div>
     </header>
 
@@ -188,14 +188,6 @@ function getSubjectIcon(code) {
 .greeting p {
   color: rgba(255, 255, 255, 0.9);
   font-size: var(--text-base);
-}
-
-.mascot {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  border-radius: var(--radius-md);
-  flex-shrink: 0;
 }
 
 /* 飘浮装饰 */

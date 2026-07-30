@@ -14,7 +14,7 @@ import { getLearnedLessons, getLearnedStats } from '../api/progress'
 import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
 import StarBar from '../components/StarBar.vue'
-import mascotCompanion from '../assets/mascot/mascot-companion.jpg'
+import MimiMascot from '../components/MimiMascot.vue'
 
 const router = useRouter()
 const { safeBack } = useSafeBack()
@@ -180,7 +180,7 @@ const subjectDistribution = computed(() => {
 
     <!-- 空状态 -->
     <div v-else-if="learnedLessons.length === 0" class="empty-state">
-      <img :src="mascotCompanion" alt="小老鼠陪伴" class="empty-mascot" />
+      <MimiMascot variant="empty" size="lg" />
       <p class="empty-text">快去学习第一课吧！</p>
     </div>
 
@@ -428,24 +428,6 @@ const subjectDistribution = computed(() => {
   gap: var(--space-4);
 }
 
-.empty-mascot {
-  width: 160px;
-  height: 160px;
-  object-fit: contain;
-  border-radius: var(--radius-md);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .empty-mascot {
-    animation: gentleBounce 3s ease-in-out infinite;
-  }
-}
-
-@keyframes gentleBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
 .empty-text {
   font-size: var(--text-base);
   color: var(--text-secondary);
@@ -483,7 +465,6 @@ const subjectDistribution = computed(() => {
 
 /* ===== 响应式 ===== */
 @media (max-width: 480px) {
-  .empty-mascot { width: 128px; height: 128px; }
   .stat-num { font-size: var(--text-lg); }
 }
 </style>
