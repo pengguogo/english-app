@@ -6,6 +6,7 @@
  * @since 2026-07-20
  */
 import { createRouter, createWebHistory } from 'vue-router'
+import { normalizeRouterBase } from '../utils/routerBase'
 
 // 路由表：home / subject / theme / unit / lesson 五级学习流 + 错题集/我学过的快捷入口
 const routes = [
@@ -22,7 +23,7 @@ const routes = [
 
 // 创建 history 模式路由
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(normalizeRouterBase(import.meta.env.BASE_URL)),
   routes,
   scrollBehavior(to, from, savedPosition) {
     return savedPosition || { top: 0 }
