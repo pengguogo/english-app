@@ -57,10 +57,12 @@ const altText = computed(() => {
 
 const classes = computed(() => {
   return [
-    'mimi',
+    'mimi-outer',
     `mimi--${props.size}`,
     `mimi--${props.variant}`,
     `mimi--motion-${preset.value.motion}`,
+    `mimi--secondary-${preset.value.secondaryMotion}`,
+    `mimi--aura-${preset.value.auraMotion}`,
     { 'mimi--sticker': props.hasSticker }
   ]
 })
@@ -68,19 +70,22 @@ const classes = computed(() => {
 
 <template>
   <span class="mimi-wrap" :class="classes">
-    <img class="mimi-img" :src="src" :alt="altText" />
+    <span class="mimi-aura"></span>
+    <span class="mimi-inner">
+      <img class="mimi-img" :src="src" :alt="altText" />
+    </span>
   </span>
 </template>
 
 <style scoped>
 /* 容器：统一占位与可控的贴纸包装 */
 .mimi-wrap {
+  --mimi-bounce-distance: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   position: relative;
   flex-shrink: 0;
-  transform-origin: 50% 65%;
 }
 
 /* 图片：尽量保持清晰，不做裁切 */
@@ -97,6 +102,26 @@ const classes = computed(() => {
 .mimi--sm { width: 56px; height: 56px; }
 .mimi--md { width: 80px; height: 80px; }
 .mimi--lg { width: 160px; height: 160px; }
+
+.mimi-inner {
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transform-origin: 50% 65%;
+}
+
+.mimi-aura {
+  position: absolute;
+  inset: -10px;
+  border-radius: calc(var(--radius-md) + 18px);
+  background: radial-gradient(circle at 50% 50%, var(--mascot-glow) 0%, rgba(255, 255, 255, 0) 72%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
 
 /* 贴纸感：通过伪元素做“白边 + 柔光”，即使 jpg 也更像品牌角色 */
 .mimi--sticker::before {
@@ -121,13 +146,20 @@ const classes = computed(() => {
   z-index: 0;
 }
 
+.mimi-inner,
 .mimi-img { position: relative; z-index: 1; }
 
 /* 动效（遵循 prefers-reduced-motion） */
 @media (prefers-reduced-motion: no-preference) {
   .mimi--motion-float { animation: mimiFloat var(--duration-mascot-float) var(--ease-smooth) infinite; }
   .mimi--motion-breathe { animation: mimiBreathe var(--duration-mascot-breathe) var(--ease-smooth) infinite; }
-  .mimi--motion-celebrate { animation: mimiCelebrate var(--duration-mascot-celebrate) var(--ease-bounce) both; }
+  .mimi--motion-bounce { animation: mimiBounce 1080ms var(--ease-bounce) infinite; }
+
+  .mimi--secondary-sway .mimi-inner { animation: mimiSway 2600ms ease-in-out infinite; }
+  .mimi--secondary-nod .mimi-inner { animation: mimiNod 2200ms ease-in-out infinite; }
+  .mimi--secondary-wiggle .mimi-inner { animation: mimiWiggle 900ms ease-in-out infinite; }
+
+  .mimi--aura-pulse .mimi-aura { animation: mimiAuraPulse 1400ms ease-in-out infinite; }
 }
 
 @keyframes mimiFloat {
@@ -140,16 +172,39 @@ const classes = computed(() => {
   50% { transform: translateY(-3px) scale(1.03); }
 }
 
-@keyframes mimiCelebrate {
-  0% { transform: scale(0.75) rotate(-10deg); opacity: 0; }
-  55% { transform: scale(1.12) rotate(6deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0); opacity: 1; }
+@keyframes mimiBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(calc(var(--mimi-bounce-distance) * -1)) scale(1.02); }
+  65% { transform: translateY(0) scale(0.985); }
+}
+
+@keyframes mimiSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes mimiNod {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  30% { transform: rotate(-1deg) translateY(-1px); }
+  60% { transform: rotate(1deg) translateY(1px); }
+}
+
+@keyframes mimiWiggle {
+  0%, 100% { transform: rotate(-3deg) scale(1); }
+  25% { transform: rotate(3deg) scale(1.02); }
+  50% { transform: rotate(-1deg) scale(1); }
+  75% { transform: rotate(4deg) scale(1.03); }
+}
+
+@keyframes mimiAuraPulse {
+  0%, 100% { opacity: 0.2; transform: scale(0.96); }
+  50% { opacity: 0.55; transform: scale(1.08); }
 }
 
 /* 移动端：缩小 20%（项目规范） */
 @media (max-width: 480px) {
   .mimi--lg { width: 128px; height: 128px; }
   .mimi--md { width: 64px; height: 64px; }
+  .mimi-wrap { --mimi-bounce-distance: 7px; }
 }
 </style>
-

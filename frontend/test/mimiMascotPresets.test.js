@@ -2,19 +2,39 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { getMimiPreset } from '../src/utils/mimiMascotPresets.js'
 
-test('should_returnFloat_when_variantIsWelcome', () => {
-  assert.equal(getMimiPreset('welcome').motion, 'float')
+test('should_returnLivelyMotions_when_variantIsWelcome', () => {
+  const preset = getMimiPreset('welcome')
+  assert.equal(preset.motion, 'float')
+  assert.equal(preset.secondaryMotion, 'sway')
 })
 
-test('should_returnBreathe_when_variantIsCompanion', () => {
-  assert.equal(getMimiPreset('companion').motion, 'breathe')
+test('should_returnGentleMotions_when_variantIsCompanion', () => {
+  const preset = getMimiPreset('companion')
+  assert.equal(preset.motion, 'breathe')
+  assert.equal(preset.secondaryMotion, 'nod')
 })
 
-test('should_returnCelebrate_when_variantIsCelebrate', () => {
-  assert.equal(getMimiPreset('celebrate').motion, 'celebrate')
+test('should_returnMostCheerfulMotions_when_variantIsCelebrate', () => {
+  const preset = getMimiPreset('celebrate')
+  assert.equal(preset.motion, 'bounce')
+  assert.equal(preset.secondaryMotion, 'wiggle')
+  assert.equal(preset.auraMotion, 'pulse')
+})
+
+test('should_returnMinimalMotion_when_variantIsAvatar', () => {
+  const preset = getMimiPreset('avatar')
+  assert.equal(preset.motion, 'breathe')
+  assert.equal(preset.secondaryMotion, 'none')
+})
+
+test('should_returnLightFloat_when_variantIsEmpty', () => {
+  const preset = getMimiPreset('empty')
+  assert.equal(preset.motion, 'float')
+  assert.equal(preset.secondaryMotion, 'sway')
 })
 
 test('should_fallbackToBreathe_when_variantIsUnknown', () => {
-  assert.equal(getMimiPreset('unknown').motion, 'breathe')
+  const preset = getMimiPreset('unknown')
+  assert.equal(preset.motion, 'breathe')
+  assert.equal(preset.secondaryMotion, 'nod')
 })
-

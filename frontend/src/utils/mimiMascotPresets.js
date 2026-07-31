@@ -10,26 +10,48 @@
  */
 
 /**
- * @typedef {"none"|"float"|"breathe"|"celebrate"} MimiMotion
+ * @typedef {"none"|"float"|"breathe"|"bounce"} MimiMotion
+ */
+
+/**
+ * @typedef {"none"|"sway"|"nod"|"wiggle"} MimiSecondaryMotion
+ */
+
+/**
+ * @typedef {"none"|"pulse"} MimiAuraMotion
  */
 
 /**
  * 获取吉祥物场景动效预设。
  * @param {MimiVariant} variant 场景类型
- * @return {{ motion: MimiMotion }} 预设对象
+ * @return {{ motion: MimiMotion, secondaryMotion: MimiSecondaryMotion, auraMotion: MimiAuraMotion }} 预设对象
  */
 export function getMimiPreset(variant) {
   // Guard Clauses：未知 variant 回退 companion（更安全）
-  if (!variant) return { motion: 'breathe' }
+  if (!variant) {
+    return { motion: 'breathe', secondaryMotion: 'nod', auraMotion: 'none' }
+  }
 
-  if (variant === 'welcome') return { motion: 'float' }
-  if (variant === 'companion') return { motion: 'breathe' }
-  if (variant === 'celebrate') return { motion: 'celebrate' }
+  if (variant === 'welcome') {
+    return { motion: 'float', secondaryMotion: 'sway', auraMotion: 'none' }
+  }
+
+  if (variant === 'companion') {
+    return { motion: 'breathe', secondaryMotion: 'nod', auraMotion: 'none' }
+  }
+
+  if (variant === 'celebrate') {
+    return { motion: 'bounce', secondaryMotion: 'wiggle', auraMotion: 'pulse' }
+  }
 
   // avatar/empty 需要克制一些：仅轻微呼吸或漂浮，不做弹跳
-  if (variant === 'avatar') return { motion: 'breathe' }
-  if (variant === 'empty') return { motion: 'float' }
+  if (variant === 'avatar') {
+    return { motion: 'breathe', secondaryMotion: 'none', auraMotion: 'none' }
+  }
 
-  return { motion: 'breathe' }
+  if (variant === 'empty') {
+    return { motion: 'float', secondaryMotion: 'sway', auraMotion: 'none' }
+  }
+
+  return { motion: 'breathe', secondaryMotion: 'nod', auraMotion: 'none' }
 }
-
