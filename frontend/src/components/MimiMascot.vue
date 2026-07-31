@@ -63,6 +63,7 @@ const classes = computed(() => {
     `mimi--motion-${preset.value.motion}`,
     `mimi--secondary-${preset.value.secondaryMotion}`,
     `mimi--aura-${preset.value.auraMotion}`,
+    `mimi--style-${preset.value.motionStyle}`,
     { 'mimi--sticker': props.hasSticker }
   ]
 })
@@ -81,6 +82,17 @@ const classes = computed(() => {
 /* 容器：统一占位与可控的贴纸包装 */
 .mimi-wrap {
   --mimi-bounce-distance: 10px;
+  --mimi-bounce-duration: 1080ms;
+  --mimi-wiggle-duration: 900ms;
+  --mimi-wiggle-rotate-a: -3deg;
+  --mimi-wiggle-rotate-b: 3deg;
+  --mimi-wiggle-rotate-c: 4deg;
+  --mimi-wiggle-scale-a: 1.02;
+  --mimi-wiggle-scale-b: 1.03;
+  --mimi-aura-opacity-low: 0.2;
+  --mimi-aura-opacity-high: 0.55;
+  --mimi-aura-scale-low: 0.96;
+  --mimi-aura-scale-high: 1.08;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -153,13 +165,28 @@ const classes = computed(() => {
 @media (prefers-reduced-motion: no-preference) {
   .mimi--motion-float { animation: mimiFloat var(--duration-mascot-float) var(--ease-smooth) infinite; }
   .mimi--motion-breathe { animation: mimiBreathe var(--duration-mascot-breathe) var(--ease-smooth) infinite; }
-  .mimi--motion-bounce { animation: mimiBounce 1080ms var(--ease-bounce) infinite; }
+  .mimi--motion-bounce { animation: mimiBounce var(--mimi-bounce-duration) var(--ease-bounce) infinite; }
 
   .mimi--secondary-sway .mimi-inner { animation: mimiSway 2600ms ease-in-out infinite; }
   .mimi--secondary-nod .mimi-inner { animation: mimiNod 2200ms ease-in-out infinite; }
-  .mimi--secondary-wiggle .mimi-inner { animation: mimiWiggle 900ms ease-in-out infinite; }
+  .mimi--secondary-wiggle .mimi-inner { animation: mimiWiggle var(--mimi-wiggle-duration) ease-in-out infinite; }
 
   .mimi--aura-pulse .mimi-aura { animation: mimiAuraPulse 1400ms ease-in-out infinite; }
+}
+
+.mimi--style-celebrate-excited {
+  --mimi-bounce-distance: 14px;
+  --mimi-bounce-duration: 1180ms;
+  --mimi-wiggle-duration: 760ms;
+  --mimi-wiggle-rotate-a: -6deg;
+  --mimi-wiggle-rotate-b: 6deg;
+  --mimi-wiggle-rotate-c: 8deg;
+  --mimi-wiggle-scale-a: 1.04;
+  --mimi-wiggle-scale-b: 1.08;
+  --mimi-aura-opacity-low: 0.28;
+  --mimi-aura-opacity-high: 0.72;
+  --mimi-aura-scale-low: 0.98;
+  --mimi-aura-scale-high: 1.12;
 }
 
 @keyframes mimiFloat {
@@ -174,8 +201,11 @@ const classes = computed(() => {
 
 @keyframes mimiBounce {
   0%, 100% { transform: translateY(0) scale(1); }
-  35% { transform: translateY(calc(var(--mimi-bounce-distance) * -1)) scale(1.02); }
-  65% { transform: translateY(0) scale(0.985); }
+  18% { transform: translateY(calc(var(--mimi-bounce-distance) * -0.7)) scale(1.015); }
+  36% { transform: translateY(0) scale(0.985); }
+  56% { transform: translateY(calc(var(--mimi-bounce-distance) * -1)) scale(1.04); }
+  74% { transform: translateY(0) scale(0.97); }
+  86% { transform: translateY(calc(var(--mimi-bounce-distance) * -0.22)) scale(1.01); }
 }
 
 @keyframes mimiSway {
@@ -190,15 +220,16 @@ const classes = computed(() => {
 }
 
 @keyframes mimiWiggle {
-  0%, 100% { transform: rotate(-3deg) scale(1); }
-  25% { transform: rotate(3deg) scale(1.02); }
-  50% { transform: rotate(-1deg) scale(1); }
-  75% { transform: rotate(4deg) scale(1.03); }
+  0%, 100% { transform: rotate(var(--mimi-wiggle-rotate-a)) scale(1); }
+  20% { transform: rotate(var(--mimi-wiggle-rotate-b)) scale(var(--mimi-wiggle-scale-a)); }
+  42% { transform: rotate(calc(var(--mimi-wiggle-rotate-a) * 0.25)) scale(1); }
+  72% { transform: rotate(var(--mimi-wiggle-rotate-c)) scale(var(--mimi-wiggle-scale-b)); }
+  86% { transform: rotate(calc(var(--mimi-wiggle-rotate-b) * -0.35)) scale(1.01); }
 }
 
 @keyframes mimiAuraPulse {
-  0%, 100% { opacity: 0.2; transform: scale(0.96); }
-  50% { opacity: 0.55; transform: scale(1.08); }
+  0%, 100% { opacity: var(--mimi-aura-opacity-low); transform: scale(var(--mimi-aura-scale-low)); }
+  50% { opacity: var(--mimi-aura-opacity-high); transform: scale(var(--mimi-aura-scale-high)); }
 }
 
 /* 移动端：缩小 20%（项目规范） */

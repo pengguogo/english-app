@@ -19,6 +19,7 @@ test('should_returnMostCheerfulMotions_when_variantIsCelebrate', () => {
   assert.equal(preset.motion, 'bounce')
   assert.equal(preset.secondaryMotion, 'wiggle')
   assert.equal(preset.auraMotion, 'pulse')
+  assert.equal(preset.motionStyle, 'celebrate-excited')
 })
 
 test('should_returnMinimalMotion_when_variantIsAvatar', () => {
