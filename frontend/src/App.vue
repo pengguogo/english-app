@@ -15,9 +15,9 @@
 
 <style>
 .app-container {
-  max-width: 800px;
+  max-width: var(--content-max);
   margin: 0 auto;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-page);
   position: relative;
 }

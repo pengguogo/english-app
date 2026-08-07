@@ -32,10 +32,13 @@ const filter = ref('all')
 // 加载状态
 const isLoading = ref(true)
 const errorMsg = ref('')
+const actionError = ref('')
 
-onMounted(async () => {
+onMounted(loadPage)
+
+async function loadPage() {
   await Promise.all([loadStats(), loadWrongAnswers()])
-})
+}
 
 function goBack() {
   safeBack('/')
@@ -88,6 +91,7 @@ async function switchFilter(status) {
  * @param {Object} item 错题对象
  */
 async function handleResolve(item) {
+  actionError.value = ''
   try {
     await resolveWrongAnswer(item.id)
     // 从列表中移除
@@ -96,7 +100,7 @@ async function handleResolve(item) {
     await loadStats()
   } catch (e) {
     console.error('标记已掌握失败:', e)
-    alert('操作失败,请重试')
+    actionError.value = '标记失败，请稍后重试'
   }
 }
 
@@ -132,7 +136,7 @@ function parseQuestion(item) {
  */
 function getQuestionText(item) {
   const q = parseQuestion(item)
-  return q.question || q.sentence || q.word || '题目内容'
+  return q.question || q.sentence || q.word || q.text || '题目内容'
 }
 
 /**
@@ -170,38 +174,47 @@ function getTypeText(type) {
     <!-- 筛选标签栏 -->
     <div class="filter-bar">
       <button
+        type="button"
+        :aria-pressed="filter === 'all'"
         :class="['filter-pill', { active: filter === 'all' }]"
         @click="switchFilter('all')"
       >全部</button>
       <button
+        type="button"
+        :aria-pressed="filter === 'unresolved'"
         :class="['filter-pill', { active: filter === 'unresolved' }]"
         @click="switchFilter('unresolved')"
       >未掌握</button>
       <button
+        type="button"
+        :aria-pressed="filter === 'resolved'"
         :class="['filter-pill', { active: filter === 'resolved' }]"
         @click="switchFilter('resolved')"
       >已掌握</button>
     </div>
 
     <!-- 加载中 -->
-    <div v-if="isLoading" class="state-tip">
+    <div v-if="isLoading" class="state-tip" role="status" aria-live="polite">
       <div class="loading-dot"></div>
       <p>加载中...</p>
     </div>
 
     <!-- 加载失败 -->
-    <div v-else-if="errorMsg" class="state-tip error">
+    <div v-else-if="errorMsg" class="state-tip error" role="alert">
       <p>{{ errorMsg }}</p>
+      <AppButton variant="ghost" @click="loadPage">重新加载</AppButton>
     </div>
 
     <!-- 空状态 -->
     <div v-else-if="wrongAnswers.length === 0" class="empty-state">
       <MimiMascot variant="empty" size="lg" />
       <p class="empty-text">还没有错题哦,继续加油！</p>
+      <AppButton @click="router.push('/')">继续学习</AppButton>
     </div>
 
     <!-- 错题卡片列表 -->
     <div v-else class="card-list">
+      <p v-if="actionError" class="action-error" role="alert">{{ actionError }}</p>
       <div
         v-for="item in wrongAnswers"
         :key="item.id"
@@ -257,7 +270,7 @@ function getTypeText(type) {
 /* 页面容器 */
 .wrong-answers-view {
   padding: var(--space-4);
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ===== 统计卡片行 ===== */
@@ -299,6 +312,7 @@ function getTypeText(type) {
   font-size: var(--text-xl);
   font-weight: var(--font-bold);
   color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-warning .stat-num { color: var(--color-warning); }
@@ -319,6 +333,7 @@ function getTypeText(type) {
 }
 
 .filter-pill {
+  min-height: var(--touch-target);
   padding: var(--space-2) var(--space-4);
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
@@ -493,6 +508,16 @@ function getTypeText(type) {
 
 .state-tip.error {
   color: var(--color-warning);
+}
+
+.state-tip p + .app-btn {
+  margin-top: var(--space-3);
+}
+
+.action-error {
+  color: var(--color-warning);
+  font-size: var(--text-sm);
+  text-align: center;
 }
 
 .loading-dot {

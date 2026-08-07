@@ -13,6 +13,7 @@ import { getUnitProgress } from '../api/progress'
 import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
 import StarBar from '../components/StarBar.vue'
+import AppButton from '../components/AppButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,8 +28,12 @@ const themeName = String(route.query.themeName || '')
 const subjectId = Number(route.query.subjectId || 0)
 const subjectName = String(route.query.subjectName || '')
 
-onMounted(async () => {
+onMounted(loadLessons)
+
+async function loadLessons() {
   const unitId = route.params.unitId
+  isLoading.value = true
+  errorMsg.value = ''
   try {
     // 并行请求课时列表与单元进度,提升首屏加载速度
     // 进度接口失败时降级为 null,课时列表仍可正常展示
@@ -46,7 +51,7 @@ onMounted(async () => {
   } finally {
     isLoading.value = false
   }
-})
+}
 
 /**
  * 根据课时类型返回标签配置(文字 + 颜色)。
@@ -140,21 +145,28 @@ function openLesson(lesson) {
     <BackBar title="课时列表" @back="goBack" />
 
     <!-- 加载中 -->
-    <div v-if="isLoading" class="state-tip">
+    <div v-if="isLoading" class="state-tip" role="status" aria-live="polite">
       <div class="loading-dot"></div>
       <p>加载中...</p>
     </div>
 
     <!-- 加载失败 -->
-    <div v-else-if="errorMsg" class="state-tip error">
+    <div v-else-if="errorMsg" class="state-tip error" role="alert">
       <p>{{ errorMsg }}</p>
+      <AppButton variant="ghost" @click="loadLessons">重新加载</AppButton>
+    </div>
+
+    <div v-else-if="lessons.length === 0" class="state-tip">
+      <p>这个单元还没有课时</p>
+      <AppButton variant="ghost" @click="goBack">返回主题</AppButton>
     </div>
 
     <!-- 课时列表 -->
     <div v-else class="lesson-list">
-      <div
+      <button
         v-for="(lesson, index) in lessons"
         :key="lesson.id"
+        type="button"
         class="lesson-card"
         :class="{
           current: isCurrent(lesson),
@@ -188,7 +200,7 @@ function openLesson(lesson) {
           <!-- 当前可学: 播放图标 -->
           <span v-else class="play-icon">▶</span>
         </div>
-      </div>
+      </button>
     </div>
   </div>
 </template>
@@ -209,6 +221,8 @@ function openLesson(lesson) {
 
 /* 课时卡片: 学习卡片风格 */
 .lesson-card {
+  width: 100%;
+  text-align: left;
   display: flex;
   align-items: center;
   gap: var(--space-4);
@@ -224,6 +238,10 @@ function openLesson(lesson) {
 .lesson-card:hover {
   transform: translateX(4px);
   box-shadow: var(--shadow-hover);
+}
+
+.lesson-card:active {
+  transform: scale(0.99);
 }
 
 /* 已完成课时: 成功色左边框,给予成就感 */
@@ -361,6 +379,10 @@ function openLesson(lesson) {
 
 .state-tip.error {
   color: var(--color-warning);
+}
+
+.state-tip p + .app-btn {
+  margin-top: var(--space-3);
 }
 
 .loading-dot {

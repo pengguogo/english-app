@@ -23,6 +23,7 @@ import { useSafeBack } from '../composables/useSafeBack'
 import { stopActiveTts } from '../composables/useTts'
 import StarBar from '../components/StarBar.vue'
 import BackBar from '../components/BackBar.vue'
+import AppButton from '../components/AppButton.vue'
 import WordLesson from '../components/lesson-templates/WordLesson.vue'
 import SentenceLesson from '../components/lesson-templates/SentenceLesson.vue'
 import LessonComplete from '../components/lesson-templates/LessonComplete.vue'
@@ -50,6 +51,7 @@ const isScoring = ref(false)
 const isComplete = ref(false)
 const isSubmitting = ref(false)
 const isProgressSaved = ref(false)
+const saveError = ref('')
 let lessonLoadVersion = 0
 
 // 记录每个学习项的历史最佳分
@@ -57,6 +59,8 @@ const bestScores = ref([])
 
 // QUIZ/CALCULATE 答题记录：每题是否答对
 const answerResults = ref([])
+// WORD/SENTENCE/DIALOGUE 每项是否至少听过或跟读过
+const engagedItems = ref([])
 
 // ===== 计算属性 =====
 
@@ -75,7 +79,7 @@ const currentItem = computed(() => {
  */
 const currentText = computed(() => {
   if (!currentItem.value) return ''
-  return currentItem.value.word || currentItem.value.sentence || ''
+  return currentItem.value.word || currentItem.value.sentence || currentItem.value.text || ''
 })
 
 /**
@@ -90,6 +94,7 @@ const totalItems = computed(() => {
  * 是否为最后一个学习项。
  */
 const isLastItem = computed(() => currentIndex.value >= totalItems.value - 1)
+const currentItemEngaged = computed(() => engagedItems.value[currentIndex.value] === true)
 
 /**
  * 整个课时累计最佳分数（各 item 历史最佳成绩的平均值）。
@@ -230,6 +235,7 @@ async function loadLesson() {
   currentIndex.value = 0
   isComplete.value = false
   isProgressSaved.value = false
+  saveError.value = ''
   resetCurrentScoreState()
   try {
     const data = await getLessonById(route.params.lessonId)
@@ -241,6 +247,7 @@ async function loadLesson() {
     }
     lesson.value = data
     bestScores.value = new Array(totalItems.value).fill(0)
+    engagedItems.value = new Array(totalItems.value).fill(false)
   } catch (e) {
     if (version !== lessonLoadVersion) return
     errorMsg.value = '加载课时失败,请返回重试'
@@ -258,6 +265,7 @@ async function loadLesson() {
  */
 async function handleRecorded(wavBlob) {
   if (!currentItem.value || !currentText.value) return
+  markCurrentItemEngaged()
   isScoring.value = true
   scoreMessage.value = '评分中...'
   currentScore.value = null
@@ -291,18 +299,33 @@ function updateBestScore(index, score) {
  * 答错时静默上报错题到后端,失败不影响学习流程。
  * @param {Object} payload 答题结果 { correct, userAnswer, correctAnswer }
  */
-function handleAnswered({ correct, userAnswer, correctAnswer }) {
+function handleAnswered({ correct, userAnswer, correctAnswer, score, assisted, firstWrong = !correct }) {
   answerResults.value[currentIndex.value] = correct
-  // 答对=100分，答错=0分，复用 bestScores 机制
-  updateBestScore(currentIndex.value, correct ? 100 : 0)
+  const resultScore = typeof score === 'number' ? score : (correct ? 100 : 0)
+  updateBestScore(currentIndex.value, resultScore)
   // 更新当前显示分数
-  currentScore.value = correct ? 100 : 0
-  currentStars.value = scoreToStars(correct ? 100 : 0)
-  scoreMessage.value = correct ? '回答正确！' : '答错了，再接再厉！'
+  currentScore.value = resultScore
+  currentStars.value = scoreToStars(resultScore)
+  scoreMessage.value = correct
+    ? (assisted ? '提示后答对了，再复习一次会更牢！' : '回答正确！')
+    : '先听提示，再试一次！'
   // 答错时静默上报错题,便于错题集展示与复习
-  if (!correct) {
+  if (firstWrong) {
     recordWrongAnswerSilently({ userAnswer, correctAnswer })
   }
+}
+
+function markCurrentItemEngaged() {
+  engagedItems.value[currentIndex.value] = true
+}
+
+function skipCurrentItem() {
+  engagedItems.value[currentIndex.value] = true
+  recordWrongAnswerSilently({
+    userAnswer: '稍后复习',
+    correctAnswer: currentText.value || currentItem.value?.text || '完成学习'
+  })
+  nextItem()
 }
 
 /**
@@ -440,6 +463,7 @@ function buildThemeFallback() {
 async function finishLesson() {
   if (isSubmitting.value) return
   isSubmitting.value = true
+  saveError.value = ''
   try {
     if (!isProgressSaved.value) {
       await completeLesson(
@@ -459,7 +483,7 @@ async function finishLesson() {
     router.replace(destination)
   } catch (e) {
     console.error('保存进度失败:', e)
-    alert('保存失败,请重试')
+    saveError.value = '保存失败，请检查网络后重试'
   } finally {
     isSubmitting.value = false
   }
@@ -476,12 +500,15 @@ async function finishLesson() {
     </BackBar>
 
     <!-- 加载中 -->
-    <div v-if="isLoading" class="state-tip">
+    <div v-if="isLoading" class="state-tip" role="status" aria-live="polite">
       <div class="loading-dot"></div>
       <p>加载中...</p>
     </div>
     <!-- 加载失败 -->
-    <div v-else-if="errorMsg" class="state-tip error">{{ errorMsg }}</div>
+    <div v-else-if="errorMsg" class="state-tip error" role="alert">
+      <p>{{ errorMsg }}</p>
+      <AppButton variant="ghost" @click="loadLesson">重新加载</AppButton>
+    </div>
 
     <!-- 学习内容区 -->
     <template v-else>
@@ -492,6 +519,7 @@ async function finishLesson() {
         :total-stars="totalStars"
         :total-score="totalBestScore"
         :is-submitting="isSubmitting"
+        :save-error="saveError"
         @finish="finishLesson"
       />
 
@@ -508,9 +536,12 @@ async function finishLesson() {
         :score-message="scoreMessage"
         :is-scoring="isScoring"
         :is-last-item="isLastItem"
+        :item-engaged="currentItemEngaged"
         v-bind="lessonTemplateProps"
         @recorded="handleRecorded"
         @answered="handleAnswered"
+        @listened="markCurrentItemEngaged"
+        @skip="skipCurrentItem"
         @next="nextItem"
         @prev="prevItem"
         @continuous-finished="advanceContinuousPlayback"
@@ -528,7 +559,7 @@ async function finishLesson() {
 
 <style scoped>
 .lesson-view {
-  min-height: 100vh;
+  min-height: 100dvh;
   padding: var(--space-4);
   background: var(--gradient-warm);
   box-sizing: border-box;
@@ -541,6 +572,10 @@ async function finishLesson() {
   color: var(--text-tertiary);
 }
 .state-tip.error { color: var(--color-warning); }
+
+.state-tip p + .app-btn {
+  margin-top: var(--space-3);
+}
 
 .type-hint {
   font-size: var(--text-sm);

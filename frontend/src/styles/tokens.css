@@ -39,6 +39,7 @@
   --text-primary: #333333;
   --text-secondary: #666666;
   --text-tertiary: #999999;
+  --text-disabled: #767676;
 
   /* ===== 背景层 ===== */
   --bg-page: #FFF8F0;
@@ -52,6 +53,7 @@
   /* ===== 边框 ===== */
   --border-light: #E8E8EC;
   --border-muted: #F0F0F2;
+  --focus-ring: rgba(107, 124, 255, 0.32);
 
   /* ===== 圆角令牌 ===== */
   --radius-sm: 8px;
@@ -73,6 +75,8 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
 
   /* ===== 字号令牌 ===== */
   --text-xs: 12px;
@@ -128,4 +132,9 @@
   --subject-math: #26A69A;
   /* 课外: 紫罗兰 */
   --subject-extracurricular: #7E57C2;
+
+  /* ===== 交互尺寸 ===== */
+  --touch-target: 44px;
+  --content-max: 960px;
+  --nav-height: 60px;
 }

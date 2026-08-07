@@ -19,6 +19,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body,
+#app {
+  min-height: 100dvh;
+}
+
 button {
   font-family: inherit;
   cursor: pointer;
@@ -26,10 +36,40 @@ button {
   background: none;
 }
 
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
 /* 全局链接与交互基础 */
 a {
   color: var(--color-primary);
   text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* 全局滚动条美化(儿童友好圆角) */

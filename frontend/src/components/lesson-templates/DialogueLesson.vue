@@ -42,7 +42,8 @@ const props = defineProps({
   /** 是否正在评分 */
   isScoring: { type: Boolean, default: false },
   /** 是否最后一项 */
-  isLastItem: { type: Boolean, default: false }
+  isLastItem: { type: Boolean, default: false },
+  itemEngaged: { type: Boolean, default: false }
 })
 
 /**
@@ -57,7 +58,9 @@ const emit = defineEmits({
   /** 切换下一句 */
   next: null,
   /** 切换上一句 */
-  prev: null
+  prev: null,
+  skip: null,
+  listened: null
 })
 
 /**
@@ -126,7 +129,7 @@ const progressPercent = computed(() => {
 
     <!-- 操作区: 听发音 + 跟读录音 -->
     <div class="actions">
-      <AudioButton :text="currentText" :translation="currentItem?.translation || ''" />
+      <AudioButton :text="currentText" :translation="currentItem?.translation || ''" @played="emit('listened')" />
       <RecordButton @recorded="(blob) => emit('recorded', blob)" />
     </div>
 
@@ -153,12 +156,19 @@ const progressPercent = computed(() => {
       >← 上一句</AppButton>
       <span v-else class="action-placeholder"></span>
       <AppButton
+        v-if="!itemEngaged"
+        variant="ghost"
+        size="md"
+        @click="emit('skip')"
+      >稍后复习</AppButton>
+      <AppButton
         variant="primary"
         size="md"
         class="action-next"
+        :disabled="!itemEngaged"
         @click="emit('next')"
       >
-        {{ isLastItem ? '完成本课' : '下一句 →' }}
+        {{ !itemEngaged ? '先听或跟读' : (isLastItem ? '完成本课' : '下一句 →') }}
       </AppButton>
     </div>
   </div>

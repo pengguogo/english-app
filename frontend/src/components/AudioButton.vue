@@ -22,6 +22,11 @@ const props = defineProps({
   lan: { type: String, default: 'en' }
 })
 
+const emit = defineEmits({
+  /** 完整播放结束后通知课时记录该学习项已听过 */
+  played: null
+})
+
 /* 复用 TTS 组合式函数,获取播放状态与播放方法 */
 const { isPlaying, playAndWait, stop } = useTts()
 let playbackSequence = 0
@@ -59,6 +64,7 @@ async function handlePlay() {
       if (sequence !== playbackSequence) return
       await playAndWait(props.text, 'en')
     }
+    if (sequence === playbackSequence) emit('played')
   } catch (e) {
     console.error('TTS 播放失败:', e)
     alert('发音加载失败,请重试')

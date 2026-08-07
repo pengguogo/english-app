@@ -21,29 +21,34 @@ const emit = defineEmits(['back'])
 </script>
 
 <template>
-  <div class="back-bar">
-    <button class="back-btn" @click="emit('back')">
+  <header class="back-bar">
+    <button class="back-btn" type="button" aria-label="返回上一页" @click="emit('back')">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5"
               stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <span>返回</span>
     </button>
-    <h2 v-if="title" class="bar-title">{{ title }}</h2>
+    <h1 v-if="title" class="bar-title">{{ title }}</h1>
     <div class="bar-right">
       <slot name="right" />
     </div>
-  </div>
+  </header>
 </template>
 
 <style scoped>
 /* 返回栏: 左右分布,垂直居中 */
 .back-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(88px, 1fr) minmax(0, 2fr) minmax(88px, 1fr);
   align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3) 0;
+  min-height: var(--nav-height);
+  padding: max(var(--space-2), env(safe-area-inset-top)) 0 var(--space-2);
   margin-bottom: var(--space-4);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-page);
 }
 
 /* 返回按钮: 透明底 + 主色文字 + 箭头图标 */
@@ -55,6 +60,7 @@ const emit = defineEmits(['back'])
   font-size: var(--text-base);
   font-weight: var(--font-medium);
   padding: var(--space-1) var(--space-2);
+  min-height: var(--touch-target);
   border-radius: var(--radius-sm);
   transition: background var(--duration-fast) var(--ease-smooth);
 }
@@ -67,11 +73,16 @@ const emit = defineEmits(['back'])
   font-size: var(--text-base);
   font-weight: var(--font-medium);
   color: var(--text-primary);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 右侧插槽区域 */
 .bar-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
 }
 </style>

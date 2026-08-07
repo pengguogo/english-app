@@ -13,6 +13,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getSubjects } from '../api/subject'
 import MimiMascot from '../components/MimiMascot.vue'
+import AppButton from '../components/AppButton.vue'
 
 const router = useRouter()
 const subjects = ref([])
@@ -35,7 +36,11 @@ const subjectEmojis = {
   'EXTRACURRICULAR': '🚂'
 }
 
-onMounted(async () => {
+onMounted(loadSubjects)
+
+async function loadSubjects() {
+  isLoading.value = true
+  errorMsg.value = ''
   try {
     subjects.value = await getSubjects()
   } catch (e) {
@@ -44,7 +49,7 @@ onMounted(async () => {
   } finally {
     isLoading.value = false
   }
-})
+}
 
 /**
  * 获取学科卡片的主题色
@@ -86,7 +91,8 @@ function getSubjectIcon(code) {
       <h2 class="section-title">快捷功能</h2>
       <div class="quick-grid">
         <!-- 错题集入口 -->
-        <div
+        <button
+          type="button"
           class="quick-card"
           :style="{ '--card-accent': 'var(--color-warning)' }"
           @click="router.push('/wrong-answers')"
@@ -99,9 +105,10 @@ function getSubjectIcon(code) {
               <p class="quick-sub">复习错题</p>
             </div>
           </div>
-        </div>
+        </button>
         <!-- 我学过的入口 -->
-        <div
+        <button
+          type="button"
           class="quick-card"
           :style="{ '--card-accent': 'var(--color-primary)' }"
           @click="router.push('/learned')"
@@ -114,7 +121,7 @@ function getSubjectIcon(code) {
               <p class="quick-sub">学习记录</p>
             </div>
           </div>
-        </div>
+        </button>
       </div>
     </section>
 
@@ -123,21 +130,23 @@ function getSubjectIcon(code) {
       <h2 class="section-title">选择学科</h2>
 
       <!-- 加载中 -->
-      <div v-if="isLoading" class="state-tip">
+      <div v-if="isLoading" class="state-tip" role="status" aria-live="polite">
         <div class="loading-dot"></div>
         <p>加载中...</p>
       </div>
 
       <!-- 加载失败 -->
-      <div v-else-if="errorMsg" class="state-tip error">
+      <div v-else-if="errorMsg" class="state-tip error" role="alert">
         <p>{{ errorMsg }}</p>
+        <AppButton variant="ghost" @click="loadSubjects">重新加载</AppButton>
       </div>
 
       <!-- 学科卡片网格 -->
       <div v-else class="subject-grid">
-        <div
+        <button
           v-for="subject in subjects"
           :key="subject.id"
+          type="button"
           class="subject-card"
           :style="{ '--card-accent': getSubjectColor(subject.code) }"
           @click="router.push(`/subject/${subject.id}`)"
@@ -147,7 +156,7 @@ function getSubjectIcon(code) {
           </div>
           <h3 class="card-title">{{ subject.name }}</h3>
           <p class="card-desc">点击进入 →</p>
-        </div>
+        </button>
       </div>
     </section>
   </div>
@@ -234,6 +243,8 @@ function getSubjectIcon(code) {
 
 /* 快捷卡片:白底圆角 + 左侧彩色竖条 */
 .quick-card {
+  width: 100%;
+  text-align: left;
   position: relative;
   background: var(--bg-card);
   border-radius: var(--radius-lg);
@@ -251,6 +262,11 @@ function getSubjectIcon(code) {
 .quick-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
+}
+
+.quick-card:active,
+.subject-card:active {
+  transform: scale(0.98);
 }
 
 /* 左侧彩色竖条 */
@@ -302,6 +318,7 @@ function getSubjectIcon(code) {
 
 /* 学科卡片 */
 .subject-card {
+  width: 100%;
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
@@ -353,6 +370,10 @@ function getSubjectIcon(code) {
 
 .state-tip.error {
   color: var(--color-warning);
+}
+
+.state-tip.error p {
+  margin-bottom: var(--space-3);
 }
 
 .loading-dot {

@@ -15,6 +15,7 @@ import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
 import StarBar from '../components/StarBar.vue'
 import MimiMascot from '../components/MimiMascot.vue'
+import AppButton from '../components/AppButton.vue'
 
 const router = useRouter()
 const { safeBack } = useSafeBack()
@@ -26,9 +27,11 @@ const stats = ref({ learnedCount: 0, totalStars: 0, averageScore: 0, subjectDist
 const isLoading = ref(true)
 const errorMsg = ref('')
 
-onMounted(async () => {
+onMounted(loadPage)
+
+async function loadPage() {
   await Promise.all([loadStats(), loadLearnedLessons()])
-})
+}
 
 function goBack() {
   safeBack('/')
@@ -168,29 +171,32 @@ const subjectDistribution = computed(() => {
     </section>
 
     <!-- 加载中 -->
-    <div v-if="isLoading" class="state-tip">
+    <div v-if="isLoading" class="state-tip" role="status" aria-live="polite">
       <div class="loading-dot"></div>
       <p>加载中...</p>
     </div>
 
     <!-- 加载失败 -->
-    <div v-else-if="errorMsg" class="state-tip error">
+    <div v-else-if="errorMsg" class="state-tip error" role="alert">
       <p>{{ errorMsg }}</p>
+      <AppButton variant="ghost" @click="loadPage">重新加载</AppButton>
     </div>
 
     <!-- 空状态 -->
     <div v-else-if="learnedLessons.length === 0" class="empty-state">
       <MimiMascot variant="empty" size="lg" />
       <p class="empty-text">快去学习第一课吧！</p>
+      <AppButton @click="router.push('/')">选择课程</AppButton>
     </div>
 
     <!-- 已学课时列表 -->
     <section v-else class="lesson-section">
       <h2 class="section-title">已学课时</h2>
       <div class="lesson-list">
-        <div
+        <button
           v-for="lesson in learnedLessons"
           :key="lesson.lessonId"
+          type="button"
           class="lesson-card"
           @click="reviewLesson(lesson)"
         >
@@ -215,7 +221,7 @@ const subjectDistribution = computed(() => {
               {{ formatTime(lesson.completedAt) }}
             </span>
           </div>
-        </div>
+        </button>
       </div>
     </section>
   </div>
@@ -225,7 +231,7 @@ const subjectDistribution = computed(() => {
 /* 页面容器 */
 .learned-view {
   padding: var(--space-4);
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ===== 统计卡片行 ===== */
@@ -267,6 +273,7 @@ const subjectDistribution = computed(() => {
   font-size: var(--text-xl);
   font-weight: var(--font-bold);
   color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-primary .stat-num { color: var(--color-primary); }
@@ -347,6 +354,8 @@ const subjectDistribution = computed(() => {
 }
 
 .lesson-card {
+  width: 100%;
+  text-align: left;
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
@@ -359,6 +368,10 @@ const subjectDistribution = computed(() => {
 .lesson-card:hover {
   transform: translateX(4px);
   box-shadow: var(--shadow-hover);
+}
+
+.lesson-card:active {
+  transform: scale(0.99);
 }
 
 .card-header {
@@ -442,6 +455,10 @@ const subjectDistribution = computed(() => {
 
 .state-tip.error {
   color: var(--color-warning);
+}
+
+.state-tip p + .app-btn {
+  margin-top: var(--space-3);
 }
 
 .loading-dot {

@@ -15,6 +15,7 @@ import { getThemesBySubject } from '../api/subject'
 import { getThemeConfig } from '../config/themeConfig'
 import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
+import AppButton from '../components/AppButton.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -43,7 +44,11 @@ const subjectId = Number(route.params.subjectId)
 const subjectColor = subjectColors[subjectId] || 'var(--color-primary)'
 const subjectName = subjectNames[subjectId] || '学习'
 
-onMounted(async () => {
+onMounted(loadThemes)
+
+async function loadThemes() {
+  isLoading.value = true
+  errorMsg.value = ''
   try {
     themes.value = await getThemesBySubject(subjectId)
   } catch (e) {
@@ -52,7 +57,7 @@ onMounted(async () => {
   } finally {
     isLoading.value = false
   }
-})
+}
 
 /**
  * 根据主题 ID 返回对应的 emoji 图标。
@@ -86,14 +91,15 @@ function openTheme(theme) {
     <!-- 主题选择区 -->
     <section class="theme-section">
       <!-- 加载中 -->
-      <div v-if="isLoading" class="state-tip">
+      <div v-if="isLoading" class="state-tip" role="status" aria-live="polite">
         <div class="loading-dot"></div>
         <p>加载中...</p>
       </div>
 
       <!-- 加载失败 -->
-      <div v-else-if="errorMsg" class="state-tip error">
+      <div v-else-if="errorMsg" class="state-tip error" role="alert">
         <p>{{ errorMsg }}</p>
+        <AppButton variant="ghost" @click="loadThemes">重新加载</AppButton>
       </div>
 
       <!-- 空列表 -->
@@ -103,9 +109,10 @@ function openTheme(theme) {
 
       <!-- 主题卡片网格 -->
       <div v-else class="theme-grid">
-        <div
+        <button
           v-for="theme in themes"
           :key="theme.id"
+          type="button"
           class="theme-card"
           :style="{ '--card-accent': subjectColor }"
           @click="openTheme(theme)"
@@ -113,7 +120,7 @@ function openTheme(theme) {
           <div class="card-icon">{{ getThemeIcon(theme) }}</div>
           <h3 class="card-title">{{ theme.name }}</h3>
           <p class="card-desc">点击进入</p>
-        </div>
+        </button>
       </div>
     </section>
   </div>
@@ -139,6 +146,7 @@ function openTheme(theme) {
 
 /* 主题卡片 */
 .theme-card {
+  width: 100%;
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
@@ -153,6 +161,10 @@ function openTheme(theme) {
 .theme-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
+}
+
+.theme-card:active {
+  transform: scale(0.98);
 }
 
 .card-icon {
@@ -181,6 +193,10 @@ function openTheme(theme) {
 
 .state-tip.error {
   color: var(--color-warning);
+}
+
+.state-tip.error p {
+  margin-bottom: var(--space-3);
 }
 
 .loading-dot {

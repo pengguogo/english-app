@@ -14,6 +14,7 @@ import StarBar from '../StarBar.vue'
 import AudioButton from '../AudioButton.vue'
 import AppButton from '../AppButton.vue'
 import MimiMascot from '../MimiMascot.vue'
+import { evaluateAnswerAttempt } from '../../utils/answerAttempts'
 
 /**
  * 组件 Props
@@ -69,6 +70,8 @@ const mode = ref('learn')
 const selectedIndex = ref(null)
 // 是否已答题（选中后锁定选项）
 const hasAnswered = ref(false)
+const attemptCount = ref(0)
+const feedbackStatus = ref('')
 
 /**
  * 当前字母（如 "Ff"）。
@@ -158,6 +161,8 @@ function enterPractice() {
   mode.value = 'practice'
   selectedIndex.value = null
   hasAnswered.value = false
+  attemptCount.value = 0
+  feedbackStatus.value = ''
 }
 
 /**
@@ -174,10 +179,22 @@ function backToLearn() {
 function selectOption(index) {
   if (hasAnswered.value) return
   selectedIndex.value = index
-  hasAnswered.value = true
+  attemptCount.value++
   const userAnswer = practiceOptions.value[index] ?? ''
   const correctAnswer = currentLetter.value
-  emit('answered', { correct: userAnswer === correctAnswer, userAnswer, correctAnswer })
+  const correct = userAnswer === correctAnswer
+  const result = evaluateAnswerAttempt(attemptCount.value, correct)
+  hasAnswered.value = result.complete
+  feedbackStatus.value = result.status
+  emit('answered', {
+    correct,
+    userAnswer,
+    correctAnswer,
+    score: result.score,
+    assisted: result.assisted,
+    firstWrong: attemptCount.value === 1 && !correct
+  })
+  if (!result.complete) selectedIndex.value = null
 }
 
 /**
@@ -202,6 +219,8 @@ watch(() => props.currentIndex, () => {
   mode.value = 'learn'
   selectedIndex.value = null
   hasAnswered.value = false
+  attemptCount.value = 0
+  feedbackStatus.value = ''
 })
 </script>
 
@@ -289,9 +308,12 @@ watch(() => props.currentIndex, () => {
       </div>
 
       <!-- 答题反馈文字 -->
-      <div v-if="hasAnswered" class="feedback-area" aria-live="polite">
+      <div v-if="feedbackStatus" class="feedback-area" aria-live="polite">
         <p :class="['feedback-text', isCorrect ? 'feedback-correct' : 'feedback-wrong']">
-          {{ isCorrect ? '回答正确！太棒了！' : '答错了，正确答案是 ' + currentLetter }}
+          <template v-if="feedbackStatus === 'retry'">再听一遍发音，换一个字母试试。</template>
+          <template v-else-if="feedbackStatus === 'correct'">回答正确！太棒了！</template>
+          <template v-else-if="feedbackStatus === 'assisted-correct'">提示后答对了！</template>
+          <template v-else>正确答案是 {{ currentLetter }}，稍后再复习。</template>
         </p>
       </div>
     </div>
@@ -339,9 +361,10 @@ watch(() => props.currentIndex, () => {
         variant="primary"
         size="md"
         class="action-next"
+        :disabled="!hasAnswered"
         @click="emit('next')"
       >
-        {{ isLastItem ? '完成本课' : '下一步 →' }}
+        {{ !hasAnswered ? '先完成练习' : (isLastItem ? '完成本课' : '下一步 →') }}
       </AppButton>
     </div>
   </div>

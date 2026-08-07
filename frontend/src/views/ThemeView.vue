@@ -16,6 +16,7 @@ import { getUnitImage } from '../config/unitImages'
 import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
 import StarBar from '../components/StarBar.vue'
+import AppButton from '../components/AppButton.vue'
 // 汪汪队角色图片(仅主题 3 使用)
 import pawPatrolHero from '../assets/paw-patrol/rescue-team-hero.jpg'
 import ryderImg from '../assets/paw-patrol/ryder.jpg'
@@ -51,8 +52,12 @@ const themeName = computed(() => String(route.query.themeName || ''))
 // 当前主题视觉配置:按路由 themeId 动态读取,避免硬编码某一主题内容
 const themeVisual = computed(() => getThemeConfig(themeId.value, themeName.value))
 
-onMounted(async () => {
+onMounted(loadUnits)
+
+async function loadUnits() {
   const themeId = route.params.themeId
+  isLoading.value = true
+  errorMsg.value = ''
   try {
     const unitList = await getUnitsByTheme(themeId)
     units.value = await Promise.all(unitList.map(async (unit) => {
@@ -75,7 +80,7 @@ onMounted(async () => {
   } finally {
     isLoading.value = false
   }
-})
+}
 
 /**
  * 根据单元索引返回对应的场景配置(emoji + 主色调)。
@@ -171,14 +176,20 @@ function getTypeText(type) {
     </section>
 
     <!-- 加载中 -->
-    <div v-if="isLoading" class="state-tip">
+    <div v-if="isLoading" class="state-tip" role="status" aria-live="polite">
       <div class="loading-dot"></div>
       <p>加载中...</p>
     </div>
 
     <!-- 加载失败 -->
-    <div v-else-if="errorMsg" class="state-tip error">
+    <div v-else-if="errorMsg" class="state-tip error" role="alert">
       <p>{{ errorMsg }}</p>
+      <AppButton variant="ghost" @click="loadUnits">重新加载</AppButton>
+    </div>
+
+    <div v-else-if="units.length === 0" class="state-tip">
+      <p>这个主题还没有学习内容</p>
+      <AppButton variant="ghost" @click="goBack">选择其他主题</AppButton>
     </div>
 
     <template v-else>
@@ -608,6 +619,10 @@ function getTypeText(type) {
 
 .state-tip.error {
   color: var(--color-warning);
+}
+
+.state-tip p + .app-btn {
+  margin-top: var(--space-3);
 }
 
 .loading-dot {

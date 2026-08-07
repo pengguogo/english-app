@@ -22,6 +22,7 @@ const props = defineProps({
 
 <template>
   <button
+    type="button"
     class="app-btn"
     :class="[`variant-${variant}`, `size-${size}`, { block, disabled }]"
     :disabled="disabled"
@@ -44,6 +45,7 @@ const props = defineProps({
               background var(--duration-fast) var(--ease-smooth);
   white-space: nowrap;
   user-select: none;
+  min-height: var(--touch-target);
 }
 
 /* 尺寸: 中号(md)与大号(lg) */
@@ -110,7 +112,7 @@ const props = defineProps({
 /* 禁用态 */
 .app-btn:disabled,
 .app-btn.disabled {
-  background: var(--text-tertiary) !important;
+  background: var(--text-disabled) !important;
   color: white !important;
   box-shadow: none !important;
   cursor: not-allowed;

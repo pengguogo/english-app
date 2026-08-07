@@ -40,6 +40,11 @@ const props = defineProps({
   isSubmitting: {
     type: Boolean,
     default: false
+  },
+  /** 保存失败时展示在完成操作旁的错误信息 */
+  saveError: {
+    type: String,
+    default: ''
   }
 })
 
@@ -64,6 +69,8 @@ const emit = defineEmits({
     <StarBar :stars="totalStars" size="lg" />
 
     <p class="total-score">平均得分:{{ totalScore }} 分</p>
+
+    <p v-if="saveError" class="save-error" role="alert">{{ saveError }}</p>
 
     <AppButton
       variant="success"
@@ -104,6 +111,11 @@ const emit = defineEmits({
 
 .total-score {
   color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
+.save-error {
+  color: var(--color-warning);
   font-size: var(--text-sm);
 }
 

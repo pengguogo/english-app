@@ -13,6 +13,7 @@ import { ref, computed, watch } from 'vue'
 import AppButton from '../AppButton.vue'
 import { useTts } from '../../composables/useTts'
 import MimiMascot from '../MimiMascot.vue'
+import { evaluateAnswerAttempt } from '../../utils/answerAttempts'
 
 /**
  * 组件 Props
@@ -51,6 +52,8 @@ const emit = defineEmits({
 const userInput = ref('')
 // 是否已提交（锁定输入）
 const hasAnswered = ref(false)
+const attemptCount = ref(0)
+const feedbackStatus = ref('')
 
 // TTS 组合式函数,用于播放题目语音
 const { isPlaying: isQuestionPlaying, play: playQuestion } = useTts()
@@ -98,6 +101,8 @@ const isCorrect = computed(() => {
 watch(() => props.currentIndex, () => {
   userInput.value = ''
   hasAnswered.value = false
+  attemptCount.value = 0
+  feedbackStatus.value = ''
 })
 
 /**
@@ -145,12 +150,23 @@ function clearInput() {
  */
 function submitAnswer() {
   if (hasAnswered.value || userInput.value === '') return
-  hasAnswered.value = true
+  attemptCount.value++
   const correct = userInput.value === String(props.currentItem?.answer)
+  const result = evaluateAnswerAttempt(attemptCount.value, correct)
+  hasAnswered.value = result.complete
+  feedbackStatus.value = result.status
   // 上报答题结果,同时携带用户答案与正确答案,便于父组件记录错题
   const userAnswer = userInput.value
   const correctAnswer = props.currentItem?.answer != null ? String(props.currentItem.answer) : ''
-  emit('answered', { correct, userAnswer, correctAnswer })
+  emit('answered', {
+    correct,
+    userAnswer,
+    correctAnswer,
+    score: result.score,
+    assisted: result.assisted,
+    firstWrong: attemptCount.value === 1 && !correct
+  })
+  if (!result.complete) userInput.value = ''
 }
 </script>
 
@@ -201,7 +217,7 @@ function submitAnswer() {
         'answer-wrong': hasAnswered && !isCorrect
       }">
         <span class="answer-text">{{ userInput || '?' }}</span>
-        <span v-if="hasAnswered && !isCorrect" class="correct-answer">
+        <span v-if="feedbackStatus === 'revealed'" class="correct-answer">
           正确答案：{{ currentItem.answer }}
         </span>
       </div>
@@ -220,9 +236,12 @@ function submitAnswer() {
       </div>
 
       <!-- 答题反馈 -->
-      <div v-if="hasAnswered" class="feedback-area">
+      <div v-if="feedbackStatus" class="feedback-area" aria-live="polite">
         <p :class="['feedback-text', isCorrect ? 'feedback-correct' : 'feedback-wrong']">
-          {{ isCorrect ? '回答正确！太棒了！' : '答错了，再接再厉！' }}
+          <template v-if="feedbackStatus === 'retry'">差一点！再听一遍题目，重新算一次。</template>
+          <template v-else-if="feedbackStatus === 'correct'">回答正确！太棒了！</template>
+          <template v-else-if="feedbackStatus === 'assisted-correct'">重新计算后答对了！</template>
+          <template v-else>正确答案是 {{ currentItem.answer }}，稍后再复习。</template>
         </p>
       </div>
     </div>

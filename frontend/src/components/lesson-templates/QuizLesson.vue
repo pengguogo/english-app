@@ -14,6 +14,7 @@ import StarBar from '../StarBar.vue'
 import AppButton from '../AppButton.vue'
 import { useTts } from '../../composables/useTts'
 import MimiMascot from '../MimiMascot.vue'
+import { evaluateAnswerAttempt } from '../../utils/answerAttempts'
 
 /**
  * 组件 Props
@@ -52,6 +53,8 @@ const emit = defineEmits({
 const selectedIndex = ref(null)
 // 是否已答题（选中后锁定选项）
 const hasAnswered = ref(false)
+const attemptCount = ref(0)
+const feedbackStatus = ref('')
 
 // TTS 组合式函数,用于播放题目语音
 const { isPlaying: isQuestionPlaying, play: playQuestion } = useTts()
@@ -107,6 +110,8 @@ const isCorrect = computed(() => {
 watch(() => props.currentIndex, () => {
   selectedIndex.value = null
   hasAnswered.value = false
+  attemptCount.value = 0
+  feedbackStatus.value = ''
 })
 
 /**
@@ -124,12 +129,23 @@ const progressPercent = computed(() => {
 function selectOption(index) {
   if (hasAnswered.value) return
   selectedIndex.value = index
-  hasAnswered.value = true
+  attemptCount.value++
   const correct = index === props.currentItem?.answer
+  const result = evaluateAnswerAttempt(attemptCount.value, correct)
+  hasAnswered.value = result.complete
+  feedbackStatus.value = result.status
   // 上报答题结果,同时携带用户答案与正确答案,便于父组件记录错题
   const userAnswer = optionText(props.currentItem?.options?.[index])
   const correctAnswer = optionText(props.currentItem?.options?.[props.currentItem.answer])
-  emit('answered', { correct, userAnswer, correctAnswer })
+  emit('answered', {
+    correct,
+    userAnswer,
+    correctAnswer,
+    score: result.score,
+    assisted: result.assisted,
+    firstWrong: attemptCount.value === 1 && !correct
+  })
+  if (!result.complete) selectedIndex.value = null
 }
 
 /**
@@ -210,9 +226,12 @@ function getOptionClass(index) {
       </div>
 
       <!-- 答题反馈 -->
-      <div v-if="hasAnswered" class="feedback-area">
+      <div v-if="feedbackStatus" class="feedback-area" aria-live="polite">
         <p :class="['feedback-text', isCorrect ? 'feedback-correct' : 'feedback-wrong']">
-          {{ isCorrect ? '回答正确！太棒了！' : '答错了，正确答案是 ' + String.fromCharCode(65 + currentItem.answer) + '：' + optionText(currentItem.options[currentItem.answer]) }}
+          <template v-if="feedbackStatus === 'retry'">差一点！再听一遍题目，换一个答案试试。</template>
+          <template v-else-if="feedbackStatus === 'correct'">回答正确！太棒了！</template>
+          <template v-else-if="feedbackStatus === 'assisted-correct'">提示后答对了！再复习一次会更牢。</template>
+          <template v-else>正确答案是 {{ String.fromCharCode(65 + currentItem.answer) }}：{{ optionText(currentItem.options[currentItem.answer]) }}</template>
         </p>
       </div>
     </div>
