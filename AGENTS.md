@@ -73,4 +73,5 @@ Co-Authored-By: TRAE Agent <noreply@trae.ai>
 
 ## Git
 - 提交格式: `<type>(<scope>): <subject>`，type: feat/fix/docs/style/refactor/test/chore
-- 分支: `main` / `develop` / `feature/xxx` / `fix/xxx`，小写连字符
+- 默认直接在 `main` 分支工作并推送；只有用户明确要求时才创建
+  `develop` / `feature/xxx` / `fix/xxx` 分支，分支名使用小写连字符
