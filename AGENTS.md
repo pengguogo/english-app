@@ -20,6 +20,7 @@
 > 必须显式指定 JAVA_HOME 为 Corretto 17，否则报 `无效的标记: --release`
 
 ## 构建与课程内容
+- 课程与故事内容创作应优先从现有优秀图书和故事中汲取精华
 - 项目构建、课程内容和图片交付必须遵守
   [`docs/project-build-rules.md`](docs/project-build-rules.md)
 - 正式交付顺序：后端测试 → `npm ci` → 前端构建 → Maven 完整打包；完成前不得使用
@@ -73,5 +74,6 @@ Co-Authored-By: TRAE Agent <noreply@trae.ai>
 
 ## Git
 - 提交格式: `<type>(<scope>): <subject>`，type: feat/fix/docs/style/refactor/test/chore
+- 修改完成并验证无问题后，自动提交并推送代码
 - 默认直接在 `main` 分支工作并推送；只有用户明确要求时才创建
   `develop` / `feature/xxx` / `fix/xxx` 分支，分支名使用小写连字符
