@@ -18,9 +18,11 @@ public interface VoiceService {
      *
      * @param text 待合成语音的文本
      * @param lan  语言代码("en" 英文, "zh" 中文)
+     * @param voiceProfile 业务语音档案
+     * @param cacheable 是否允许缓存固定内容
      * @return 音频二进制数据
      */
-    byte[] textToSpeech(String text, String lan);
+    byte[] textToSpeech(String text, String lan, String voiceProfile, boolean cacheable);
 
     /**
      * 语音转文字

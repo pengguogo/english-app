@@ -276,7 +276,12 @@ watch(() => props.currentIndex, () => {
 
       <!-- 听发音按钮 -->
       <div class="actions">
-        <AudioButton :text="currentWord" :translation="currentItem.translation || ''" />
+        <AudioButton
+          :text="currentWord"
+          :translation="currentItem.translation || ''"
+          :voice-profile="currentItem.voiceProfile || 'english-teacher'"
+          :audio="currentItem.audio || ''"
+        />
       </div>
     </div>
 

@@ -19,7 +19,10 @@ import { useTts } from '../composables/useTts'
 const props = defineProps({
   text: { type: String, required: true },
   translation: { type: String, default: '' },
-  lan: { type: String, default: 'en' }
+  lan: { type: String, default: 'en' },
+  voiceProfile: { type: String, default: '' },
+  audio: { type: String, default: '' },
+  cacheable: { type: Boolean, default: true }
 })
 
 const emit = defineEmits({
@@ -55,14 +58,25 @@ async function handlePlay() {
   try {
     if (props.lan === 'zh') {
       // 纯中文模式:仅播放 text
-      await playAndWait(props.text, 'zh')
+      await playAndWait(props.text, 'zh', {
+        voiceProfile: props.voiceProfile || 'story-narrator',
+        audioUrl: props.audio,
+        cacheable: props.cacheable
+      })
     } else {
       // 双语模式:先播放中文翻译(如果有),再播放英文
       if (props.translation) {
-        await playAndWait(props.translation, 'zh')
+        await playAndWait(props.translation, 'zh', {
+          voiceProfile: props.voiceProfile || 'english-teacher',
+          cacheable: props.cacheable
+        })
       }
       if (sequence !== playbackSequence) return
-      await playAndWait(props.text, 'en')
+      await playAndWait(props.text, 'en', {
+        voiceProfile: props.voiceProfile || 'english-teacher',
+        audioUrl: props.audio,
+        cacheable: props.cacheable
+      })
     }
     if (sequence === playbackSequence) emit('played')
   } catch (e) {

@@ -90,7 +90,11 @@ async function handlePlayQuestion() {
     (optionsText ? `${question}。${optionsText}` : question)
   const language = props.currentItem?.audioLanguage || 'zh'
   try {
-    await playQuestion(fullText, language)
+    await playQuestion(fullText, language, {
+      voiceProfile: props.currentItem?.voiceProfile || 'challenge-curious',
+      audioUrl: props.currentItem?.audio || '',
+      cacheable: true
+    })
   } catch (e) {
     console.error('题目语音播放失败:', e)
   }

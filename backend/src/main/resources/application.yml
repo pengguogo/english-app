@@ -19,11 +19,15 @@ server:
   port: 8080
 
 voice:
-  provider: baidu
+  tts:
+    cache-enabled: ${TTS_CACHE_ENABLED:true}
+    cache-dir: ${TTS_CACHE_DIR:.tts-cache}
   baidu:
     app-id: ${BAIDU_APP_ID:}
     api-key: ${BAIDU_API_KEY:}
     secret-key: ${BAIDU_SECRET_KEY:}
+    connect-timeout-ms: ${BAIDU_CONNECT_TIMEOUT_MS:5000}
+    read-timeout-ms: ${BAIDU_READ_TIMEOUT_MS:30000}
 
 app:
   word-image:

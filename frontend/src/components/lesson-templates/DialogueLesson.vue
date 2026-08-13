@@ -129,7 +129,13 @@ const progressPercent = computed(() => {
 
     <!-- 操作区: 听发音 + 跟读录音 -->
     <div class="actions">
-      <AudioButton :text="currentText" :translation="currentItem?.translation || ''" @played="emit('listened')" />
+      <AudioButton
+        :text="currentText"
+        :translation="currentItem?.translation || ''"
+        :voice-profile="currentItem?.voiceProfile || (isMimi ? 'mimi-warm' : 'train-conductor')"
+        :audio="currentItem?.audio || ''"
+        @played="emit('listened')"
+      />
       <RecordButton @recorded="(blob) => emit('recorded', blob)" />
     </div>
 

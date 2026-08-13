@@ -10,6 +10,7 @@
  */
 import { ref } from 'vue'
 import { textToSpeech } from '../api/voice'
+import { markAudioOutputActive, warmAudioOutput } from '../utils/audioOutputWarmup'
 
 let activeStop = null
 
@@ -36,6 +37,7 @@ export function useTts() {
   const isPlaying = ref(false)
   // 当前正在播放的 Audio 对象引用,用于停止播放
   let currentAudio = null
+  let ownsAudioUrl = false
   // 当前等待播放完成任务的结束回调,用于主动停止时立即解除等待
   let finishCurrentPlayback = null
   // 播放任务版本号,用于取消仍在请求 TTS 的旧任务
@@ -45,10 +47,26 @@ export function useTts() {
    * 释放之前创建的 ObjectURL,避免内存泄漏。
    */
   function releaseUrl() {
-    if (audioUrl.value) {
+    if (audioUrl.value && ownsAudioUrl) {
       URL.revokeObjectURL(audioUrl.value)
-      audioUrl.value = null
     }
+    audioUrl.value = null
+    ownsAudioUrl = false
+  }
+
+  async function createAudio(text, lan, options) {
+    releaseUrl()
+    if (options.audioUrl) {
+      audioUrl.value = options.audioUrl
+      return new Audio(options.audioUrl)
+    }
+    const blob = await textToSpeech(text, lan, options)
+    if (!blob || blob.size === 0) {
+      throw new Error('语音合成返回空数据,可能服务暂时不可用')
+    }
+    audioUrl.value = URL.createObjectURL(blob)
+    ownsAudioUrl = true
+    return new Audio(audioUrl.value)
   }
 
   /**
@@ -93,23 +111,24 @@ export function useTts() {
    * @return {Promise<void>}
    * @throws {Error} 当 blob 为空或播放失败时抛出
    */
-  async function play(text, lan = 'en') {
+  async function play(text, lan = 'en', options = {}) {
     claimPlayback()
     const version = ++playbackVersion
     isPlaying.value = true
     isLoading.value = true
     try {
-      const blob = await textToSpeech(text, lan)
+      // 在拉取音频的同时预热输出设备，避免手机/蓝牙设备吞掉开头几个字。
+      const warmup = warmAudioOutput()
+      const audio = await createAudio(text, lan, options)
       if (version !== playbackVersion) return
-      // 校验 blob:空 blob 说明后端 TTS 失败,直接抛错避免创建无效 Audio
-      if (!blob || blob.size === 0) {
-        throw new Error('语音合成返回空数据,可能服务暂时不可用')
-      }
-      releaseUrl()
-      audioUrl.value = URL.createObjectURL(blob)
-      currentAudio = new Audio(audioUrl.value)
+      await warmup
+      // 请求较慢时首次预热可能已经失效，播放前按闲置时间再检查一次。
+      await warmAudioOutput()
+      if (version !== playbackVersion) return
+      currentAudio = audio
       // 播放结束时清理状态(不在 finally 中重置,因为 play 不等待播放完成)
       currentAudio.onended = () => {
+        markAudioOutputActive()
         isPlaying.value = false
         currentAudio = null
         if (activeStop === stop) activeStop = null
@@ -141,20 +160,19 @@ export function useTts() {
    * @return {Promise<void>}
    * @throws {Error} 当 blob 为空或播放失败时抛出
    */
-  async function playAndWait(text, lan = 'en') {
+  async function playAndWait(text, lan = 'en', options = {}) {
     claimPlayback()
     const version = ++playbackVersion
     isPlaying.value = true
     try {
-      const blob = await textToSpeech(text, lan)
+      // 预热与网络请求并行，不额外叠加大部分接口等待时间。
+      const warmup = warmAudioOutput()
+      const audio = await createAudio(text, lan, options)
       if (version !== playbackVersion) return
-      // 校验 blob:空 blob 说明后端 TTS 失败,直接抛错避免创建无效 Audio
-      if (!blob || blob.size === 0) {
-        throw new Error('语音合成返回空数据,可能服务暂时不可用')
-      }
-      releaseUrl()
-      audioUrl.value = URL.createObjectURL(blob)
-      currentAudio = new Audio(audioUrl.value)
+      await warmup
+      await warmAudioOutput()
+      if (version !== playbackVersion) return
+      currentAudio = audio
       // 等待播放完成,带超时兜底防止 onended 不触发导致永久卡死
       await new Promise((resolve, reject) => {
         let settled = false
@@ -166,6 +184,7 @@ export function useTts() {
           settled = true
           if (timeoutId) clearTimeout(timeoutId)
           finishCurrentPlayback = null
+          markAudioOutputActive()
           isPlaying.value = false
           currentAudio = null
           if (activeStop === stop) activeStop = null

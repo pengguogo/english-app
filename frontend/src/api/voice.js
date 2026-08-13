@@ -15,10 +15,16 @@ import http from './http'
  *
  * @param {string} text 待合成语音的文本
  * @param {string} [lan='en'] 语言代码("en" 英文, "zh" 中文)
+ * @param {Object} [options] 语音档案与缓存选项
  * @return {Promise<Blob>} 语音二进制数据
  */
-export const textToSpeech = (text, lan = 'en') =>
-  http.post('/voice/tts', { text, lan }, { responseType: 'blob' })
+export const textToSpeech = (text, lan = 'en', options = {}) =>
+  http.post('/voice/tts', {
+    text,
+    lan,
+    voiceProfile: options.voiceProfile || 'default',
+    cacheable: options.cacheable !== false
+  }, { responseType: 'blob' })
 
 /**
  * 发音评测。

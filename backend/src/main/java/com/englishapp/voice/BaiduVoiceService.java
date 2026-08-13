@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -21,15 +21,14 @@ import java.util.Map;
  * 百度语音服务实现(TTS + 发音评测)
  * <p>
  * 通过百度智能云提供的开放接口实现文字转语音与发音评测能力。
- * 仅在配置项 {@code voice.provider=baidu} 时生效。
+ * 负责调用百度语音合成接口并返回音频数据。
  * </p>
  *
  * @author englishapp
  * @since 1.0.0
  */
 @Service
-@ConditionalOnProperty(name = "voice.provider", havingValue = "baidu")
-public class BaiduVoiceService implements VoiceService {
+public class BaiduVoiceService {
 
     private static final Logger log = LoggerFactory.getLogger(BaiduVoiceService.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -42,7 +41,7 @@ public class BaiduVoiceService implements VoiceService {
     private static final String ASR_URL = "https://vop.baidu.com/server_api";
 
     private final VoiceProperties voiceProperties;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     /** 缓存的 access_token,避免每次调用都重新获取 */
     private String cachedToken;
     /** token 过期时间戳(毫秒) */
@@ -55,6 +54,15 @@ public class BaiduVoiceService implements VoiceService {
      */
     public BaiduVoiceService(VoiceProperties voiceProperties) {
         this.voiceProperties = voiceProperties;
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(voiceProperties.getConnectTimeoutMs());
+        factory.setReadTimeout(voiceProperties.getReadTimeoutMs());
+        this.restTemplate = new RestTemplate(factory);
+    }
+
+    public boolean isAvailable() {
+        return voiceProperties.getApiKey() != null && !voiceProperties.getApiKey().isBlank()
+                && voiceProperties.getSecretKey() != null && !voiceProperties.getSecretKey().isBlank();
     }
 
     /**
@@ -101,9 +109,9 @@ public class BaiduVoiceService implements VoiceService {
      * @param lan  语言代码("en" 英文, "zh" 中文)
      * @return 音频二进制数据;失败时返回空数组
      */
-    @Override
-    public byte[] textToSpeech(String text, String lan) {
+    public byte[] synthesize(String text, String lan, VoiceProfile profile) {
         log.info("TTS 请求: text={}, lan={}", text, lan);
+        if (!isAvailable()) return new byte[0];
         try {
             String token = getToken();
             HttpHeaders headers = new HttpHeaders();
@@ -117,10 +125,20 @@ public class BaiduVoiceService implements VoiceService {
             form.add("ctp", "1");
             // 英文使用英文男声,中文使用度小薇(女声,适合儿童)
             form.add("per", "en".equals(lan) ? "0" : "4118");
+            form.add("spd", String.valueOf(profile.getBaiduSpeed()));
+            form.add("pit", String.valueOf(profile.getBaiduPitch()));
+            form.add("vol", String.valueOf(profile.getBaiduVolume()));
 
             HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(form, headers);
             ResponseEntity<byte[]> resp = restTemplate.postForEntity(TTS_URL, entity, byte[].class);
-            return resp.getBody();
+            MediaType contentType = resp.getHeaders().getContentType();
+            byte[] audio = resp.getBody();
+            if (audio == null || audio.length == 0 || contentType == null
+                    || !"audio".equalsIgnoreCase(contentType.getType())) {
+                log.warn("百度 TTS 返回了非音频响应: contentType={}", contentType);
+                return new byte[0];
+            }
+            return audio;
         } catch (Exception e) {
             log.error("TTS 调用失败: {}", text, e);
             return new byte[0];
@@ -136,7 +154,6 @@ public class BaiduVoiceService implements VoiceService {
      * @param audioData 音频二进制数据
      * @return 识别出的文本(暂返回空字符串)
      */
-    @Override
     public String speechToText(byte[] audioData) {
         log.info("ASR 请求, 音频长度: {} bytes", audioData.length);
         return "";
@@ -155,7 +172,6 @@ public class BaiduVoiceService implements VoiceService {
      * @param text      参考文本
      * @return 评测结果(分数 + 反馈)
      */
-    @Override
     public ScoreResponse scorePronunciation(byte[] audioData, String text) {
         log.info("发音评测: text={}, audioBytes={}", text, audioData.length);
         try {

@@ -84,7 +84,11 @@ async function playContinuously() {
 
   try {
     while (session === playbackSession.value) {
-      await playAndWait(readAloudText.value, 'zh')
+      await playAndWait(readAloudText.value, 'zh', {
+        voiceProfile: props.currentItem?.voiceProfile || 'story-narrator',
+        audioUrl: props.currentItem?.audio || '',
+        cacheable: true
+      })
       if (!isContinuousPlaying.value || session !== playbackSession.value) break
       if (props.isLastItem) {
         emit('continuousFinished')
@@ -170,7 +174,13 @@ onBeforeUnmount(() => {
             : isContinuousPlaying ? '■ 停止朗读' : '▶ 连续朗读'
         }}
       </button>
-      <AudioButton v-else :text="readAloudText" lan="zh" />
+      <AudioButton
+        v-else
+        :text="readAloudText"
+        lan="zh"
+        :voice-profile="currentItem.voiceProfile || 'story-narrator'"
+        :audio="currentItem.audio || ''"
+      />
       <!-- 上一步 / 下一步 / 完成阅读 -->
       <div class="action-row">
         <!-- 上一步按钮:第一页不显示 -->

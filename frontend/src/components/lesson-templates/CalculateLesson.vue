@@ -81,7 +81,11 @@ async function handlePlayQuestion() {
   const question = props.currentItem?.question || ''
   const text = formatQuestionForTTS(question)
   try {
-    await playQuestion(text, 'zh')
+    await playQuestion(text, 'zh', {
+      voiceProfile: props.currentItem?.voiceProfile || 'challenge-curious',
+      audioUrl: props.currentItem?.audio || '',
+      cacheable: true
+    })
   } catch (e) {
     console.error('题目语音播放失败:', e)
   }

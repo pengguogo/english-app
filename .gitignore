@@ -2,6 +2,8 @@
 backend/target/
 backend/*.db
 backend/english.db
+backend/.tts-cache/
+.tts-cache/
 *.class
 *.jar
 *.war
@@ -16,6 +18,8 @@ backend/.env
 backend/src/main/resources/static/*
 # 但保留课程配图(源资源,需要版本控制)
 !backend/src/main/resources/static/images/
+# 保留审核后的真人/预生成课程语音
+!backend/src/main/resources/static/audio/
 frontend/dist/
 
 # ===== Android (Gradle) =====
