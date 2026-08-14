@@ -16,7 +16,8 @@ WorkingDirectory=/opt/english-app
 # 环境变量(百度语音密钥等),文件由 .env 提供
 EnvironmentFile=/opt/english-app/.env
 # JVM 堆限制为 512m(2G 内存机器预留系统资源)
-ExecStart=/usr/bin/java -Xmx512m -Xss256k -jar /opt/english-app/backend/target/english-app-backend-1.0.0.jar
+# 使用稳定的符号链接路径 java-17-openjdk,升级小版本后路径不变
+ExecStart=/usr/lib/jvm/java-17-openjdk/bin/java -Xmx512m -Xss256k -jar /opt/english-app/backend/target/english-app-backend-1.0.0.jar
 SuccessExitStatus=143
 # 崩溃自动重启
 Restart=on-failure
