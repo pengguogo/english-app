@@ -41,16 +41,17 @@ dnf install -y git tar wget
 curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
 dnf install -y nodejs
 
-# Amazon Corretto 17(JRE+构建用)
-# Alibaba Cloud Linux 3 的 AppStream 通常自带 corretto17 源
-dnf install -y java-17-amazon-corretto-devel
-# 若上面找不到,改用:
-# dnf install -y java-17-openjdk-devel
+# OpenJDK 17(JRE+构建用,含 javac)
+# Alibaba Cloud Linux 3 的 AppStream 自带 openjdk17 源
+dnf install -y java-17-openjdk-devel
+
+# 切换默认 java 到 17(交互式,输入 java-17 对应编号)
+alternatives --config java
 
 # Maven
 dnf install -y maven
 
-# 验证
+# 验证(java 必须显示 17,否则编译会报"不支持发行版本 17")
 java -version
 mvn -v
 node -v
