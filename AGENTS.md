@@ -11,7 +11,7 @@
 ## 常用命令
 | 任务 | 命令 |
 |------|------|
-| 启动后端 | `cd backend && export JAVA_HOME=/Users/dawn/Library/Java/JavaVirtualMachines/corretto-17.0.13/Contents/Home && export PATH=$JAVA_HOME/bin:$PATH && ./run.sh` |
+| 启动后端 | `cd backend && export JAVA_HOME=$(/usr/libexec/java_home -v 17 2>/dev/null || echo /path/to/java17) && export PATH=$JAVA_HOME/bin:$PATH && ./run.sh` |
 | 后端测试 | `cd backend && mvn test` |
 | 单测类 | `cd backend && mvn test -Dtest=XxxTest` |
 | 前端开发 | `cd frontend && npm run dev` |
