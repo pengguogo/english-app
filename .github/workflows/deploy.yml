@@ -1,0 +1,31 @@
+# 自动部署到阿里云主机
+# 触发:push 到 main 分支,或手动(workflow_dispatch)
+# 方式:SSH(密码)登录云主机,执行 git pull + 构建脚本 + 重启 systemd 服务
+name: Deploy to Aliyun
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH 登录云主机执行部署
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}        # 公网 IP,如 39.96.59.120
+          username: ${{ secrets.ALIYUN_USER }}      # 登录用户,如 root
+          password: ${{ secrets.ALIYUN_PASSWORD }}  # 登录密码
+          port: 22
+          script_stop: true                         # 任一命令失败即终止
+          script: |
+            set -e
+            cd /opt/english-app
+            git pull --ff-only
+            ./scripts/deploy.sh
+            systemctl restart mimi
+            echo "[deploy] 服务已重启,等待健康检查"
+            sleep 8
+            systemctl is-active mimi && echo "[deploy] mimi 运行中" || (echo "[deploy] mimi 启动失败" && journalctl -u mimi -n 50 --no-pager)
