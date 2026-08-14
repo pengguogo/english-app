@@ -84,9 +84,15 @@ async function playContinuously() {
 
   try {
     while (session === playbackSession.value) {
-      await playAndWait(readAloudText.value, 'zh', {
-        voiceProfile: props.currentItem?.voiceProfile || 'story-narrator',
-        audioUrl: props.currentItem?.audio || '',
+      // 进入循环体即快照本次要播放的文本与语音配置。
+      // 避免在 await playAndWait 期间 currentItem 切换导致读到错乱值,
+      // 也避免跨课时路由切换时旧值残留造成重复播放同一页。
+      const textSnapshot = readAloudText.value
+      const voiceProfile = props.currentItem?.voiceProfile || 'story-narrator'
+      const audioUrl = props.currentItem?.audio || ''
+      await playAndWait(textSnapshot, 'zh', {
+        voiceProfile,
+        audioUrl,
         cacheable: true
       })
       if (!isContinuousPlaying.value || session !== playbackSession.value) break
@@ -95,7 +101,10 @@ async function playContinuously() {
         break
       }
       emit('next')
+      // 等待 props 同步到新页:nextTick 保证 DOM 更新,随后再次校验 session,
+      // 防止切换期间被停止后仍继续播放。
       await nextTick()
+      if (session !== playbackSession.value) break
     }
   } catch (e) {
     if (session === playbackSession.value) {

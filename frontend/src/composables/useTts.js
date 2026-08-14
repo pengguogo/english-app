@@ -185,6 +185,20 @@ export function useTts() {
           if (timeoutId) clearTimeout(timeoutId)
           finishCurrentPlayback = null
           markAudioOutputActive()
+          // 兜底:超时先于 onended 触发时,音频可能仍在播放。
+          // 必须主动 pause + 移除事件,否则旧音频会继续发声,
+          // 与下一轮新音频叠加,表现为"中间重复播放"。
+          if (currentAudio) {
+            try {
+              currentAudio.onended = null
+              currentAudio.onerror = null
+              currentAudio.onloadedmetadata = null
+              currentAudio.pause()
+              currentAudio.currentTime = 0
+            } catch (e) {
+              console.warn('结束音频时出错:', e)
+            }
+          }
           isPlaying.value = false
           currentAudio = null
           if (activeStop === stop) activeStop = null
@@ -197,6 +211,18 @@ export function useTts() {
           settled = true
           if (timeoutId) clearTimeout(timeoutId)
           finishCurrentPlayback = null
+          // 与 finish 一致:出错时也主动 pause 旧音频,避免残留发声。
+          if (currentAudio) {
+            try {
+              currentAudio.onended = null
+              currentAudio.onerror = null
+              currentAudio.onloadedmetadata = null
+              currentAudio.pause()
+              currentAudio.currentTime = 0
+            } catch (err) {
+              console.warn('结束音频时出错:', err)
+            }
+          }
           isPlaying.value = false
           currentAudio = null
           if (activeStop === stop) activeStop = null
