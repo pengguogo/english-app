@@ -7,7 +7,7 @@ TTS 与发音评分开箱即用，游戏化课程地图让孩子主动学完一�
 
 [在线体验](#在线体验) · [快速开始](#快速开始) · [参与贡献](CONTRIBUTING.md) · [架构文档](docs/architecture.md)
 
-![Mimi 启蒙乐园演示](docs/assets/demo.gif)
+![Mimi 启蒙乐园演示](docs/assets/home.jpg)
 
 ---
 
@@ -27,12 +27,11 @@ TTS 与发音评分开箱即用，游戏化课程地图让孩子主动学完一�
 
 ## 📸 产品截图
 
-> 截图与演示 GIF 录制路径见 [docs/recording-guide.md](docs/recording-guide.md)。
-> 录好后放入 `docs/assets/`，并将上方占位链接替换为实际文件。
+> 截图与演示录制路径见 [docs/recording-guide.md](docs/recording-guide.md)。
 
 | 首页 | 课程学习 | 完成庆祝 |
 |------|---------|---------|
-| 首页截图占位 | 学习页截图占位 | 庆祝页截图占位 |
+| ![首页](docs/assets/home.jpg) | ![课程学习](docs/assets/study.png) | ![完成庆祝](docs/assets/end.png) |
 
 ---
 
