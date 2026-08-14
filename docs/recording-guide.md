@@ -51,3 +51,7 @@ ffmpeg -i recording.mp4 \
 ```
 
 截图同理替换表格中的「占位」文字。
+
+> 当前 `docs/assets/demo.gif` 已生成（640×400, 12fps, ~1.5MB），演示路径：
+> 首页 → 选学科 → 进入 QUIZ 课程 → 逐题作答 → 完成庆祝页。
+> 用 Playwright 驱动系统 Chrome 自动录制，脚本见 [`scripts/record-demo.js`](../scripts/record-demo.js)。

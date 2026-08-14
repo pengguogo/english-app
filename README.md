@@ -7,7 +7,7 @@ TTS 与发音评分开箱即用，游戏化课程地图让孩子主动学完一�
 
 [在线体验](#在线体验) · [快速开始](#快速开始) · [参与贡献](CONTRIBUTING.md) · [架构文档](docs/architecture.md)
 
-![Mimi 启蒙乐园演示](docs/assets/home.jpg)
+![Mimi 启蒙乐园演示](docs/assets/demo.gif)
 
 ---
 
