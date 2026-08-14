@@ -38,9 +38,11 @@ TTS 与发音评分开箱即用，游戏化课程地图让孩子主动学完一�
 
 ## 在线体验
 
-> 🚧 官方 Demo 部署中。本地体验请按下方「快速开始」启动。
->
-> 如果你已部署公开 Demo，欢迎在 Issue 中告知，我们会补充到此处。
+🌐 **官方 Demo**：http://39.96.59.120:8080/app/
+
+部署于阿里云(Alibaba Cloud Linux 3, 2C2G),`main` 分支推送即由
+GitHub Actions 自动构建并重启服务,详见 [部署文档](docs/deploy-aliyun.md)。
+
 
 ---
 
@@ -53,6 +55,12 @@ docker compose up
 ```
 
 启动后访问 `http://localhost:8080/app/`。详见 [docker-compose.yml](docker-compose.yml)。
+
+### 云主机部署（裸 JAR + systemd）
+
+小规格云主机(2C2G)推荐直装 JRE 跑 JAR,省去 Docker daemon 内存开销。
+`main` 分支推送即由 GitHub Actions 自动部署。完整步骤见
+[部署文档](docs/deploy-aliyun.md)。
 
 ### 本地开发
 
@@ -134,7 +142,7 @@ curl http://localhost:8080/api/v1/wrong-answers/stats
 | 后端 | Java 17 · Spring Boot 3.2 · JPA · Flyway · SQLite |
 | 前端 | Vue 3 · Vite · Pinia · Vue Router |
 | 语音 | 百度 TTS + ASR（适配器模式，可切供应商） |
-| 部署 | 单 JAR（Vue 构建嵌入 Spring Boot static/） |
+| 部署 | 单 JAR(Vue 构建嵌入 Spring Boot static/) · GitHub Actions 自动部署 |
 
 > Android 版（Kotlin + Jetpack Compose）骨架保留在 `android/`，后续视网页版反馈决定迭代。
 

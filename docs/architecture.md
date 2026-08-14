@@ -266,6 +266,11 @@ Vue 构建产物通过 `vite.config.js` 直接输出到 `backend/src/main/resour
 课程图片保留在 `backend/src/main/resources/static/images/`。`WebConfig` 配置 Vue Router
 history 模式 fallback：非 `/api` 请求统一返回 `app/index.html`，生产环境无 CORS 问题。
 
+生产环境部署于阿里云(Alibaba Cloud Linux 3, 2C2G),直装 OpenJDK 17 跑 JAR +
+systemd 管理服务(开机自启/崩溃重启/日志)。`main` 分支推送即由 GitHub Actions
+经 SSH 触发云主机 `git pull` + 构建 + 重启,实现自动化部署。详见
+[部署文档](deploy-aliyun.md)。Docker 方案(`docker compose up`)作为本地/可选部署保留。
+
 ### 云迁移准备
 
 - 配置外部化：敏感信息通过 `.env` 环境变量注入
