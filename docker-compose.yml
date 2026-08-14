@@ -1,0 +1,32 @@
+# Mimi 启蒙乐园 - 一键启动
+# 用法: docker compose up
+# 访问: http://localhost:8080/app/
+#
+# 百度语音密钥为可选。未配置时语音接口返回降级提示，其余功能正常。
+# 如需启用，在下方 environment 填入密钥，或创建 .env 文件（已被 .gitignore 忽略）。
+
+services:
+  mimi-app:
+    build: .
+    image: mimi-app:latest
+    container_name: mimi-app
+    ports:
+      - "8080:8080"
+    environment:
+      # 百度智能云语音服务（可选）
+      BAIDU_APP_ID: ${BAIDU_APP_ID:-}
+      BAIDU_API_KEY: ${BAIDU_API_KEY:-}
+      BAIDU_SECRET_KEY: ${BAIDU_SECRET_KEY:-}
+      # 语音缓存
+      TTS_CACHE_ENABLED: "true"
+      TTS_CACHE_DIR: /app/.tts-cache
+    volumes:
+      # 数据库持久化（SQLite）
+      - mimi-data:/app/data
+      # 语音缓存
+      - mimi-cache:/app/.tts-cache
+    restart: unless-stopped
+
+volumes:
+  mimi-data:
+  mimi-cache:

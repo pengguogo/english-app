@@ -1,0 +1,33 @@
+# Docker 构建忽略文件，减小构建上下文
+.git
+.github
+.gh_config
+.trae
+.superpowers
+.worktrees
+.uploads
+.idea
+.vscode
+
+# 构建产物
+backend/target
+frontend/dist
+frontend/node_modules
+backend/src/main/resources/static/app
+
+# 数据库与缓存（运行时生成）
+backend/english.db
+backend/.tts-cache
+*.log
+logs/
+
+# 系统/IDE
+.DS_Store
+*.iml
+
+# 大尺寸设计稿（不进镜像）
+可爱教具风格AI英语学习界面.png
+儿童英语启蒙APP界面设计.png
+儿童英语学习应用UI设计展示.png
+ChatGPT*.png
+AI幼小衔接英语APP_PRD*.docx
