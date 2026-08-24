@@ -19,13 +19,18 @@ jobs:
           username: ${{ secrets.ALIYUN_USER }}      # 登录用户,如 root
           password: ${{ secrets.ALIYUN_PASSWORD }}  # 登录密码
           port: 22
-          script_stop: true                         # 任一命令失败即终止
+          command_timeout: 30m
+          debug: true
           script: |
-            set -e
+            set -Eeuo pipefail
+            trap 'echo "[deploy] 部署失败，输出服务日志"; journalctl -u mimi -n 100 --no-pager || true' ERR
             cd /opt/english-app
-            git pull --ff-only
+            git pull --ff-only origin main
             ./scripts/deploy.sh
             systemctl restart mimi
             echo "[deploy] 服务已重启,等待健康检查"
             sleep 8
-            systemctl is-active mimi && echo "[deploy] mimi 运行中" || (echo "[deploy] mimi 启动失败" && journalctl -u mimi -n 50 --no-pager)
+            systemctl is-active --quiet mimi
+            curl --fail --silent --show-error http://127.0.0.1:8080/api/v1/subjects >/dev/null
+            echo "[deploy] mimi 运行中，API 健康检查通过"
+            journalctl -u mimi -n 50 --no-pager
