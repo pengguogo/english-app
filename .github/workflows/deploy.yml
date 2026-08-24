@@ -1,6 +1,6 @@
 # 自动部署到阿里云主机
 # 触发:push 到 main 分支,或手动(workflow_dispatch)
-# 方式:SSH(密码)登录云主机,执行 git pull + 构建脚本 + 重启 systemd 服务
+# 方式:GitHub Runner 完成测试与打包,上传 JAR 后重启 systemd 服务
 name: Deploy to Aliyun
 
 on:
@@ -12,7 +12,49 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH 登录云主机执行部署
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: '17'
+          cache: maven
+
+      - name: 配置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 后端测试
+        working-directory: backend
+        run: mvn test
+
+      - name: 前端构建
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Maven 完整打包
+        working-directory: backend
+        run: mvn clean package
+
+      - name: 上传应用 JAR
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USER }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+          port: 22
+          source: backend/target/english-app-backend-1.0.0.jar
+          target: /opt/english-app
+          overwrite: true
+
+      - name: 重启并检查云端服务
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.ALIYUN_HOST }}        # 公网 IP,如 39.96.59.120
@@ -24,13 +66,18 @@ jobs:
           script: |
             set -Eeuo pipefail
             trap 'echo "[deploy] 部署失败，输出服务日志"; journalctl -u mimi -n 100 --no-pager || true' ERR
-            cd /opt/english-app
-            git pull --ff-only origin main
-            ./scripts/deploy.sh
             systemctl restart mimi
             echo "[deploy] 服务已重启,等待健康检查"
-            sleep 8
             systemctl is-active --quiet mimi
-            curl --fail --silent --show-error http://127.0.0.1:8080/api/v1/subjects >/dev/null
+            for attempt in $(seq 1 30); do
+              if curl --fail --silent http://127.0.0.1:8080/api/v1/subjects >/dev/null; then
+                break
+              fi
+              if [ "$attempt" -eq 30 ]; then
+                echo "[deploy] API 健康检查超时" >&2
+                exit 1
+              fi
+              sleep 2
+            done
             echo "[deploy] mimi 运行中，API 健康检查通过"
             journalctl -u mimi -n 50 --no-pager
