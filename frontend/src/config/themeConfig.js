@@ -79,6 +79,15 @@ const themeConfig = {
       { icon: '🔊', color: 'var(--color-primary)', label: '字母音热身' },
       { icon: '🧩', color: 'var(--color-accent)', label: 'CVC 词族' }
     ]
+  },
+  // 主题 51:Feelings & Calm(1 单元:说出感受，慢慢平静)
+  51: {
+    emoji: '💛',
+    title: 'Feelings & Calm',
+    description: '认识感受，用英语求助，再让身体慢慢平静',
+    scenes: [
+      { icon: '🌿', color: 'var(--color-success)', label: '说出感受，慢慢平静' }
+    ]
   }
 }
 
