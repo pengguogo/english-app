@@ -69,6 +69,7 @@ public class WordImageResolver {
         }
         try {
             JsonNode root = objectMapper.readTree(content);
+            PicturebookContentValidator.validate(root);
             JsonNode itemsNode = root.get(ITEMS_FIELD);
             // 无 items 数组(如句型课的其他结构)或非数组,原样返回
             if (itemsNode == null || !itemsNode.isArray()) {

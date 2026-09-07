@@ -10,6 +10,8 @@ import { normalizeRouterBase } from '../utils/routerBase'
 
 // 路由表：home / subject / theme / unit / lesson 五级学习流 + 错题集/我学过的快捷入口
 const routes = [
+  { path: '/picturebooks', name: 'picturebooks', component: () => import('../views/PicturebooksView.vue') },
+  { path: '/picturebooks/:unitId', name: 'picturebook', component: () => import('../views/PicturebookView.vue') },
   { path: '/', name: 'home', component: () => import('../views/HomeView.vue') },
   { path: '/subject/:subjectId', name: 'subject', component: () => import('../views/SubjectView.vue') },
   { path: '/theme/:themeId', name: 'theme', component: () => import('../views/ThemeView.vue') },

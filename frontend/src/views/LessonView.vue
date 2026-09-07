@@ -24,6 +24,7 @@ import { stopActiveTts } from '../composables/useTts'
 import StarBar from '../components/StarBar.vue'
 import BackBar from '../components/BackBar.vue'
 import AppButton from '../components/AppButton.vue'
+import MascotFeedback from '../components/MascotFeedback.vue'
 import WordLesson from '../components/lesson-templates/WordLesson.vue'
 import SentenceLesson from '../components/lesson-templates/SentenceLesson.vue'
 import LessonComplete from '../components/lesson-templates/LessonComplete.vue'
@@ -52,7 +53,9 @@ const isComplete = ref(false)
 const isSubmitting = ref(false)
 const isProgressSaved = ref(false)
 const saveError = ref('')
+const mascotFeedback = ref(null)
 let lessonLoadVersion = 0
+let mascotFeedbackTimer = null
 
 // 记录每个学习项的历史最佳分
 const bestScores = ref([])
@@ -95,6 +98,7 @@ const totalItems = computed(() => {
  */
 const isLastItem = computed(() => currentIndex.value >= totalItems.value - 1)
 const currentItemEngaged = computed(() => engagedItems.value[currentIndex.value] === true)
+const isFruitPilot = computed(() => Number(route.query.themeId) === 1)
 
 /**
  * 整个课时累计最佳分数（各 item 历史最佳成绩的平均值）。
@@ -151,7 +155,10 @@ const lessonTemplateProps = computed(() => {
 
 onMounted(loadLesson)
 watch(() => route.params.lessonId, loadLesson)
-onBeforeUnmount(stopActiveTts)
+onBeforeUnmount(() => {
+  stopActiveTts()
+  clearMascotFeedback()
+})
 
 // ===== 业务方法 =====
 
@@ -229,6 +236,7 @@ function normalizeContent(raw) {
  */
 async function loadLesson() {
   stopActiveTts()
+  clearMascotFeedback()
   const version = ++lessonLoadVersion
   isLoading.value = true
   errorMsg.value = ''
@@ -240,6 +248,11 @@ async function loadLesson() {
   try {
     const data = await getLessonById(route.params.lessonId)
     if (version !== lessonLoadVersion) return
+    const content = typeof data.content === 'string' ? JSON.parse(data.content) : data.content
+    if (content?.picturebook === true) {
+      await router.replace({ path: `/picturebooks/${data.unitId}`, query: { lesson: String(data.id) } })
+      return
+    }
     if (typeof data.content === 'string') {
       data.content = normalizeContent(JSON.parse(data.content))
     } else if (data.content && typeof data.content === 'object') {
@@ -275,6 +288,10 @@ async function handleRecorded(wavBlob) {
     currentStars.value = scoreToStars(result.score)
     scoreMessage.value = result.feedback || ''
     updateBestScore(currentIndex.value, result.score)
+    showMascotFeedback(
+      result.score >= 80 ? 'happy' : 'encourage',
+      result.score >= 80 ? '发音真清楚，收下一颗星星！' : '已经开口啦，慢慢说会更棒。'
+    )
   } catch (e) {
     scoreMessage.value = '评分失败,请重试'
     console.error('发音评测失败:', e)
@@ -309,6 +326,10 @@ function handleAnswered({ correct, userAnswer, correctAnswer, score, assisted, f
   scoreMessage.value = correct
     ? (assisted ? '提示后答对了，再复习一次会更牢！' : '回答正确！')
     : '先听提示，再试一次！'
+  showMascotFeedback(
+    correct ? 'happy' : 'encourage',
+    correct ? '找到正确水果啦！' : '没关系，再听一遍就能找到。'
+  )
   // 答错时静默上报错题,便于错题集展示与复习
   if (firstWrong) {
     recordWrongAnswerSilently({ userAnswer, correctAnswer })
@@ -317,6 +338,26 @@ function handleAnswered({ correct, userAnswer, correctAnswer, score, assisted, f
 
 function markCurrentItemEngaged() {
   engagedItems.value[currentIndex.value] = true
+}
+
+function handleListened() {
+  markCurrentItemEngaged()
+  showMascotFeedback('happy', '听到啦！跟着 Mimi 说一遍吧。')
+}
+
+function showMascotFeedback(mood, message) {
+  if (!isFruitPilot.value) return
+  clearTimeout(mascotFeedbackTimer)
+  mascotFeedback.value = { mood, message, id: Date.now() }
+  mascotFeedbackTimer = setTimeout(() => {
+    mascotFeedback.value = null
+  }, 2400)
+}
+
+function clearMascotFeedback() {
+  clearTimeout(mascotFeedbackTimer)
+  mascotFeedbackTimer = null
+  mascotFeedback.value = null
 }
 
 function skipCurrentItem() {
@@ -365,11 +406,13 @@ function resetCurrentScoreState() {
  */
 function nextItem() {
   stopActiveTts()
+  clearMascotFeedback()
   if (currentIndex.value < totalItems.value - 1) {
     currentIndex.value++
     resetCurrentScoreState()
   } else {
     isComplete.value = true
+    showMascotFeedback('celebrate', '关卡完成，水果贴纸收集成功！')
   }
 }
 
@@ -379,6 +422,7 @@ function nextItem() {
  */
 function prevItem() {
   stopActiveTts()
+  clearMascotFeedback()
   if (currentIndex.value > 0) {
     currentIndex.value--
     resetCurrentScoreState()
@@ -540,7 +584,7 @@ async function finishLesson() {
         v-bind="lessonTemplateProps"
         @recorded="handleRecorded"
         @answered="handleAnswered"
-        @listened="markCurrentItemEngaged"
+        @listened="handleListened"
         @skip="skipCurrentItem"
         @next="nextItem"
         @prev="prevItem"
@@ -553,6 +597,13 @@ async function finishLesson() {
         <p>该课型正在开发中，敬请期待！</p>
         <p class="type-hint">课型: {{ lesson.type }}</p>
       </div>
+
+      <MascotFeedback
+        v-if="mascotFeedback"
+        :key="mascotFeedback.id"
+        :mood="mascotFeedback.mood"
+        :message="mascotFeedback.message"
+      />
     </template>
   </div>
 </template>

@@ -14,6 +14,7 @@ import { useRouter } from 'vue-router'
 import { getSubjects } from '../api/subject'
 import MimiMascot from '../components/MimiMascot.vue'
 import AppButton from '../components/AppButton.vue'
+import PicturebookEntry from '../components/picturebooks/PicturebookEntry.vue'
 
 const router = useRouter()
 const subjects = ref([])
@@ -68,6 +69,17 @@ function getSubjectColor(code) {
 function getSubjectIcon(code) {
   return subjectEmojis[code] || '📚'
 }
+
+function startFruitAdventure() {
+  router.push({
+    path: '/theme/1',
+    query: {
+      subjectId: '1',
+      subjectName: '英语',
+      themeName: '水果乐园'
+    }
+  })
+}
 </script>
 
 <template>
@@ -85,6 +97,22 @@ function getSubjectIcon(code) {
         <MimiMascot variant="welcome" size="lg" />
       </div>
     </header>
+
+    <PicturebookEntry />
+
+    <!-- 英语趣味化试点：首屏一次点击开始 -->
+    <section class="adventure-section" aria-labelledby="adventure-title">
+      <button type="button" class="adventure-card" @click="startFruitAdventure">
+        <img :src="'/images/fruit/apple.jpg'" alt="红苹果" class="adventure-image" />
+        <div class="adventure-copy">
+          <span class="adventure-kicker">今日冒险 · ENGLISH</span>
+          <h2 id="adventure-title">帮 Mimi 收集水果</h2>
+          <p>听一听、说一说、猜一猜，闯过 3 个小关卡。</p>
+          <span class="adventure-action">▶ 开始冒险</span>
+        </div>
+        <span class="adventure-stars" aria-hidden="true">⭐ 🍌 ✨</span>
+      </button>
+    </section>
 
     <!-- 快捷功能区 -->
     <section class="quick-section">
@@ -227,6 +255,87 @@ function getSubjectIcon(code) {
   font-weight: var(--font-bold);
   color: var(--text-primary);
   margin-bottom: var(--space-4);
+}
+
+/* ===== 今日英语冒险 ===== */
+.adventure-section {
+  margin-bottom: var(--space-6);
+}
+
+.adventure-card {
+  width: 100%;
+  min-height: 184px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-5);
+  text-align: left;
+  background: var(--gradient-adventure);
+  border: 3px solid var(--color-warning);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hover);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-bounce);
+}
+
+.adventure-card:hover { transform: translateY(-4px) scale(1.01); }
+.adventure-card:active { transform: scale(0.99); }
+
+.adventure-image {
+  width: 136px;
+  height: 136px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 5px solid white;
+  border-radius: 32px;
+  box-shadow: var(--shadow-soft);
+}
+
+.adventure-copy { position: relative; z-index: 1; }
+.adventure-kicker {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  color: var(--color-orange);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  letter-spacing: 0.08em;
+}
+
+.adventure-copy h2 {
+  margin-bottom: var(--space-2);
+  color: var(--text-primary);
+  font-size: clamp(var(--text-lg), 3vw, var(--text-xl));
+}
+
+.adventure-copy p {
+  margin-bottom: var(--space-3);
+  color: var(--text-secondary);
+}
+
+.adventure-action {
+  display: inline-flex;
+  padding: var(--space-2) var(--space-4);
+  color: white;
+  background: var(--color-orange);
+  border-radius: var(--radius-pill);
+  font-weight: var(--font-bold);
+}
+
+.adventure-stars {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-4);
+  font-size: 24px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .adventure-stars { animation: fruitSparkle 1.8s ease-in-out infinite; }
+}
+
+@keyframes fruitSparkle {
+  50% { transform: translateY(-5px) rotate(3deg); }
 }
 
 /* ===== 快捷功能区 ===== */
@@ -399,5 +508,9 @@ function getSubjectIcon(code) {
 @media (max-width: 480px) {
   .mascot { width: 96px; height: 96px; }
   .greeting h1 { font-size: var(--text-lg); }
+  .adventure-card { min-height: 156px; padding: var(--space-4); gap: var(--space-3); }
+  .adventure-image { width: 92px; height: 92px; border-radius: 24px; }
+  .adventure-copy p { font-size: var(--text-sm); }
+  .adventure-stars { display: none; }
 }
 </style>
