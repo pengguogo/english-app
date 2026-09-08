@@ -24,6 +24,14 @@ final class PicturebookContentValidator {
             if ("QUIZ".equals(root.path("type").asText())) {
                 JsonNode options = item.path("options");
                 require(options.isArray() && options.size() >= 2, "绘本问题至少需要两个选项");
+                for (JsonNode option : options) {
+                    if (option.isTextual()) {
+                        require(!option.asText().isBlank(), "绘本文字选项不能为空");
+                    } else {
+                        require(option.isObject() && !option.path("text").asText().isBlank(), "绘本图片选项必须有语音说明");
+                        require(option.path("image").asText().matches("[a-z0-9-]+(?:/[a-z0-9-]+)+"), "绘本选项配图 key 无效");
+                    }
+                }
                 require(item.path("answer").isInt() && item.path("answer").asInt() >= 0
                         && item.path("answer").asInt() < options.size(), "绘本答案索引无效");
                 require(!item.path("audioText").asText().isBlank(), "绘本问题广播不能为空");

@@ -8,10 +8,10 @@ const router = useRouter()
   <section class="book-entry" aria-labelledby="book-entry-title">
     <img :src="'/images/picturebooks/train-station.jpg'" alt="溪边车站的绿色小火车" />
     <div>
-      <span class="eyebrow">本周线下课 · PICTUREBOOK EXPRESS</span>
+      <span class="eyebrow">看图 · 听故事 · 跟着说</span>
       <h2 id="book-entry-title">绘本小火车，准备发车！</h2>
-      <p>听故事、当站长、回答问题。下一站，溪边探险。</p>
-      <AppButton variant="success" @click="router.push('/picturebooks')">进入绘本专区 →</AppButton>
+      <p>不用认识字。点大图听故事，听声音选图片。</p>
+      <AppButton size="lg" variant="success" @click="router.push('/picturebooks')"><span aria-hidden="true">🔊</span>开始听故事</AppButton>
     </div>
   </section>
 </template>
