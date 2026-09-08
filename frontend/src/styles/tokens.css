@@ -7,6 +7,15 @@
  */
 
 :root {
+  /* 3D 展台与模型材质：渲染器也从这些令牌读取颜色。 */
+  --model-stage: #edf4f4;
+  --model-red: #b93d42;
+  --model-dark: #263640;
+  --model-brass: #d9ad60;
+  --model-steel: #93a5ad;
+  --model-glass: #a6dce4;
+  --model-wood: #85725e;
+  --model-ground: #d5e2df;
   /* ===== 配色令牌 ===== */
   /* 主色: 蓝紫色,用于主按钮、导航、链接 */
   --color-primary: #6B7CFF;

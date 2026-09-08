@@ -15,6 +15,7 @@ import { getSubjects } from '../api/subject'
 import MimiMascot from '../components/MimiMascot.vue'
 import AppButton from '../components/AppButton.vue'
 import PicturebookEntry from '../components/picturebooks/PicturebookEntry.vue'
+import ModelEntry from '../components/models/ModelEntry.vue'
 
 const router = useRouter()
 const subjects = ref([])
@@ -99,6 +100,7 @@ function startFruitAdventure() {
     </header>
 
     <PicturebookEntry />
+    <ModelEntry />
 
     <!-- 英语趣味化试点：首屏一次点击开始 -->
     <section class="adventure-section" aria-labelledby="adventure-title">
