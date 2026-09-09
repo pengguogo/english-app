@@ -8,8 +8,8 @@ const router = useRouter()
   <section class="model-entry" aria-labelledby="model-entry-title">
     <div>
       <span class="eyebrow">小小探索家 · 3D</span>
-      <h2 id="model-entry-title">把蒸汽火车转过来看</h2>
-      <p>走近立体模型，从每个角度发现新细节。</p>
+      <h2 id="model-entry-title">走近火车，发现机械细节</h2>
+      <p>蒸汽火车与燃油机车，旋转、放大，还能打开机罩看零件。</p>
     </div>
     <AppButton @click="router.push('/models')">探索 3D 模型 →</AppButton>
   </section>

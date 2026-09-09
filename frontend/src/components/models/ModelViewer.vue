@@ -2,6 +2,22 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import AppButton from '../AppButton.vue'
 import { createModelScene } from './modelScene'
+import { dieselParts } from './dieselTrain'
+
+const props = defineProps({ model: { type: String, default: 'steam' } })
+const selected = ref('')
+const hoodOpen = ref(false)
+function selectPart(id, open) {
+  selected.value = id
+  hoodOpen.value = open
+  host.value?.scrollIntoView({ block: 'center', behavior: 'instant' })
+}
+function toggleHood() {
+  hoodOpen.value = !hoodOpen.value
+  if (!hoodOpen.value && selected.value === 'engine') selected.value = ''
+  scene?.setHood(hoodOpen.value)
+}
+function reset() { selected.value = ''; scene?.view() }
 
 const host = ref(null)
 const error = ref('')
@@ -15,11 +31,13 @@ function start() {
   scene = undefined
   host.value.replaceChildren()
   error.value = ''
+  selected.value = ''
+  hoodOpen.value = false
   try {
-    scene = createModelScene(host.value)
+    scene = createModelScene(host.value, props.model, selectPart)
   } catch (cause) {
     error.value = '当前设备暂时无法显示 3D 模型，请启用浏览器硬件加速后重试。'
-    console.error('加载蒸汽火车模型失败', cause)
+    console.error('加载火车模型失败', cause)
   }
 }
 onMounted(() => {
@@ -33,14 +51,22 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="viewer" aria-label="蒸汽火车模型查看器">
+  <section class="viewer" :aria-label="model === 'diesel' ? '燃油火车模型查看器' : '蒸汽火车模型查看器'">
     <div class="stage-wrap">
       <div ref="host" class="stage" />
       <div v-if="error" class="error" role="alert">
         <p>{{ error }}</p>
         <AppButton @click="start">重新加载</AppButton>
       </div>
-      <span v-else class="stage-label">01 / STEAM LOCOMOTIVE</span>
+      <span v-else class="stage-label">{{ model === 'diesel' ? '02 / DIESEL LOCOMOTIVE' : '01 / STEAM LOCOMOTIVE' }}</span>
+    </div>
+    <div v-if="model === 'diesel'" class="inspection" aria-label="零件近景">
+      <p class="inspection-title">零件放大镜 <span>点击零件或选择下方名称</span></p>
+      <div class="part-buttons">
+        <AppButton v-for="part in dieselParts" :key="part.id" :variant="selected === part.id ? 'primary' : 'ghost'" :aria-pressed="selected === part.id" :disabled="!!error" @click="scene?.focus(part.id)">{{ part.label }}</AppButton>
+        <AppButton variant="warning" :aria-pressed="hoodOpen" :disabled="!!error" @click="toggleHood">{{ hoodOpen ? '关闭机罩' : '打开机罩' }}</AppButton>
+      </div>
+      <p class="part-description" aria-live="polite">{{ dieselParts.find(part => part.id === selected)?.description || '选择一个零件，镜头会靠近它；继续放大，可以检查螺栓、管线与金属连接处。' }}</p>
     </div>
     <div class="toolbar" aria-label="模型操作">
       <AppButton variant="ghost" :disabled="!!error" @click="scene?.view('side')">侧面</AppButton>
@@ -48,13 +74,18 @@ onBeforeUnmount(() => {
       <AppButton variant="ghost" :disabled="!!error" @click="scene?.view('top')">俯视</AppButton>
       <AppButton variant="ghost" :disabled="!!error" aria-label="放大模型" @click="scene?.zoom(.8)">放大 ＋</AppButton>
       <AppButton variant="ghost" :disabled="!!error" aria-label="缩小模型" @click="scene?.zoom(1.25)">缩小 −</AppButton>
-      <AppButton :disabled="!!error" @click="scene?.view()">复位视角</AppButton>
+      <AppButton :disabled="!!error" @click="reset">复位视角</AppButton>
     </div>
-    <p class="hint">拖动旋转 · 滚轮或双指缩放 · 也可以点击按钮切换视角</p>
+    <p class="hint">拖动旋转 · 滚轮或双指缩放<span v-if="model === 'diesel'"> · 右键拖动或双指移动可平移</span> · 按钮可切换视角</p>
   </section>
 </template>
 
 <style scoped>
+.inspection { padding: var(--space-4); border-bottom: 1px solid var(--border-light); }
+.inspection-title { font-weight: var(--font-bold); color: var(--text-primary); }
+.inspection-title span { display: inline-block; margin-left: var(--space-2); font-size: var(--text-xs); color: var(--text-secondary); font-weight: var(--font-normal); }
+.part-buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-3) 0; }
+.part-description { color: var(--text-secondary); line-height: 1.7; min-height: 3.4em; }
 .viewer { border: 1px solid var(--border-light); border-radius: var(--radius-lg); overflow: hidden; background: var(--bg-card); box-shadow: var(--shadow-card); }
 .stage-wrap { position: relative; }
 .stage { height: clamp(320px, 55vw, 530px); background: var(--model-stage); touch-action: none; }
