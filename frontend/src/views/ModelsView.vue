@@ -4,6 +4,7 @@ import AppButton from '../components/AppButton.vue'
 import { useRouter } from 'vue-router'
 import BackBar from '../components/BackBar.vue'
 import ModelViewer from '../components/models/ModelViewer.vue'
+import KenneyTrainExhibit from '../components/models/KenneyTrainExhibit.vue'
 const router = useRouter()
 const model = ref('diesel')
 </script>
@@ -11,6 +12,7 @@ const model = ref('diesel')
 <template>
   <main class="models-page">
     <BackBar title="3D 模型馆" @back="router.push('/')" />
+    <KenneyTrainExhibit />
     <header class="intro">
       <div class="model-tabs" aria-label="选择火车模型">
         <AppButton :variant="model === 'steam' ? 'primary' : 'ghost'" :aria-pressed="model === 'steam'" @click="model = 'steam'">01 蒸汽火车</AppButton>
