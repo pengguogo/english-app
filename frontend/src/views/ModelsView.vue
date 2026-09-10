@@ -4,32 +4,52 @@ import AppButton from '../components/AppButton.vue'
 import { useRouter } from 'vue-router'
 import BackBar from '../components/BackBar.vue'
 import ModelViewer from '../components/models/ModelViewer.vue'
-import KenneyTrainExhibit from '../components/models/KenneyTrainExhibit.vue'
 const router = useRouter()
-const model = ref('diesel')
+const model = ref('gp7')
+
+const modelInfo = {
+  steam: {
+    eyebrow: '交通工具 · 蒸汽时代',
+    title: '蒸汽火车',
+    english: 'Steam locomotive',
+    description: '一座可以转动的小小火车展台。看看圆圆的锅炉，再找找驾驶室和大车轮。'
+  },
+  diesel: {
+    eyebrow: '交通工具 · 机械细节探索',
+    title: '燃油火车',
+    english: 'Diesel-electric locomotive',
+    description: '从整辆机车，走近一颗螺栓。打开机罩，看柴油机；靠近底盘，探索轮组和悬挂。'
+  },
+  gp7: {
+    eyebrow: '真实车型 · 1950 年代',
+    title: 'EMD GP7 800',
+    english: 'Diesel-electric locomotive',
+    description: '观察真实 GP7 柴油电力机车的驾驶室、长机罩、转向架和车身涂装。'
+  }
+}
 </script>
 
 <template>
   <main class="models-page">
     <BackBar title="3D 模型馆" @back="router.push('/')" />
-    <KenneyTrainExhibit />
     <header class="intro">
       <div class="model-tabs" aria-label="选择火车模型">
         <AppButton :variant="model === 'steam' ? 'primary' : 'ghost'" :aria-pressed="model === 'steam'" @click="model = 'steam'">01 蒸汽火车</AppButton>
         <AppButton :variant="model === 'diesel' ? 'primary' : 'ghost'" :aria-pressed="model === 'diesel'" @click="model = 'diesel'">02 燃油火车</AppButton>
+        <AppButton :variant="model === 'gp7' ? 'primary' : 'ghost'" :aria-pressed="model === 'gp7'" @click="model = 'gp7'">03 GP7 真实机车</AppButton>
       </div>
-      <span class="eyebrow">交通工具 · {{ model === 'diesel' ? '机械细节探索' : '蒸汽时代' }}</span>
-      <h1 v-if="model === 'diesel'">燃油火车 <span>Diesel-electric locomotive</span></h1>
-      <h1 v-else>蒸汽火车 <span>Steam locomotive</span></h1>
-      <p v-if="model === 'diesel'">从整辆机车，走近一颗螺栓。打开机罩，看柴油机；靠近底盘，探索轮组和悬挂。</p>
-      <p v-else>一座可以转动的小小火车展台。看看圆圆的锅炉，再找找驾驶室和大车轮。</p>
+      <span class="eyebrow">{{ modelInfo[model].eyebrow }}</span>
+      <h1>{{ modelInfo[model].title }} <span>{{ modelInfo[model].english }}</span></h1>
+      <p>{{ modelInfo[model].description }}</p>
     </header>
     <ModelViewer :key="model" :model="model" />
     <aside class="note">
       <h2>试着换个角度</h2>
-      <p v-if="model === 'diesel'">先选择“轮组与悬挂”，放大观察轴箱上的六角螺栓。再选择“柴油机”，打开机罩寻找两排气缸盖和细细的管线。</p>
+      <p v-if="model === 'gp7'">拖动观察长机罩两侧的散热格栅，再靠近转向架，比较它与上方原创教学模型的轮组结构。</p>
+      <p v-else-if="model === 'diesel'">先选择“轮组与悬挂”，放大观察轴箱上的六角螺栓。再选择“柴油机”，打开机罩寻找两排气缸盖和细细的管线。</p>
       <p v-else>从侧面观察车轮和连杆，从正面看看车灯，从上方找一找装煤的车厢。</p>
-      <span>{{ model === 'diesel' ? '原创柴油电力机车教学模型，参考真实机械结构；内部布局与比例经过简化，并非特定车型的工程复刻。' : '风格化展示模型，比例与细节经过简化。' }}</span>
+      <span v-if="model === 'gp7'">网页优化模型：SlavaPo；原始模型：Jesper Landin。均按 Creative Commons Attribution 4.0 授权。</span>
+      <span v-else>{{ model === 'diesel' ? '原创柴油电力机车教学模型，参考真实机械结构；内部布局与比例经过简化，并非特定车型的工程复刻。' : '风格化展示模型，比例与细节经过简化。' }}</span>
     </aside>
   </main>
 </template>
