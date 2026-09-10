@@ -3,6 +3,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import AppButton from '../AppButton.vue'
 import { createModelScene } from './modelScene'
 import { dieselParts } from './dieselTrain'
+import { externalTrainModels, isExternalTrain } from './externalTrainModels'
 
 const props = defineProps({ model: { type: String, default: 'steam' } })
 const selected = ref('')
@@ -27,7 +28,7 @@ function contextLost(event) {
   error.value = '3D 显示暂时中断，请重新加载模型。'
 }
 function start() {
-  if (props.model === 'gp7') return
+  if (isExternalTrain(props.model)) return
   scene?.dispose()
   scene = undefined
   host.value.replaceChildren()
@@ -42,7 +43,7 @@ function start() {
   }
 }
 onMounted(() => {
-  if (props.model === 'gp7') return
+  if (isExternalTrain(props.model)) return
   host.value.addEventListener('webglcontextlost', contextLost, true)
   start()
 })
@@ -53,15 +54,15 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="model === 'gp7'" class="viewer gp7-viewer" aria-label="EMD GP7 真实机车模型查看器">
+  <section v-if="isExternalTrain(model)" class="viewer external-viewer" :aria-label="`${externalTrainModels[model].title} 真实机车模型查看器`">
     <iframe
-      title="EMD GP7 Knox and Louisville 800 交互式三维模型"
-      src="https://sketchfab.com/models/0ea3b74c59494c99a475a96d3aa246e3/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0"
+      :title="`${externalTrainModels[model].viewerTitle} 交互式三维模型`"
+      :src="`https://sketchfab.com/models/${externalTrainModels[model].uid}/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0`"
       allow="autoplay; fullscreen; xr-spatial-tracking"
       allowfullscreen
       loading="eager"
     />
-    <p class="gp7-credit">网页优化模型：<a href="https://sketchfab.com/StuckVicuna6712" target="_blank" rel="noopener noreferrer">SlavaPo</a>；基于 <a href="https://sketchfab.com/JesperLandin" target="_blank" rel="noopener noreferrer">Jesper Landin</a> 的原始模型，采用 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> 授权。</p>
+    <p class="model-credit">模型由 <a :href="externalTrainModels[model].authorUrl" target="_blank" rel="noopener noreferrer">{{ externalTrainModels[model].author }}</a> 制作，采用 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> 授权。</p>
   </section>
   <section v-else class="viewer" :aria-label="model === 'diesel' ? '燃油火车模型查看器' : '蒸汽火车模型查看器'">
     <div class="stage-wrap">
@@ -106,8 +107,8 @@ onBeforeUnmount(() => {
 .toolbar { display: flex; justify-content: center; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-4); }
 .hint { text-align: center; color: var(--text-secondary); font-size: var(--text-sm); padding: 0 var(--space-4) var(--space-5); }
 .error { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); padding: var(--space-6); background: var(--model-stage); text-align: center; }
-.gp7-viewer iframe { display: block; width: 100%; height: clamp(420px, 60vw, 620px); border: 0; background: var(--model-stage); }
-.gp7-credit { padding: var(--space-3) var(--space-4); text-align: center; color: var(--text-secondary); font-size: var(--text-xs); }
-.gp7-credit a { color: var(--color-primary-hover); }
+.external-viewer iframe { display: block; width: 100%; height: clamp(420px, 60vw, 620px); border: 0; background: var(--model-stage); }
+.model-credit { padding: var(--space-3) var(--space-4); text-align: center; color: var(--text-secondary); font-size: var(--text-xs); }
+.model-credit a { color: var(--color-primary-hover); }
 @media (max-width: 480px) { .toolbar { gap: var(--space-1); padding: var(--space-3); } }
 </style>
