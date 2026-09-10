@@ -3,7 +3,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import AppButton from '../AppButton.vue'
 import { createModelScene } from './modelScene'
 import { dieselParts } from './dieselTrain'
-import { externalTrainModels, isExternalTrain } from './externalTrainModels'
+import { externalVehicleModels, isExternalVehicle } from './externalVehicleModels'
 
 const props = defineProps({ model: { type: String, default: 'steam' } })
 const selected = ref('')
@@ -28,7 +28,7 @@ function contextLost(event) {
   error.value = '3D 显示暂时中断，请重新加载模型。'
 }
 function start() {
-  if (isExternalTrain(props.model)) return
+  if (isExternalVehicle(props.model)) return
   scene?.dispose()
   scene = undefined
   host.value.replaceChildren()
@@ -43,7 +43,7 @@ function start() {
   }
 }
 onMounted(() => {
-  if (isExternalTrain(props.model)) return
+  if (isExternalVehicle(props.model)) return
   host.value.addEventListener('webglcontextlost', contextLost, true)
   start()
 })
@@ -54,15 +54,15 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="isExternalTrain(model)" class="viewer external-viewer" :aria-label="`${externalTrainModels[model].title} 真实机车模型查看器`">
+  <section v-if="isExternalVehicle(model)" class="viewer external-viewer" :aria-label="`${externalVehicleModels[model].title} 真实交通工具模型查看器`">
     <iframe
-      :title="`${externalTrainModels[model].viewerTitle} 交互式三维模型`"
-      :src="`https://sketchfab.com/models/${externalTrainModels[model].uid}/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0`"
+      :title="`${externalVehicleModels[model].viewerTitle} 交互式三维模型`"
+      :src="`https://sketchfab.com/models/${externalVehicleModels[model].uid}/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0`"
       allow="autoplay; fullscreen; xr-spatial-tracking"
       allowfullscreen
       loading="eager"
     />
-    <p class="model-credit">模型由 <a :href="externalTrainModels[model].authorUrl" target="_blank" rel="noopener noreferrer">{{ externalTrainModels[model].author }}</a> 制作，采用 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> 授权。</p>
+    <p class="model-credit">模型由 <a :href="externalVehicleModels[model].authorUrl" target="_blank" rel="noopener noreferrer">{{ externalVehicleModels[model].author }}</a> 制作，采用 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> 授权。</p>
   </section>
   <section v-else class="viewer" :aria-label="model === 'diesel' ? '燃油火车模型查看器' : '蒸汽火车模型查看器'">
     <div class="stage-wrap">

@@ -1,4 +1,4 @@
-# 写实火车模型来源记录
+# 写实交通工具模型来源记录
 
 接入日期：2026-09-10。以下模型均通过作者发布的 Sketchfab 官方查看器展示，需要联网。
 
@@ -29,3 +29,14 @@
 - 三个模型均在模型馆的统一选择栏中展示，并保留作者和授权链接。
 - 高精度模型对 GPU、内存和网络要求较高；Sketchfab 可能依据设备能力显示性能提示。
 - 这些模型提供真实车型外观，不包含内部柴油机或可拆卸机罩。
+
+## 其他写实交通工具
+
+| 展品 | 作者 | 三角面 | 纹理 | 来源 |
+| --- | --- | ---: | ---: | --- |
+| 1975 Porsche 911 Turbo | Lionsharp Studios | 241,265 | 33 | https://sketchfab.com/3d-models/free-1975-porsche-911-930-turbo-8568d9d14a994b9cae59499f0dbed21e |
+| Harley-Davidson Police | Comrade1280 | 540,449 | 未提供 | https://sketchfab.com/3d-models/harley-davidson-police-79dc00298bf449d7bcfdf6eb32bd15ac |
+| F-35A Lightning II | shangus930 | 190,514 | 31 | https://sketchfab.com/3d-models/f-35a-lightning-ii-a06d6113cfb44a0aa7b8f17106aca9c4 |
+| Container Ship | RM02 | 188,711 | 14 | https://sketchfab.com/3d-models/container-ship-aaa41cca946b4a08bc08cf692b7757be |
+
+以上四个模型均由各自作者发布，采用 https://creativecommons.org/licenses/by/4.0/（CC BY 4.0）授权，并通过 Sketchfab 官方查看器展示。
