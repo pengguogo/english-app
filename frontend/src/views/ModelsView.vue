@@ -80,6 +80,24 @@ const modelInfo = {
     title: externalVehicleModels.submarineCutaway.title,
     english: 'Submarine cutaway',
     description: '通过切开的艇体观察基础潜艇内部的舱室、通道、设备与人员活动空间。'
+  },
+  y25Bogie: {
+    eyebrow: '火车零件 · 走行与制动',
+    title: externalVehicleModels.y25Bogie.title,
+    english: 'Freight wagon bogie',
+    description: '单独观察轮对、轴箱、悬挂、转向架构架和基础制动装置怎样组合在一起。'
+  },
+  shibataCoupler: {
+    eyebrow: '火车零件 · 车辆连接',
+    title: externalVehicleModels.shibataCoupler.title,
+    english: 'Shibata coupler',
+    description: '近距离观察电力列车常用车钩的连接面、定位结构和机械锁闭部位。'
+  },
+  br52Mechanism: {
+    eyebrow: '火车零件 · 蒸汽传动',
+    title: externalVehicleModels.br52Mechanism.title,
+    english: 'Steam locomotive running gear',
+    description: '播放动画，观察蒸汽机车车轮、主连杆和侧连杆之间的同步运动关系。'
   }
 }
 </script>
@@ -101,6 +119,9 @@ const modelInfo = {
         <AppButton :variant="model === 'steamEngine' ? 'primary' : 'ghost'" :aria-pressed="model === 'steamEngine'" @click="model = 'steamEngine'">10 蒸汽机内部</AppButton>
         <AppButton :variant="model === 'turbofan' ? 'primary' : 'ghost'" :aria-pressed="model === 'turbofan'" @click="model = 'turbofan'">11 涡扇内部</AppButton>
         <AppButton :variant="model === 'submarineCutaway' ? 'primary' : 'ghost'" :aria-pressed="model === 'submarineCutaway'" @click="model = 'submarineCutaway'">12 潜艇剖面</AppButton>
+        <AppButton :variant="model === 'y25Bogie' ? 'primary' : 'ghost'" :aria-pressed="model === 'y25Bogie'" @click="model = 'y25Bogie'">13 转向架</AppButton>
+        <AppButton :variant="model === 'shibataCoupler' ? 'primary' : 'ghost'" :aria-pressed="model === 'shibataCoupler'" @click="model = 'shibataCoupler'">14 柴田式车钩</AppButton>
+        <AppButton :variant="model === 'br52Mechanism' ? 'primary' : 'ghost'" :aria-pressed="model === 'br52Mechanism'" @click="model = 'br52Mechanism'">15 车轮连杆</AppButton>
       </div>
       <span class="eyebrow">{{ modelInfo[model].eyebrow }}</span>
       <h1>{{ modelInfo[model].title }} <span>{{ modelInfo[model].english }}</span></h1>
@@ -112,6 +133,9 @@ const modelInfo = {
       <p v-if="model === 'steamEngine'">播放模型动画，沿着活塞杆找到连杆和飞轮，观察各零件怎样同步运动。</p>
       <p v-else-if="model === 'turbofan'">从正面找到大风扇，再转到侧面，沿中心轴观察空气经过的多级结构。</p>
       <p v-else-if="model === 'submarineCutaway'">从切开的侧面进入艇内，比较不同舱室的用途和有限空间中的设备布局。</p>
+      <p v-else-if="model === 'y25Bogie'">从侧面寻找弹簧和制动闸瓦，再从上方观察两组轮对如何安装在同一构架中。</p>
+      <p v-else-if="model === 'shibataCoupler'">把镜头转向车钩正面和背面，比较连接面、锁闭部位与车体安装端的形状。</p>
+      <p v-else-if="model === 'br52Mechanism'">播放动画后盯住一个车轮，沿主连杆观察动力怎样传递给其他动轮。</p>
       <p v-else-if="isExternalVehicle(model)">拖动旋转模型并放大关键结构，观察真实交通工具的造型、连接方式与使用痕迹。</p>
       <p v-else-if="model === 'diesel'">先选择“轮组与悬挂”，放大观察轴箱上的六角螺栓。再选择“柴油机”，打开机罩寻找两排气缸盖和细细的管线。</p>
       <p v-else>从侧面观察车轮和连杆，从正面看看车灯，从上方找一找装煤的车厢。</p>

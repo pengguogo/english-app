@@ -8,7 +8,10 @@ export const externalVehicleModels = {
   ship: model('aaa41cca946b4a08bc08cf692b7757be', '集装箱船', 'Container Ship', 'RM02', 'RM02'),
   steamEngine: model('dc1797a6d49e4629bf8ca668bd76e0d0', '动画蒸汽机', 'Animated Steam Engine', 'Robert Crosby', 'robmcrosby'),
   turbofan: model('74c6aceed86b4a41aaad3b93afc3e262', '涡扇发动机', 'Turbofan Jet Engine', 'blenderbirb', 'blenderbirb'),
-  submarineCutaway: model('70f0532170b44593a5afa88ffc7c0c1e', '半剖潜艇', 'Submarine with Interior', 'martyn169', 'martyn169')
+  submarineCutaway: model('70f0532170b44593a5afa88ffc7c0c1e', '半剖潜艇', 'Submarine with Interior', 'martyn169', 'martyn169'),
+  y25Bogie: model('59b720c2616748729910d341d916d6ad', 'Y25 货车转向架', 'Y25 Railway Bogie', 'Víctor Hernández', 'victorhugohc'),
+  shibataCoupler: model('9c6e220e0c4f4a9f8cf6489189e534ba', '柴田式车钩', 'Japanese Shibata Train Coupler', 'Syailendra Razak', 'SyailendraRazak'),
+  br52Mechanism: model('852f498c26ee457d933f7fbeeb50c8ab', 'BR52 走行机构', 'BR52 Steam Locomotive Animation', 'Ryan.Qin', 'Ryan.Qin')
 }
 
 function model(uid, title, viewerTitle, author, username) {

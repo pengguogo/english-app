@@ -50,3 +50,13 @@
 | 半剖潜艇 | martyn169 | 162,000 | 切开艇体展示基础舱室布局 | https://sketchfab.com/3d-models/submarine-with-interior-70f0532170b44593a5afa88ffc7c0c1e |
 
 以上三个模型均可下载，采用 https://creativecommons.org/licenses/by/4.0/（CC BY 4.0）授权，并通过 Sketchfab 官方查看器展示。模型用于结构教学观察，不作为工程尺寸或特定型号复原依据。
+
+## 火车零件与传动机构
+
+| 展品 | 作者 | 三角面 | 可观察结构 | 来源 |
+| --- | --- | ---: | --- | --- |
+| Y25 货车转向架 | Víctor Hernández | 141,700 | 轮对、轴箱、悬挂、构架与基础制动装置 | https://sketchfab.com/3d-models/bogie-type-y25-59b720c2616748729910d341d916d6ad |
+| 柴田式车钩 | Syailendra Razak | 210,000 | 连接面、定位与机械锁闭结构 | https://sketchfab.com/3d-models/japanese-train-coupler-9c6e220e0c4f4a9f8cf6489189e534ba |
+| BR52 蒸汽机车动画 | Ryan.Qin | 78,400 | 动轮、主连杆与侧连杆的运动关系 | https://sketchfab.com/3d-models/br52-steam-locomotive-animation-852f498c26ee457d933f7fbeeb50c8ab |
+
+以上三个模型均可下载，采用 https://creativecommons.org/licenses/by/4.0/（CC BY 4.0）授权，并通过 Sketchfab 官方查看器展示。转向架的参数和组成以作者页面说明为依据；其余模型用于外形与运动关系观察，不作为检修或工程设计资料。
