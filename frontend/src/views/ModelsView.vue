@@ -62,6 +62,24 @@ const modelInfo = {
     title: externalVehicleModels.ship.title,
     english: 'Container ship',
     description: '观察大型货船的船艏、驾驶台、甲板集装箱、吊装区域和船尾结构。'
+  },
+  steamEngine: {
+    eyebrow: '内部结构 · 动力机械',
+    title: externalVehicleModels.steamEngine.title,
+    english: 'Animated steam engine',
+    description: '播放动画，从开放结构中观察活塞、连杆和飞轮怎样把往复运动变成旋转运动。'
+  },
+  turbofan: {
+    eyebrow: '内部结构 · 航空动力',
+    title: externalVehicleModels.turbofan.title,
+    english: 'Turbofan jet engine',
+    description: '沿发动机轴线观察风扇、压气机、燃烧核心和涡轮的层层排列。'
+  },
+  submarineCutaway: {
+    eyebrow: '内部结构 · 水下交通',
+    title: externalVehicleModels.submarineCutaway.title,
+    english: 'Submarine cutaway',
+    description: '通过切开的艇体观察基础潜艇内部的舱室、通道、设备与人员活动空间。'
   }
 }
 </script>
@@ -80,6 +98,9 @@ const modelInfo = {
         <AppButton :variant="model === 'motorcycle' ? 'primary' : 'ghost'" :aria-pressed="model === 'motorcycle'" @click="model = 'motorcycle'">07 摩托车</AppButton>
         <AppButton :variant="model === 'fighter' ? 'primary' : 'ghost'" :aria-pressed="model === 'fighter'" @click="model = 'fighter'">08 F-35A</AppButton>
         <AppButton :variant="model === 'ship' ? 'primary' : 'ghost'" :aria-pressed="model === 'ship'" @click="model = 'ship'">09 集装箱船</AppButton>
+        <AppButton :variant="model === 'steamEngine' ? 'primary' : 'ghost'" :aria-pressed="model === 'steamEngine'" @click="model = 'steamEngine'">10 蒸汽机内部</AppButton>
+        <AppButton :variant="model === 'turbofan' ? 'primary' : 'ghost'" :aria-pressed="model === 'turbofan'" @click="model = 'turbofan'">11 涡扇内部</AppButton>
+        <AppButton :variant="model === 'submarineCutaway' ? 'primary' : 'ghost'" :aria-pressed="model === 'submarineCutaway'" @click="model = 'submarineCutaway'">12 潜艇剖面</AppButton>
       </div>
       <span class="eyebrow">{{ modelInfo[model].eyebrow }}</span>
       <h1>{{ modelInfo[model].title }} <span>{{ modelInfo[model].english }}</span></h1>
@@ -88,7 +109,10 @@ const modelInfo = {
     <ModelViewer :key="model" :model="model" />
     <aside class="note">
       <h2>试着换个角度</h2>
-      <p v-if="isExternalVehicle(model)">拖动旋转模型并放大关键结构，观察真实交通工具的造型、连接方式与使用痕迹。</p>
+      <p v-if="model === 'steamEngine'">播放模型动画，沿着活塞杆找到连杆和飞轮，观察各零件怎样同步运动。</p>
+      <p v-else-if="model === 'turbofan'">从正面找到大风扇，再转到侧面，沿中心轴观察空气经过的多级结构。</p>
+      <p v-else-if="model === 'submarineCutaway'">从切开的侧面进入艇内，比较不同舱室的用途和有限空间中的设备布局。</p>
+      <p v-else-if="isExternalVehicle(model)">拖动旋转模型并放大关键结构，观察真实交通工具的造型、连接方式与使用痕迹。</p>
       <p v-else-if="model === 'diesel'">先选择“轮组与悬挂”，放大观察轴箱上的六角螺栓。再选择“柴油机”，打开机罩寻找两排气缸盖和细细的管线。</p>
       <p v-else>从侧面观察车轮和连杆，从正面看看车灯，从上方找一找装煤的车厢。</p>
       <span v-if="isExternalVehicle(model)">模型：{{ externalVehicleModels[model].author }}，Creative Commons Attribution 4.0；写实外观展示，内部结构以作者实际建模内容为准。</span>

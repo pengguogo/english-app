@@ -5,7 +5,10 @@ export const externalVehicleModels = {
   porsche: model('8568d9d14a994b9cae59499f0dbed21e', 'Porsche 911 Turbo', '1975 Porsche 911 930 Turbo', 'Lionsharp Studios', 'lionsharp'),
   motorcycle: model('79dc00298bf449d7bcfdf6eb32bd15ac', 'Harley Police', 'Harley-Davidson Police Motorcycle', 'Comrade1280', 'comrade1280'),
   fighter: model('a06d6113cfb44a0aa7b8f17106aca9c4', 'F-35A', 'F-35A Lightning II', 'shangus930', 'shangus930'),
-  ship: model('aaa41cca946b4a08bc08cf692b7757be', '集装箱船', 'Container Ship', 'RM02', 'RM02')
+  ship: model('aaa41cca946b4a08bc08cf692b7757be', '集装箱船', 'Container Ship', 'RM02', 'RM02'),
+  steamEngine: model('dc1797a6d49e4629bf8ca668bd76e0d0', '动画蒸汽机', 'Animated Steam Engine', 'Robert Crosby', 'robmcrosby'),
+  turbofan: model('74c6aceed86b4a41aaad3b93afc3e262', '涡扇发动机', 'Turbofan Jet Engine', 'blenderbirb', 'blenderbirb'),
+  submarineCutaway: model('70f0532170b44593a5afa88ffc7c0c1e', '半剖潜艇', 'Submarine with Interior', 'martyn169', 'martyn169')
 }
 
 function model(uid, title, viewerTitle, author, username) {

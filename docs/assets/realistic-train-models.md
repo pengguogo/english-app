@@ -40,3 +40,13 @@
 | Container Ship | RM02 | 188,711 | 14 | https://sketchfab.com/3d-models/container-ship-aaa41cca946b4a08bc08cf692b7757be |
 
 以上四个模型均由各自作者发布，采用 https://creativecommons.org/licenses/by/4.0/（CC BY 4.0）授权，并通过 Sketchfab 官方查看器展示。
+
+## 可查看内部结构的教学模型
+
+| 展品 | 作者 | 三角面 | 内部结构 | 来源 |
+| --- | --- | ---: | --- | --- |
+| 动画蒸汽机 | Robert Crosby | 38,500 | 活塞、连杆与飞轮动画 | https://sketchfab.com/3d-models/steam-engine-dc1797a6d49e4629bf8ca668bd76e0d0 |
+| 涡扇发动机 | blenderbirb | 236,000 | 风扇、压气机、核心机与涡轮 | https://sketchfab.com/3d-models/turbine-turbofan-engine-jet-engine-74c6aceed86b4a41aaad3b93afc3e262 |
+| 半剖潜艇 | martyn169 | 162,000 | 切开艇体展示基础舱室布局 | https://sketchfab.com/3d-models/submarine-with-interior-70f0532170b44593a5afa88ffc7c0c1e |
+
+以上三个模型均可下载，采用 https://creativecommons.org/licenses/by/4.0/（CC BY 4.0）授权，并通过 Sketchfab 官方查看器展示。模型用于结构教学观察，不作为工程尺寸或特定型号复原依据。
