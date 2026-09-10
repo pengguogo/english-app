@@ -146,7 +146,7 @@ const modelInfo = {
 </template>
 
 <style scoped>
-.model-tabs { display: flex; gap: var(--space-2); margin-bottom: var(--space-5); padding-bottom: var(--space-2); overflow-x: auto; scrollbar-width: thin; }
+.model-tabs { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-5); padding-bottom: var(--space-2); }
 .model-tabs :deep(button) { flex: 0 0 auto; }
 .models-page { padding: var(--space-4); }
 .intro { padding: var(--space-4) 0 var(--space-6); }
@@ -157,4 +157,5 @@ p { color: var(--text-secondary); line-height: 1.8; }
 .note { margin-top: var(--space-6); padding: var(--space-5); border-radius: var(--radius-md); background: var(--bg-card); }
 .note h2 { font-size: var(--text-base); margin-bottom: var(--space-2); }
 .note span { display: block; margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-secondary); }
+@media (max-width: 720px) { .model-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; } }
 </style>
