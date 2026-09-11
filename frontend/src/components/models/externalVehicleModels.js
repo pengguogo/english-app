@@ -14,7 +14,10 @@ export const externalVehicleModels = {
   br52Mechanism: model('852f498c26ee457d933f7fbeeb50c8ab', 'BR52 走行机构', 'BR52 Steam Locomotive Animation', 'Ryan.Qin', 'Ryan.Qin'),
   locomotiveCab: model('0383f5afce0945b3bb8309aa77d760cb', '900 号机车驾驶室', 'Locomotive 900 Cab Interior', 'peter54', 'peter54'),
   thsrInterior: model('42b78950675942cb871904f69006783f', '700T 车头内部', 'THSR 700T Locomotive Interior', 'Basic Hsu', 'Hsu.Pei.Ge'),
-  railwayWheel: model('8d0b0c78792a48dbb1d78cd6c48b4b00', '铁路轮对', 'Railway Wheelset', 'Mehdi Shahsavan', 'ahmagh2e')
+  railwayWheel: model('8d0b0c78792a48dbb1d78cd6c48b4b00', '铁路轮对', 'Railway Wheelset', 'Mehdi Shahsavan', 'ahmagh2e'),
+  aarCoupler: model('074977dc95514e2da29d9a89867e3a1d', 'AAR 关节式车钩', 'AAR Knuckle Coupler', 'josepholiverdev', 'josepholiverdev'),
+  switchLever: model('24030034594d4722b3acf486e0f2de9c', '道岔扳杆', 'Railway Switch Lever', 'Blue Scans', 'boat_dfk'),
+  railwaySignal: model('f6c97d2382e44f2f942d6fc1c1452e48', '铁路信号机', 'Railway Signal Light', 'turboart', 'turboart')
 }
 
 function model(uid, title, viewerTitle, author, username) {

@@ -116,6 +116,24 @@ const modelInfo = {
     title: externalVehicleModels.railwayWheel.title,
     english: 'Railway wheelset',
     description: '近距离观察车轮、轮缘、踏面和车轴，理解列车如何沿钢轨保持方向。'
+  },
+  aarCoupler: {
+    eyebrow: '火车零件 · 车辆连接',
+    title: externalVehicleModels.aarCoupler.title,
+    english: 'Knuckle coupler',
+    description: '观察北美铁路常见关节式车钩的钩舌、钩体和锁闭轮廓，并与柴田式车钩比较。'
+  },
+  switchLever: {
+    eyebrow: '铁路设备 · 线路控制',
+    title: externalVehicleModels.switchLever.title,
+    english: 'Railway switch lever',
+    description: '观察扳杆、连动部件、钢轨与道床，理解人工道岔如何改变列车前进方向。'
+  },
+  railwaySignal: {
+    eyebrow: '铁路设备 · 行车信号',
+    title: externalVehicleModels.railwaySignal.title,
+    english: 'Railway signal',
+    description: '近距离观察信号灯组、遮光罩、支架和检修部件，认识铁路信号设备的外部结构。'
   }
 }
 </script>
@@ -143,6 +161,9 @@ const modelInfo = {
         <AppButton :variant="model === 'locomotiveCab' ? 'primary' : 'ghost'" :aria-pressed="model === 'locomotiveCab'" @click="model = 'locomotiveCab'">16 机车驾驶室</AppButton>
         <AppButton :variant="model === 'thsrInterior' ? 'primary' : 'ghost'" :aria-pressed="model === 'thsrInterior'" @click="model = 'thsrInterior'">17 高铁车头内部</AppButton>
         <AppButton :variant="model === 'railwayWheel' ? 'primary' : 'ghost'" :aria-pressed="model === 'railwayWheel'" @click="model = 'railwayWheel'">18 铁路轮对</AppButton>
+        <AppButton :variant="model === 'aarCoupler' ? 'primary' : 'ghost'" :aria-pressed="model === 'aarCoupler'" @click="model = 'aarCoupler'">19 AAR 车钩</AppButton>
+        <AppButton :variant="model === 'switchLever' ? 'primary' : 'ghost'" :aria-pressed="model === 'switchLever'" @click="model = 'switchLever'">20 道岔扳杆</AppButton>
+        <AppButton :variant="model === 'railwaySignal' ? 'primary' : 'ghost'" :aria-pressed="model === 'railwaySignal'" @click="model = 'railwaySignal'">21 铁路信号机</AppButton>
       </div>
       <span class="eyebrow">{{ modelInfo[model].eyebrow }}</span>
       <h1>{{ modelInfo[model].title }} <span>{{ modelInfo[model].english }}</span></h1>
@@ -160,6 +181,9 @@ const modelInfo = {
       <p v-else-if="model === 'locomotiveCab'">把视角移进驾驶室，寻找速度表、压力表、控制手柄和司机座椅。</p>
       <p v-else-if="model === 'thsrInterior'">从车头侧面和上方观察，比较驾驶空间与后方设备区域的布局。</p>
       <p v-else-if="model === 'railwayWheel'">放大轮缘与踏面，观察车轮接触钢轨的位置以及两轮如何由车轴固定。</p>
+      <p v-else-if="model === 'aarCoupler'">转到车钩正面观察钩舌开口，再从侧面寻找钩体与车辆连接的位置。</p>
+      <p v-else-if="model === 'switchLever'">沿扳杆底座寻找与钢轨相连的机构，比较扳杆两种位置可能对应的线路方向。</p>
+      <p v-else-if="model === 'railwaySignal'">从正面观察灯组和遮光罩，再转到背面寻找支架与检修结构。</p>
       <p v-else-if="isExternalVehicle(model)">拖动旋转模型并放大关键结构，观察真实交通工具的造型、连接方式与使用痕迹。</p>
       <p v-else-if="model === 'diesel'">先选择“轮组与悬挂”，放大观察轴箱上的六角螺栓。再选择“柴油机”，打开机罩寻找两排气缸盖和细细的管线。</p>
       <p v-else>从侧面观察车轮和连杆，从正面看看车灯，从上方找一找装煤的车厢。</p>

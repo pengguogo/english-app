@@ -70,3 +70,13 @@
 | 铁路轮对 | Mehdi Shahsavan | 33,300 | 车轮、轮缘、踏面、车轴与钢轨接触关系 | https://sketchfab.com/3d-models/train-rail-tran-train-wheel-8d0b0c78792a48dbb1d78cd6c48b4b00 |
 
 以上三个模型均可下载，采用 https://creativecommons.org/licenses/by/4.0/（CC BY 4.0）授权，并通过 Sketchfab 官方查看器展示。700T 模型由作者依据公开外观资料推测内部设备比例，不是工程图级复原；其余模型同样只用于结构观察。
+
+## 车钩、道岔与信号设备
+
+| 展品 | 作者 | 三角面 | 可观察结构 | 来源 |
+| --- | --- | ---: | --- | --- |
+| AAR 关节式车钩 | josepholiverdev | 5,000 | 钩舌、钩体与锁闭轮廓 | https://sketchfab.com/3d-models/quick-railway-railcar-coupler-scan-074977dc95514e2da29d9a89867e3a1d |
+| 道岔扳杆 | Blue Scans | 499,900 | 扳杆、连动部件、钢轨与道床 | https://sketchfab.com/3d-models/railway-switch-lever-scan-24030034594d4722b3acf486e0f2de9c |
+| 铁路信号机 | turboart | 5,000 | 灯组、遮光罩、支架与检修部件 | https://sketchfab.com/3d-models/train-singal-f6c97d2382e44f2f942d6fc1c1452e48 |
+
+以上三个模型均可下载，采用 https://creativecommons.org/licenses/by/4.0/（CC BY 4.0）授权，并通过 Sketchfab 官方查看器展示。AAR 车钩和道岔扳杆为实物扫描，适合观察外部形态；铁路信号机用于基础结构辨识，不作为具体线路的信号规则说明。
