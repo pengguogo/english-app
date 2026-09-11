@@ -60,3 +60,13 @@
 | BR52 蒸汽机车动画 | Ryan.Qin | 78,400 | 动轮、主连杆与侧连杆的运动关系 | https://sketchfab.com/3d-models/br52-steam-locomotive-animation-852f498c26ee457d933f7fbeeb50c8ab |
 
 以上三个模型均可下载，采用 https://creativecommons.org/licenses/by/4.0/（CC BY 4.0）授权，并通过 Sketchfab 官方查看器展示。转向架的参数和组成以作者页面说明为依据；其余模型用于外形与运动关系观察，不作为检修或工程设计资料。
+
+## 驾驶空间与轮轨零件
+
+| 展品 | 作者 | 三角面 | 可观察结构 | 来源 |
+| --- | --- | ---: | --- | --- |
+| 900 号机车驾驶室 | peter54 | 250,000 | 操纵台、仪表、控制手柄与司机工作空间 | https://sketchfab.com/3d-models/locomotive-900-cab-interior-0383f5afce0945b3bb8309aa77d760cb |
+| 700T 车头内部 | Basic Hsu | 129,200 | 高速列车车头设备与驾驶区域 | https://sketchfab.com/3d-models/thsr-700t-interior-locomotive-01-42b78950675942cb871904f69006783f |
+| 铁路轮对 | Mehdi Shahsavan | 33,300 | 车轮、轮缘、踏面、车轴与钢轨接触关系 | https://sketchfab.com/3d-models/train-rail-tran-train-wheel-8d0b0c78792a48dbb1d78cd6c48b4b00 |
+
+以上三个模型均可下载，采用 https://creativecommons.org/licenses/by/4.0/（CC BY 4.0）授权，并通过 Sketchfab 官方查看器展示。700T 模型由作者依据公开外观资料推测内部设备比例，不是工程图级复原；其余模型同样只用于结构观察。

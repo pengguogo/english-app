@@ -11,7 +11,10 @@ export const externalVehicleModels = {
   submarineCutaway: model('70f0532170b44593a5afa88ffc7c0c1e', '半剖潜艇', 'Submarine with Interior', 'martyn169', 'martyn169'),
   y25Bogie: model('59b720c2616748729910d341d916d6ad', 'Y25 货车转向架', 'Y25 Railway Bogie', 'Víctor Hernández', 'victorhugohc'),
   shibataCoupler: model('9c6e220e0c4f4a9f8cf6489189e534ba', '柴田式车钩', 'Japanese Shibata Train Coupler', 'Syailendra Razak', 'SyailendraRazak'),
-  br52Mechanism: model('852f498c26ee457d933f7fbeeb50c8ab', 'BR52 走行机构', 'BR52 Steam Locomotive Animation', 'Ryan.Qin', 'Ryan.Qin')
+  br52Mechanism: model('852f498c26ee457d933f7fbeeb50c8ab', 'BR52 走行机构', 'BR52 Steam Locomotive Animation', 'Ryan.Qin', 'Ryan.Qin'),
+  locomotiveCab: model('0383f5afce0945b3bb8309aa77d760cb', '900 号机车驾驶室', 'Locomotive 900 Cab Interior', 'peter54', 'peter54'),
+  thsrInterior: model('42b78950675942cb871904f69006783f', '700T 车头内部', 'THSR 700T Locomotive Interior', 'Basic Hsu', 'Hsu.Pei.Ge'),
+  railwayWheel: model('8d0b0c78792a48dbb1d78cd6c48b4b00', '铁路轮对', 'Railway Wheelset', 'Mehdi Shahsavan', 'ahmagh2e')
 }
 
 function model(uid, title, viewerTitle, author, username) {

@@ -98,6 +98,24 @@ const modelInfo = {
     title: externalVehicleModels.br52Mechanism.title,
     english: 'Steam locomotive running gear',
     description: '播放动画，观察蒸汽机车车轮、主连杆和侧连杆之间的同步运动关系。'
+  },
+  locomotiveCab: {
+    eyebrow: '火车零件 · 驾驶与控制',
+    title: externalVehicleModels.locomotiveCab.title,
+    english: 'Locomotive cab interior',
+    description: '进入机车驾驶室，观察操纵台、仪表、控制手柄和司机工作空间的布局。'
+  },
+  thsrInterior: {
+    eyebrow: '火车零件 · 高速列车',
+    title: externalVehicleModels.thsrInterior.title,
+    english: 'High-speed train interior',
+    description: '观察 700T 高速列车车头内部设备、驾驶区域和车体空间之间的关系。'
+  },
+  railwayWheel: {
+    eyebrow: '火车零件 · 轮轨系统',
+    title: externalVehicleModels.railwayWheel.title,
+    english: 'Railway wheelset',
+    description: '近距离观察车轮、轮缘、踏面和车轴，理解列车如何沿钢轨保持方向。'
   }
 }
 </script>
@@ -122,6 +140,9 @@ const modelInfo = {
         <AppButton :variant="model === 'y25Bogie' ? 'primary' : 'ghost'" :aria-pressed="model === 'y25Bogie'" @click="model = 'y25Bogie'">13 转向架</AppButton>
         <AppButton :variant="model === 'shibataCoupler' ? 'primary' : 'ghost'" :aria-pressed="model === 'shibataCoupler'" @click="model = 'shibataCoupler'">14 柴田式车钩</AppButton>
         <AppButton :variant="model === 'br52Mechanism' ? 'primary' : 'ghost'" :aria-pressed="model === 'br52Mechanism'" @click="model = 'br52Mechanism'">15 车轮连杆</AppButton>
+        <AppButton :variant="model === 'locomotiveCab' ? 'primary' : 'ghost'" :aria-pressed="model === 'locomotiveCab'" @click="model = 'locomotiveCab'">16 机车驾驶室</AppButton>
+        <AppButton :variant="model === 'thsrInterior' ? 'primary' : 'ghost'" :aria-pressed="model === 'thsrInterior'" @click="model = 'thsrInterior'">17 高铁车头内部</AppButton>
+        <AppButton :variant="model === 'railwayWheel' ? 'primary' : 'ghost'" :aria-pressed="model === 'railwayWheel'" @click="model = 'railwayWheel'">18 铁路轮对</AppButton>
       </div>
       <span class="eyebrow">{{ modelInfo[model].eyebrow }}</span>
       <h1>{{ modelInfo[model].title }} <span>{{ modelInfo[model].english }}</span></h1>
@@ -136,6 +157,9 @@ const modelInfo = {
       <p v-else-if="model === 'y25Bogie'">从侧面寻找弹簧和制动闸瓦，再从上方观察两组轮对如何安装在同一构架中。</p>
       <p v-else-if="model === 'shibataCoupler'">把镜头转向车钩正面和背面，比较连接面、锁闭部位与车体安装端的形状。</p>
       <p v-else-if="model === 'br52Mechanism'">播放动画后盯住一个车轮，沿主连杆观察动力怎样传递给其他动轮。</p>
+      <p v-else-if="model === 'locomotiveCab'">把视角移进驾驶室，寻找速度表、压力表、控制手柄和司机座椅。</p>
+      <p v-else-if="model === 'thsrInterior'">从车头侧面和上方观察，比较驾驶空间与后方设备区域的布局。</p>
+      <p v-else-if="model === 'railwayWheel'">放大轮缘与踏面，观察车轮接触钢轨的位置以及两轮如何由车轴固定。</p>
       <p v-else-if="isExternalVehicle(model)">拖动旋转模型并放大关键结构，观察真实交通工具的造型、连接方式与使用痕迹。</p>
       <p v-else-if="model === 'diesel'">先选择“轮组与悬挂”，放大观察轴箱上的六角螺栓。再选择“柴油机”，打开机罩寻找两排气缸盖和细细的管线。</p>
       <p v-else>从侧面观察车轮和连杆，从正面看看车灯，从上方找一找装煤的车厢。</p>
