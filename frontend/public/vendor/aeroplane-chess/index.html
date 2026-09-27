@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>极简飞行棋</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script type="module" crossorigin src="./assets/main-8e3HFXdD.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="./assets/audioManager-CORsKezd.js">
+  <link rel="modulepreload" crossorigin href="./assets/emojis-MvkXnlU0.js">
+  <link rel="stylesheet" crossorigin href="./assets/audioManager-U313Op7M.css">
+</head>
+
+<body>
+    <div class="index-container">
+        <!-- 标题区域 -->
+        <div class="index-title">
+            <h1 class="rainbow-title">
+                <span>极</span><span>简</span><span>飞</span><span>行</span><span>棋</span>
+            </h1>
+            <div class="game-tips">
+                <div class="tip-content" id="tipContent">游戏小贴士</div>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="index-content">
+            <!-- 主菜单容器 -->
+            <div class="main-menu-container" id="mainMenuContainer">
+                <button class="menu-card-btn" id="menuOnlineBtn" hidden>
+                    <div class="menu-btn-icon" id="iconOnline">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                        </svg>
+                    </div>
+                    <span class="menu-btn-text">在线联机</span>
+                </button>
+                <button class="menu-card-btn" id="menuAiBtn">
+                    <div class="menu-btn-icon" id="iconAi">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M15.15 11C14.385 11 13.8 11.65 13.8 12.5C13.8 13.35 14.385 14 15.15 14C15.915 14 16.5 13.35 16.5 12.5C16.5 11.65 15.915 11 15.15 11ZM8.85 11C8.085 11 7.5 11.65 7.5 12.5C7.5 13.35 8.085 14 8.85 14C9.615 14 10.2 13.35 10.2 12.5C10.2 11.65 9.615 11 8.85 11Z"
+                                fill="currentColor" />
+                            <path
+                                d="M3.75 6.72723C3.75 6.2039 4.1625 5.77572 4.66666 5.77572H8.33334L7.00416 2.30267C6.82084 1.82692 7.05 1.256 7.50834 1.0657C7.96666 0.875385 8.51666 1.11327 8.7 1.58903L10.3042 5.72813H13.65L15.2541 1.58903C15.4375 1.11327 15.9875 0.875385 16.4459 1.0657C16.9041 1.256 17.1334 1.82692 16.95 2.30267L15.6666 5.77572H19.3334C19.8375 5.77572 20.25 6.2039 20.25 6.72723V20.0485C20.25 20.5718 19.8375 21 19.3334 21H4.66666C4.1625 21 3.75 20.5718 3.75 20.0485V6.72723ZM5.58334 7.67875V19.097H18.4166V7.67875H5.58334ZM23 15.7667V11.009C23 10.4857 22.5875 10.0576 22.0834 10.0576C21.5791 10.0576 21.1666 10.4857 21.1666 11.009V15.7667C21.1666 16.29 21.5791 16.7182 22.0834 16.7182C22.5875 16.7182 23 16.29 23 15.7667ZM1.91666 16.7182C2.42084 16.7182 2.83334 16.29 2.83334 15.7667V11.009C2.83334 10.4857 2.42084 10.0576 1.91666 10.0576C1.4125 10.0576 1 10.4857 1 11.009V15.7667C1 16.29 1.4125 16.7182 1.91666 16.7182Z"
+                                fill="currentColor" />
+                        </svg>
+
+                    </div>
+                    <span class="menu-btn-text">人机对战</span>
+                </button>
+                <button class="menu-card-btn" id="menuLocalBtn">
+                    <div class="menu-btn-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <span class="menu-btn-text">本地多人</span>
+                </button>
+                <button class="menu-card-btn" id="menuRulesBtn">
+                    <div class="menu-btn-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </div>
+                    <span class="menu-btn-text">规则说明</span>
+                </button>
+            </div>
+
+            <!-- 玩家设置面板容器 -->
+            <div class="control-panel" id="playerConfigWrapper" style="display: none;">
+                <div class="control-content">
+                    <div class="control-section">
+                        <!-- 游戏模式选择面板 (隐藏，由主菜单触发) -->
+                        <div class="game-mode-selection" id="gameModeSelection" style="display: none;">
+                            <div class="mode-buttons">
+                                <button class="mode-btn" id="onlineMultiplayerBtn">
+                                    <div class="mode-btn-content">
+                                        <div class="mode-btn-title">在线联机</div>
+                                        <div class="mode-btn-desc">与其他玩家联机对战</div>
+                                    </div>
+                                </button>
+                                <button class="mode-btn" id="aiModeBtn">
+                                    <div class="mode-btn-content">
+                                        <div class="mode-btn-title">人机对战</div>
+                                        <div class="mode-btn-desc">与AI智能对手对战</div>
+                                    </div>
+                                </button>
+                                <button class="mode-btn" id="localMultiplayerBtn">
+                                    <div class="mode-btn-content">
+                                        <div class="mode-btn-title">本地多人</div>
+                                        <div class="mode-btn-desc">多人在同一设备上游戏</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 玩家配置面板 -->
+                        <div class="player-config-panel" id="playerConfigPanel" style="display: none;">
+                            <div class="config-header">
+                                <button class="back-btn" id="backToMainMenu">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <h3 id="configTitle">玩家设置</h3>
+                                <input type="text" id="roomNameInput" class="room-title-input" maxlength="16"
+                                    style="display: none;" autocomplete="off">
+                            </div>
+
+                            <!-- 本地多人配置 -->
+                            <div class="local-multiplayer-config" id="localMultiplayerConfig" style="display: none;">
+                                <div class="player-setup-panel">
+                                    <!-- 玩家颜色选择区域（本地多人） -->
+                                    <div class="color-selection local-color-selection">
+                                        <h4>选择玩家颜色</h4>
+                                        <div class="color-options" id="localHumanColorOptions">
+                                            <div class="color-option" data-player="1">
+                                                <div class="color-circle player-1-color"></div>
+                                            </div>
+                                            <div class="color-option" data-player="2">
+                                                <div class="color-circle player-2-color"></div>
+                                            </div>
+                                            <div class="color-option" data-player="3">
+                                                <div class="color-circle player-3-color"></div>
+                                            </div>
+                                            <div class="color-option" data-player="4">
+                                                <div class="color-circle player-4-color"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 玩家设置区域 -->
+                                    <div class="players-setup-area" id="playersSetupArea">
+                                        <!-- 动态生成的玩家设置组件将在这里显示 -->
+                                    </div>
+
+                                    <!-- AI玩家预览（本地多人补位/难度配置） -->
+                                    <div class="bot-players-preview">
+                                        <h4>AI玩家</h4>
+                                        <div class="bot-players" id="localBotPlayers">
+                                            <!-- AI选项将根据空余位置动态生成 -->
+                                        </div>
+                                        <div class="hint-text">点击切换AI难度</div>
+                                    </div>
+
+                                    <!-- 棋子个数设置 -->
+                                    <div class="piece-count-setting">
+                                        <h4>棋子个数</h4>
+                                        <div class="piece-count-selector">
+                                            <div class="local-piece-count-options">
+                                                <div class="local-piece-count-option" data-count="1">
+                                                    <div class="count-circle">1</div>
+                                                </div>
+                                                <div class="local-piece-count-option" data-count="2">
+                                                    <div class="count-circle">2</div>
+                                                </div>
+                                                <div class="local-piece-count-option" data-count="3">
+                                                    <div class="count-circle">3</div>
+                                                </div>
+                                                <div class="local-piece-count-option selected" data-count="4">
+                                                    <div class="count-circle">4</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 道具模式设置 -->
+                                    <div class="skill-mode-setting">
+                                        <div class="toggle-option-group">
+                                            <div class="toggle-option-group-header">
+                                                <span>更多模式</span>
+                                                <span class="toggle-group-help" onclick="showModeRulesModal()">?</span>
+                                            </div>
+                                            <div class="toggle-option">
+                                                <span class="toggle-label-text">道具模式</span>
+                                                <label class="toggle-switch">
+                                                    <input type="checkbox" id="localSkillModeCheckbox">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                            <!-- 欢乐模式设置 -->
+                                            <div class="toggle-option">
+                                                <span class="toggle-label-text">欢乐模式</span>
+                                                <label class="toggle-switch">
+                                                    <input type="checkbox" id="localHappyModeCheckbox">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 开始游戏按钮 -->
+                                    <div class="start-game-section">
+                                        <button class="control-btn" id="localStartGameBtn">开始游戏</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 在线联机配置 -->
+                            <div class="online-multiplayer-config" id="onlineMultiplayerConfig" style="display: none;">
+                                <!-- 第一层级：创建或加入房间 -->
+                                <div class="room-selection" id="roomSelection">
+                                    <div class="player-setup-panel">
+                                        <div class="public-room-list-panel">
+                                            <div class="public-room-list-header">
+                                                <input id="roomSearchInput" class="public-room-search" type="text"
+                                                    placeholder="按房间名查找">
+                                            </div>
+                                            <div class="public-room-list-head" id="publicRoomListHead">
+                                                <div class="head-col">房间名</div>
+                                                <div class="head-col">模式</div>
+                                                <div class="head-col">棋子数</div>
+                                                <div class="head-col">玩家数</div>
+                                                <div class="head-col">状态</div>
+                                            </div>
+                                            <div class="public-room-list" id="publicRoomList"></div>
+                                            <div class="public-room-list-empty" id="publicRoomListEmpty"
+                                                style="display: none;">暂无可加入的房间</div>
+                                        </div>
+
+                                        <div class="public-room-actions-bar">
+                                            <div class="mode-buttons mode-buttons-bottom">
+                                                <button class="mode-btn" id="createRoomBtn">
+                                                    <div class="mode-btn-content">
+                                                        <div class="mode-btn-title">开房间</div>
+                                                    </div>
+                                                </button>
+                                                <button class="mode-btn" id="joinRoomBtn">
+                                                    <div class="mode-btn-content">
+                                                        <div class="mode-btn-title">房间号</div>
+                                                    </div>
+                                                </button>
+                                                <button class="mode-btn" id="reconnectBtn" style="display: none;">
+                                                    <div class="mode-btn-content">
+                                                        <div class="mode-btn-title">重连</div>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 第二层级：房间配置 -->
+                                <div class="room-config" id="roomConfig" style="display: none;">
+                                    <div class="player-setup-panel">
+                                        <!-- 房间信息 -->
+                                        <div class="room-info-container">
+                                            <div class="room-info">
+                                                <div class="room-code-display">
+                                                    <span class="room-code-label">房间号:</span>
+                                                    <span class="room-code" id="roomCodeDisplay">----</span>
+                                                </div>
+                                                <div class="hint-text">点击复制房间号</div>
+                                                <div class="game-config-info" id="gameConfigInfo">
+                                                    4棋子 - 标准模式
+                                                </div>
+                                                <div class="room-privacy-toggle" id="roomPrivacyToggle">
+                                                    <button class="privacy-toggle-btn" id="roomPrivacyPublicBtn"
+                                                        type="button">公开</button>
+                                                    <button class="privacy-toggle-btn" id="roomPrivacyPrivateBtn"
+                                                        type="button">私密</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- 玩家颜色选择区域 -->
+                                        <div class="color-selection">
+                                            <h4>选择你的颜色</h4>
+                                            <div class="color-options">
+                                                <div class="color-option" data-player="1">
+                                                    <div class="color-circle player-1-color">
+                                                    </div>
+                                                    <div class="player-nickname" id="playerNickname1"
+                                                        style="display: none;"></div>
+                                                    <div class="player-ready-status" id="playerReadyStatus1"
+                                                        style="display: none;"></div>
+                                                </div>
+                                                <div class="color-option" data-player="2">
+                                                    <div class="color-circle player-2-color">
+                                                    </div>
+                                                    <div class="player-nickname" id="playerNickname2"
+                                                        style="display: none;"></div>
+                                                    <div class="player-ready-status" id="playerReadyStatus2"
+                                                        style="display: none;"></div>
+                                                </div>
+                                                <div class="color-option" data-player="3">
+                                                    <div class="color-circle player-3-color">
+                                                    </div>
+                                                    <div class="player-nickname" id="playerNickname3"
+                                                        style="display: none;"></div>
+                                                    <div class="player-ready-status" id="playerReadyStatus3"
+                                                        style="display: none;"></div>
+                                                </div>
+                                                <div class="color-option" data-player="4">
+                                                    <div class="color-circle player-4-color">
+                                                    </div>
+                                                    <div class="player-nickname" id="playerNickname4"
+                                                        style="display: none;"></div>
+                                                    <div class="player-ready-status" id="playerReadyStatus4"
+                                                        style="display: none;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 当前玩家设置 -->
+                                        <div class="current-player-settings" id="currentPlayerSettings"
+                                            style="display: none;">
+                                            <!-- 表情选择器 -->
+                                            <div class="emoji-switcher">
+                                                <button class="emoji-nav-btn" id="multiplayerPrevEmoji">‹</button>
+                                                <div class="current-emoji-display">
+                                                    <div class="emoji-preview" id="multiplayerEmojiPreview">
+                                                        <div class="emoji-content" id="multiplayerCurrentEmojiPreview">
+                                                        </div>
+                                                    </div>
+                                                    <span class="emoji-name" id="multiplayerCurrentEmojiName">开心</span>
+                                                </div>
+                                                <button class="emoji-nav-btn" id="multiplayerNextEmoji">›</button>
+                                            </div>
+
+                                            <!-- 昵称输入 -->
+                                            <div class="username-setting">
+                                                <h4>设置昵称</h4>
+                                                <div class="username-input-group">
+                                                    <div class="username-input-with-icon">
+                                                        <input type="text" id="multiplayerPlayerUsername"
+                                                            class="username-input" placeholder="输入昵称" maxlength="8"
+                                                            value="" autocomplete="off">
+                                                        <button class="nickname-dice-btn" id="multiplayerNicknameDice"
+                                                            title="随机昵称">
+                                                            <svg t="1760247195100" class="icon" viewBox="0 0 1024 1024"
+                                                                version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                                                p-id="10681" width="20" height="20">
+                                                                <path
+                                                                    d="M509.2 980.8c-6 0-11.8-0.4-17.8-1.2-5.8-0.8-11.8-2-17.4-3.4-5.6-1.6-11.4-3.4-16.8-5.8-5.4-2.2-10.8-5-16-7.8L120.8 775.8c-3.8-2.2-7.4-4.6-11-7.4-3.4-2.6-6.8-5.6-9.8-8.8-3-3.2-6-6.4-8.6-10-2.6-3.4-5.2-7.2-7.4-11s-4.2-7.8-5.8-11.8c-1.6-4-3-8.2-4.2-12.4-1.2-4.2-2-8.6-2.6-13-0.6-4.4-0.8-8.8-0.8-13.2v-360c0-4.4 0.2-8.8 0.8-13.2 0.6-4.4 1.4-8.8 2.6-13 1.2-4.2 2.6-8.4 4.2-12.4s3.6-8 5.8-11.8c2.2-3.8 4.6-7.4 7.2-11 2.6-3.4 5.6-6.8 8.6-10s6.4-6 9.8-8.8c3.4-2.6 7.2-5.2 11-7.4L441.2 54c5-3 10.4-5.6 16-8 5.4-2.2 11.2-4.2 16.8-5.8 5.6-1.6 11.6-2.8 17.4-3.4 11.8-1.6 23.8-1.6 35.4 0 5.8 0.8 11.8 2 17.4 3.4 5.8 1.6 11.4 3.4 16.8 5.8 5.4 2.2 10.8 5 16 8l320.6 186.6c3.8 2.2 7.4 4.6 11 7.4 3.4 2.6 6.8 5.6 9.8 8.8 3 3.2 6 6.4 8.6 10 2.6 3.4 5.2 7.2 7.2 11 2.2 3.8 4.2 7.8 5.8 11.8 1.6 4 3 8.2 4.2 12.4 1.2 4.2 2 8.6 2.6 13 0.6 4.4 0.8 8.8 0.8 13.2v360.2c0 4.4-0.2 8.8-0.8 13.2-0.6 4.4-1.4 8.6-2.6 13-1.2 4.2-2.6 8.4-4.2 12.4s-3.6 8-5.8 11.8c-2.2 3.8-4.6 7.4-7.2 11-2.6 3.4-5.6 6.8-8.6 10s-6.4 6-9.8 8.8c-3.4 2.6-7.2 5.2-11 7.4l-320.6 186.6c-5.2 3-10.4 5.6-16 8-5.4 2.2-11.2 4.2-16.8 5.8-5.6 1.6-11.6 2.8-17.4 3.4-5.6 0.6-11.6 1-17.6 1z m0-877.4c-3 0-6 0.2-8.8 0.6-3 0.4-5.8 1-8.8 1.8-2.8 0.8-5.6 1.8-8.4 2.8-2.8 1.2-5.4 2.4-8 4L154.8 299.2l-3.6 2.4c-1.2 0.8-2.2 1.8-3.4 3-1 1-2 2.2-2.8 3.4-0.8 1.2-1.8 2.4-2.4 3.6-0.8 1.2-1.4 2.6-2 4-0.6 1.4-1 2.8-1.4 4.2-0.4 1.4-0.6 2.8-0.8 4.4-0.2 1.4-0.2 3-0.2 4.4v360.2c0 1.4 0 3 0.2 4.4 0.2 1.4 0.4 3 0.8 4.4 0.4 1.4 0.8 2.8 1.4 4.2 0.6 1.4 1.2 2.6 2 4l2.4 3.6c0.8 1.2 1.8 2.2 2.8 3.4 1 1 2.2 2 3.4 3 1.2 0.8 2.4 1.8 3.6 2.4l320.6 186.6c2.6 1.4 5.2 2.8 8 4 2.8 1.2 5.6 2.2 8.4 2.8 2.8 0.8 5.8 1.4 8.8 1.8 5.8 0.8 11.8 0.8 17.8 0 3-0.4 5.8-1 8.8-1.8 2.8-0.8 5.6-1.8 8.4-2.8 2.8-1.2 5.4-2.4 8-4l320.6-186.6 3.6-2.4c1.2-1 2.2-1.8 3.4-3 1-1 2-2.2 2.8-3.4l2.4-3.6c0.8-1.2 1.4-2.6 2-4 0.6-1.4 1-2.8 1.4-4.2 0.4-1.4 0.6-2.8 0.8-4.4 0.2-1.4 0.2-3 0.2-4.4V328.2c0-1.4 0-2.8-0.2-4.4-0.2-1.4-0.4-2.8-0.8-4.4-0.4-1.4-0.8-2.8-1.4-4.2-0.6-1.4-1.2-2.6-2-4l-2.4-3.6c-0.8-1.2-1.8-2.2-2.8-3.4-1-1-2.2-2-3.2-3-1.2-0.8-2.4-1.8-3.6-2.4L543.2 112.6c-2.6-1.4-5.2-2.8-8-4-2.8-1.2-5.6-2.2-8.4-2.8-2.8-0.8-5.8-1.4-8.8-1.8-2.8-0.4-5.8-0.6-8.8-0.6z"
+                                                                    p-id="10682" fill="currentColor"></path>
+                                                                <path
+                                                                    d="M509.2 980.8c-18.6 0-33.8-15.2-33.8-33.8V544.4L97.6 322.2c-16-9.4-21.4-30.2-12-46.2 9.4-16 30.2-21.4 46.2-12l377.4 222 377.4-222c16-9.4 36.8-4 46.2 12 9.4 16 4 36.8-12 46.2L543 544.4v402.6c0 18.8-15.2 33.8-33.8 33.8z"
+                                                                    p-id="10683" fill="currentColor"></path>
+                                                                <path
+                                                                    d="M559.8 289c0 1.2 0 2.2-0.2 3.4s-0.4 2.2-0.8 3.2-0.8 2.2-1.2 3.2c-0.4 1-1 2-1.6 3.2-0.6 1-1.4 2-2.2 3-0.8 1-1.6 2-2.6 2.8-1 1-2 1.8-3 2.6s-2.2 1.6-3.4 2.4-2.4 1.6-3.6 2.2c-1.2 0.8-2.6 1.4-4 2l-4.2 1.8c-1.4 0.6-3 1-4.4 1.4-1.6 0.4-3 0.8-4.6 1.2-1.6 0.4-3.2 0.6-4.8 0.8-1.6 0.2-3.2 0.4-5 0.4-1.6 0.2-3.4 0.2-5 0.2s-3.4 0-5-0.2-3.2-0.2-5-0.4c-1.6-0.2-3.2-0.4-4.8-0.8-1.6-0.4-3.2-0.6-4.6-1.2-1.6-0.4-3-0.8-4.4-1.4-1.4-0.6-2.8-1-4.2-1.8-1.4-0.6-2.8-1.2-4-2s-2.6-1.4-3.6-2.2c-1.2-0.8-2.2-1.6-3.4-2.4s-2-1.8-3-2.6c-1-1-1.8-1.8-2.6-2.8-0.8-1-1.4-2-2.2-3-0.6-1-1.2-2-1.6-3.2-0.4-1-0.8-2.2-1.2-3.2-0.4-1-0.6-2.2-0.8-3.2-0.2-1.2-0.2-2.2-0.2-3.4 0-1.2 0-2.2 0.2-3.4 0.2-1.2 0.4-2.2 0.8-3.2s0.8-2.2 1.2-3.2c0.4-1 1-2 1.6-3.2 0.6-1 1.4-2 2.2-3 0.8-1 1.6-2 2.6-2.8 1-1 2-1.8 3-2.6s2.2-1.6 3.4-2.4c1.2-0.8 2.4-1.6 3.6-2.2s2.6-1.4 4-2l4.2-1.8c1.4-0.6 3-1 4.4-1.4 1.6-0.4 3-0.8 4.6-1.2 1.6-0.4 3.2-0.6 4.8-0.8 1.6-0.2 3.2-0.4 5-0.4 1.6-0.2 3.4-0.2 5-0.2s3.4 0 5 0.2 3.2 0.2 5 0.4c1.6 0.2 3.2 0.4 4.8 0.8 1.6 0.4 3.2 0.6 4.6 1.2 1.6 0.4 3 0.8 4.4 1.4 1.4 0.6 2.8 1 4.2 1.8 1.4 0.6 2.8 1.2 4 2 1.2 0.8 2.6 1.4 3.6 2.2 1.2 0.8 2.2 1.6 3.4 2.4 1 0.8 2 1.8 3 2.6 1 1 1.8 1.8 2.6 2.8 0.8 1 1.4 2 2.2 3 0.6 1 1.2 2 1.6 3.2 0.4 1 0.8 2.2 1.2 3.2 0.4 1 0.6 2.2 0.8 3.2s0.2 2.2 0.2 3.4zM441.8 592.8c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5c-0.2 1.6-0.4 3.2-0.8 4.8-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4s-1.4 2.6-2.2 3.6c-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3-1 1-1.8 1.8-2.8 2.6-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6-1 0.4-2.2 0.8-3.2 1.2-1 0.4-2.2 0.6-3.2 0.8s-2.2 0.2-3.4 0.2c-1.2 0-2.2 0-3.4-0.2-1-0.2-2.2-0.4-3.2-0.8s-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6-0.4-1.6-0.6-3.2-0.8-4.8-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5 0.4-3.2 0.8-4.8 0.6-3.2 1.2-4.6c0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4 0.8-1.2 1.4-2.6 2.2-3.6 0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8 1.2-0.2 2.2-0.2 3.4-0.2 1.2 0 2.2 0 3.4 0.2 1.2 0.2 2.2 0.4 3.2 0.8s2.2 0.8 3.2 1.2c1 0.4 2 1 3.2 1.6 1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6s0.6 3.2 0.8 4.8c0.2 1.6 0.4 3.2 0.4 5s0.2 3.2 0.2 5zM239.2 660.2c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5c-0.2 1.6-0.4 3.2-0.8 4.8-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4-0.8 1.2-1.4 2.6-2.2 3.6-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3-1 1-1.8 1.8-2.8 2.6-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6-1 0.4-2.2 0.8-3.2 1.2-1 0.4-2.2 0.6-3.2 0.8s-2.2 0.2-3.4 0.2c-1.2 0-2.2 0-3.4-0.2s-2.2-0.4-3.2-0.8-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6s-0.6-3.2-0.8-4.8c-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5c0.2-1.6 0.4-3.2 0.8-4.8s0.6-3.2 1.2-4.6c0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4 0.8-1.2 1.4-2.6 2.2-3.6 0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8s2.2-0.2 3.4-0.2c1.2 0 2.2 0 3.4 0.2s2.2 0.4 3.2 0.8 2.2 0.8 3.2 1.2c1 0.4 2 1 3.2 1.6 1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6 0.4 1.6 0.6 3.2 0.8 4.8 0.2 1.6 0.4 3.2 0.4 5 0.2 1.6 0.2 3.4 0.2 5zM644.2 592.8c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5c-0.2 1.6-0.4 3.2-0.8 4.8-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4-0.8 1.2-1.4 2.6-2.2 3.6-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3-1 1-1.8 1.8-2.8 2.6-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6-1 0.4-2.2 0.8-3.2 1.2-1 0.4-2.2 0.6-3.2 0.8-1.2 0.2-2.2 0.2-3.4 0.2s-2.2 0-3.4-0.2c-1.2-0.2-2.2-0.4-3.2-0.8s-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6s-0.6-3.2-0.8-4.8c-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5 0.4-3.2 0.8-4.8 0.6-3.2 1.2-4.6c0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4s1.4-2.6 2.2-3.6c0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8 1-0.2 2.2-0.2 3.4-0.2 1.2 0 2.2 0 3.4 0.2 1.2 0.2 2.2 0.4 3.2 0.8s2.2 0.8 3.2 1.2c1 0.4 2 1 3.2 1.6 1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6 0.4 1.6 0.6 3.2 0.8 4.8 0.2 1.6 0.4 3.2 0.4 5 0.2 1.6 0.2 3.2 0.2 5zM846.8 474.6c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5-0.4 3.2-0.8 4.8c-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4s-1.4 2.6-2.2 3.6c-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3s-1.8 1.8-2.8 2.6c-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6s-2.2 0.8-3.2 1.2c-1 0.4-2.2 0.6-3.2 0.8s-2.2 0.2-3.4 0.2-2.2 0-3.4-0.2c-1-0.2-2.2-0.4-3.2-0.8s-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6-0.4-1.6-0.6-3.2-0.8-4.8-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5c0.2-1.6 0.4-3.2 0.8-4.8 0.4-1.6 0.6-3.2 1.2-4.6 0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4 0.8-1.2 1.4-2.6 2.2-3.6 0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8 1.2-0.2 2.2-0.2 3.4-0.2s2.2 0 3.4 0.2c1.2 0.2 2.2 0.4 3.2 0.8s2.2 0.8 3.2 1.2c1 0.4 2 1 3.2 1.6 1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6 0.4 1.6 0.6 3.2 0.8 4.8 0.2 1.6 0.4 3.2 0.4 5 0 1.6 0.2 3.4 0.2 5zM644.2 778.4c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5c-0.2 1.6-0.4 3.2-0.8 4.8-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4-0.8 1.2-1.4 2.6-2.2 3.6-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3s-1.8 1.8-2.8 2.6c-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6-1 0.4-2.2 0.8-3.2 1.2-1 0.4-2.2 0.6-3.2 0.8-1.2 0.2-2.2 0.2-3.4 0.2s-2.2 0-3.4-0.2c-1.2-0.2-2.2-0.4-3.2-0.8s-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6-0.4-1.6-0.6-3.2-0.8-4.8-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5c0.2-1.6 0.4-3.2 0.8-4.8 0.4-1.6 0.6-3.2 1.2-4.6 0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4 0.8-1.2 1.4-2.6 2.2-3.6 0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8 1-0.2 2.2-0.2 3.4-0.2s2.2 0 3.4 0.2c1.2 0.2 2.2 0.4 3.2 0.8s2.2 0.8 3.2 1.2c1 0.4 2 1 3.2 1.6 1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6 0.4 1.6 0.6 3.2 0.8 4.8 0.2 1.6 0.4 3.2 0.4 5 0.2 1.6 0.2 3.2 0.2 5zM846.8 660.2c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5c-0.2 1.6-0.4 3.2-0.8 4.8-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4s-1.4 2.6-2.2 3.6c-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3-1 1-1.8 1.8-2.8 2.6-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6s-2.2 0.8-3.2 1.2c-1 0.4-2.2 0.6-3.2 0.8s-2.2 0.2-3.4 0.2-2.2 0-3.4-0.2c-1-0.2-2.2-0.4-3.2-0.8s-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6-0.4-1.6-0.6-3.2-0.8-4.8-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5c0.2-1.6 0.4-3.2 0.8-4.8s0.6-3.2 1.2-4.6c0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4 0.8-1.2 1.4-2.6 2.2-3.6 0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8 1.2-0.2 2.2-0.2 3.4-0.2s2.2 0 3.4 0.2c1.2 0.2 2.2 0.4 3.2 0.8s2.2 0.8 3.2 1.2 2 1 3.2 1.6c1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6 0.4 1.6 0.6 3.2 0.8 4.8 0.2 1.6 0.4 3.2 0.4 5 0 1.6 0.2 3.4 0.2 5z"
+                                                                    p-id="10684" fill="currentColor"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                    <div class="hint-text">最多8个字符</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 房主专用设置 -->
+                                        <div class="host-settings" id="hostSettings" style="display: none;">
+                                            <!-- 棋子个数设置 -->
+                                            <div class="piece-count-setting">
+                                                <h4>棋子个数</h4>
+                                                <div class="piece-count-selector">
+                                                    <div class="piece-count-options">
+                                                        <div class="piece-count-option" data-count="1">1</div>
+                                                        <div class="piece-count-option" data-count="2">
+                                                            <div class="count-circle">2</div>
+                                                        </div>
+                                                        <div class="piece-count-option" data-count="3">
+                                                            <div class="count-circle">3</div>
+                                                        </div>
+                                                        <div class="piece-count-option selected" data-count="4">
+                                                            <div class="count-circle">4</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- AI玩家设置 -->
+                                            <div class="bot-players-preview">
+                                                <h4>AI玩家</h4>
+                                                <div class="bot-players" id="multiplayerBotPlayers">
+                                                    <!-- AI选项将根据空余位置动态生成 -->
+                                                </div>
+                                                <div class="hint-text">点击切换AI难度</div>
+                                            </div>
+
+                                            <!-- 道具模式设置 -->
+                                            <div class="skill-mode-setting">
+                                                <div class="toggle-option-group">
+                                                    <div class="toggle-option-group-header">
+                                                        <span>更多模式</span>
+                                                        <span class="toggle-group-help" onclick="showModeRulesModal()">?</span>
+                                                    </div>
+                                                    <div class="toggle-option">
+                                                        <span class="toggle-label-text">道具模式</span>
+                                                        <label class="toggle-switch">
+                                                            <input type="checkbox" id="skillModeCheckbox">
+                                                            <span class="toggle-slider"></span>
+                                                        </label>
+                                                    </div>
+                                                    <!-- 欢乐模式设置 -->
+                                                    <div class="toggle-option">
+                                                        <span class="toggle-label-text">欢乐模式</span>
+                                                        <label class="toggle-switch">
+                                                            <input type="checkbox" id="happyModeCheckbox">
+                                                            <span class="toggle-slider"></span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 开始游戏按钮 -->
+                                            <div class="start-game-section">
+                                                <button id="multiplayerStartGame" class="control-btn">开始游戏</button>
+                                            </div>
+                                        </div>
+                                        <!-- 非房主玩家的准备按钮 -->
+                                        <div class="player-ready-section" id="playerReadySection"
+                                            style="display: none;">
+                                            <button id="playerReadyBtn" class="control-btn">准备</button>
+                                        </div>
+                                        <!-- 等待房主开始-->
+                                        <div class="waiting-for-host" id="waitingForHost" style="display: none;">
+                                            <div class="waiting-text">
+                                                等待房主开始游戏
+                                                <span class="loading-dots">
+                                                    <span class="dot dot1">.</span>
+                                                    <span class="dot dot2">.</span>
+                                                    <span class="dot dot3">.</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="room-chat-drawer" id="roomChatDrawer">
+                                    <button class="room-chat-toggle" id="roomChatToggleBtn" type="button" title="聊天">
+                                        <svg class="room-chat-toggle-icon" viewBox="0 0 1024 1024" version="1.1"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M512 981.33H85.34c-15.85 0-30.38-8.77-37.77-22.81a42.624 42.624 0 0 1 2.6-44.02L135 791.08C75.25 710.5 42.67 612.6 42.67 512 42.67 253.21 253.21 42.67 512 42.67S981.34 253.21 981.34 512 770.8 981.33 512 981.33zM166.44 896H512c211.73 0 384-172.27 384-384S723.73 128 512 128 128 300.27 128 512c0 91.29 32.83 179.9 92.46 249.46 12.58 14.69 13.73 36 2.77 51.94L166.44 896z"
+                                                fill="currentColor"></path>
+                                            <path d="M384 448m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z"
+                                                fill="currentColor"></path>
+                                            <path d="M640 448m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z"
+                                                fill="currentColor"></path>
+                                        </svg>
+                                        <span class="room-chat-unread-badge" id="roomChatUnreadBadge" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="room-chat-panel">
+                                        <div class="room-chat-header">房间聊天</div>
+                                        <div class="room-chat-messages" id="roomChatMessages"></div>
+                                        <div class="room-chat-input-wrap">
+                                            <button id="roomChatEmojiBtn" class="room-chat-emoji-btn" type="button" title="表情">
+                                                <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M512 85.290667c235.690667 0 426.752 191.061333 426.752 426.752 0 235.648-191.061333 426.709333-426.752 426.709333-235.690667 0-426.752-191.061333-426.752-426.709333C85.248 276.352 276.309333 85.290667 512 85.290667z m0 64a362.752 362.752 0 1 0 0 725.461333A362.752 362.752 0 0 0 512 149.333333zM361.045333 630.784A191.616 191.616 0 0 0 512 704.085333a191.658667 191.658667 0 0 0 150.826667-73.130666 32 32 0 1 1 50.218666 39.68A255.616 255.616 0 0 1 512 768.085333a255.616 255.616 0 0 1-201.216-97.706666 32 32 0 0 1 50.261333-39.594667zM384 373.333333a53.333333 53.333333 0 1 1 0 106.624A53.333333 53.333333 0 0 1 384 373.333333z m256 0a53.333333 53.333333 0 1 1 0 106.624 53.333333 53.333333 0 0 1 0-106.624z"
+                                                        fill="currentColor"></path>
+                                                </svg>
+                                            </button>
+                                            <div id="roomChatEmojiPanel" class="room-chat-emoji-panel">
+                                                <div class="room-chat-emoji-panel-content" id="roomChatEmojiPanelContent"></div>
+                                            </div>
+                                            <input type="text" id="roomChatInput" class="room-chat-input" maxlength="40"
+                                                placeholder="输入聊天内容..." autocomplete="off">
+                                            <button id="roomChatSendBtn" class="room-chat-send-btn" type="button" title="发送">
+                                                <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M883.84 129.493333a43.733333 43.733333 0 0 1 51.84 58.24L673.066667 867.84a43.733333 43.733333 0 0 1-71.04 16l-148.053334-142.08-52.48 52.906667a44.16 44.16 0 0 1-75.52-31.36V618.666667L98.773333 401.066667a43.946667 43.946667 0 0 1 19.413334-74.24z m-92.373333 188.8L441.386667 608.213333l173.866666 166.826667z m-69.12-56.533333l-506.026667 130.56 161.493333 154.88z"
+                                                        fill="currentColor"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 人机对战配置 -->
+                            <div class="ai-battle-config" id="aiBattleConfig" style="display: none;">
+                                <div class="player-setup-panel">
+                                    <!-- 玩家颜色和表情选择 -->
+                                    <div class="color-selection">
+                                        <h4>选择你的颜色和表情</h4>
+                                        <div class="color-options">
+                                            <div class="color-option selected" data-player="1">
+                                                <div class="color-circle player-1-color"></div>
+                                            </div>
+                                            <div class="color-option" data-player="2">
+                                                <div class="color-circle player-2-color"></div>
+                                            </div>
+                                            <div class="color-option" data-player="3">
+                                                <div class="color-circle player-3-color"></div>
+                                            </div>
+                                            <div class="color-option" data-player="4">
+                                                <div class="color-circle player-4-color"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 表情切换器 -->
+                                        <div class="emoji-switcher">
+                                            <button class="emoji-nav-btn" id="prevEmoji">‹</button>
+                                            <div class="current-emoji-display">
+                                                <div class="emoji-preview" id="currentEmojiPreview">
+                                                    <div class="emoji-content"></div>
+                                                </div>
+                                                <span class="emoji-name" id="currentEmojiName">开心</span>
+                                            </div>
+                                            <button class="emoji-nav-btn" id="nextEmoji">›</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 用户名设置 -->
+                                    <div class="username-setting">
+                                        <h4>设置你的昵称</h4>
+                                        <div class="username-input-group">
+                                            <div class="username-input-with-icon">
+                                                <input type="text" id="playerUsername" class="username-input"
+                                                    placeholder="输入昵称" maxlength="8" value="玩家" autocomplete="off">
+                                                <button class="nickname-dice-btn" id="aiNicknameDice" title="随机昵称">
+                                                    <svg t="1760247195100" class="icon" viewBox="0 0 1024 1024"
+                                                        version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10681"
+                                                        width="20" height="20">
+                                                        <path
+                                                            d="M509.2 980.8c-6 0-11.8-0.4-17.8-1.2-5.8-0.8-11.8-2-17.4-3.4-5.6-1.6-11.4-3.4-16.8-5.8-5.4-2.2-10.8-5-16-7.8L120.8 775.8c-3.8-2.2-7.4-4.6-11-7.4-3.4-2.6-6.8-5.6-9.8-8.8-3-3.2-6-6.4-8.6-10-2.6-3.4-5.2-7.2-7.4-11s-4.2-7.8-5.8-11.8c-1.6-4-3-8.2-4.2-12.4-1.2-4.2-2-8.6-2.6-13-0.6-4.4-0.8-8.8-0.8-13.2v-360c0-4.4 0.2-8.8 0.8-13.2 0.6-4.4 1.4-8.8 2.6-13 1.2-4.2 2.6-8.4 4.2-12.4s3.6-8 5.8-11.8c2.2-3.8 4.6-7.4 7.2-11 2.6-3.4 5.6-6.8 8.6-10s6.4-6 9.8-8.8c3.4-2.6 7.2-5.2 11-7.4L441.2 54c5-3 10.4-5.6 16-8 5.4-2.2 11.2-4.2 16.8-5.8 5.6-1.6 11.6-2.8 17.4-3.4 11.8-1.6 23.8-1.6 35.4 0 5.8 0.8 11.8 2 17.4 3.4 5.8 1.6 11.4 3.4 16.8 5.8 5.4 2.2 10.8 5 16 8l320.6 186.6c3.8 2.2 7.4 4.6 11 7.4 3.4 2.6 6.8 5.6 9.8 8.8 3 3.2 6 6.4 8.6 10 2.6 3.4 5.2 7.2 7.2 11 2.2 3.8 4.2 7.8 5.8 11.8 1.6 4 3 8.2 4.2 12.4 1.2 4.2 2 8.6 2.6 13 0.6 4.4 0.8 8.8 0.8 13.2v360.2c0 4.4-0.2 8.8-0.8 13.2-0.6 4.4-1.4 8.6-2.6 13-1.2 4.2-2.6 8.4-4.2 12.4s-3.6 8-5.8 11.8c-2.2 3.8-4.6 7.4-7.2 11-2.6 3.4-5.6 6.8-8.6 10s-6.4 6-9.8 8.8c-3.4 2.6-7.2 5.2-11 7.4l-320.6 186.6c-5.2 3-10.4 5.6-16 8-5.4 2.2-11.2 4.2-16.8 5.8-5.6 1.6-11.6 2.8-17.4 3.4-5.6 0.6-11.6 1-17.6 1z m0-877.4c-3 0-6 0.2-8.8 0.6-3 0.4-5.8 1-8.8 1.8-2.8 0.8-5.6 1.8-8.4 2.8-2.8 1.2-5.4 2.4-8 4L154.8 299.2l-3.6 2.4c-1.2 0.8-2.2 1.8-3.4 3-1 1-2 2.2-2.8 3.4-0.8 1.2-1.8 2.4-2.4 3.6-0.8 1.2-1.4 2.6-2 4-0.6 1.4-1 2.8-1.4 4.2-0.4 1.4-0.6 2.8-0.8 4.4-0.2 1.4-0.2 3-0.2 4.4v360.2c0 1.4 0 3 0.2 4.4 0.2 1.4 0.4 3 0.8 4.4 0.4 1.4 0.8 2.8 1.4 4.2 0.6 1.4 1.2 2.6 2 4l2.4 3.6c0.8 1.2 1.8 2.2 2.8 3.4 1 1 2.2 2 3.4 3 1.2 0.8 2.4 1.8 3.6 2.4l320.6 186.6c2.6 1.4 5.2 2.8 8 4 2.8 1.2 5.6 2.2 8.4 2.8 2.8 0.8 5.8 1.4 8.8 1.8 5.8 0.8 11.8 0.8 17.8 0 3-0.4 5.8-1 8.8-1.8 2.8-0.8 5.6-1.8 8.4-2.8 2.8-1.2 5.4-2.4 8-4l320.6-186.6 3.6-2.4c1.2-1 2.2-1.8 3.4-3 1-1 2-2.2 2.8-3.4l2.4-3.6c0.8-1.2 1.4-2.6 2-4 0.6-1.4 1-2.8 1.4-4.2 0.4-1.4 0.6-2.8 0.8-4.4 0.2-1.4 0.2-3 0.2-4.4V328.2c0-1.4 0-2.8-0.2-4.4-0.2-1.4-0.4-2.8-0.8-4.4-0.4-1.4-0.8-2.8-1.4-4.2-0.6-1.4-1.2-2.6-2-4l-2.4-3.6c-0.8-1.2-1.8-2.2-2.8-3.4-1-1-2.2-2-3.2-3-1.2-0.8-2.4-1.8-3.6-2.4L543.2 112.6c-2.6-1.4-5.2-2.8-8-4-2.8-1.2-5.6-2.2-8.4-2.8-2.8-0.8-5.8-1.4-8.8-1.8-2.8-0.4-5.8-0.6-8.8-0.6z"
+                                                            p-id="10682" fill="currentColor"></path>
+                                                        <path
+                                                            d="M509.2 980.8c-18.6 0-33.8-15.2-33.8-33.8V544.4L97.6 322.2c-16-9.4-21.4-30.2-12-46.2 9.4-16 30.2-21.4 46.2-12l377.4 222 377.4-222c16-9.4 36.8-4 46.2 12 9.4 16 4 36.8-12 46.2L543 544.4v402.6c0 18.8-15.2 33.8-33.8 33.8z"
+                                                            p-id="10683" fill="currentColor"></path>
+                                                        <path
+                                                            d="M559.8 289c0 1.2 0 2.2-0.2 3.4s-0.4 2.2-0.8 3.2-0.8 2.2-1.2 3.2c-0.4 1-1 2-1.6 3.2-0.6 1-1.4 2-2.2 3-0.8 1-1.6 2-2.6 2.8-1 1-2 1.8-3 2.6s-2.2 1.6-3.4 2.4-2.4 1.6-3.6 2.2c-1.2 0.8-2.6 1.4-4 2l-4.2 1.8c-1.4 0.6-3 1-4.4 1.4-1.6 0.4-3 0.8-4.6 1.2-1.6 0.4-3.2 0.6-4.8 0.8-1.6 0.2-3.2 0.4-5 0.4-1.6 0.2-3.4 0.2-5 0.2s-3.4 0-5-0.2-3.2-0.2-5-0.4c-1.6-0.2-3.2-0.4-4.8-0.8-1.6-0.4-3.2-0.6-4.6-1.2-1.6-0.4-3-0.8-4.4-1.4-1.4-0.6-2.8-1-4.2-1.8-1.4-0.6-2.8-1.2-4-2s-2.6-1.4-3.6-2.2c-1.2-0.8-2.2-1.6-3.4-2.4s-2-1.8-3-2.6c-1-1-1.8-1.8-2.6-2.8-0.8-1-1.4-2-2.2-3-0.6-1-1.2-2-1.6-3.2-0.4-1-0.8-2.2-1.2-3.2-0.4-1-0.6-2.2-0.8-3.2-0.2-1.2-0.2-2.2-0.2-3.4 0-1.2 0-2.2 0.2-3.4 0.2-1.2 0.4-2.2 0.8-3.2s0.8-2.2 1.2-3.2c0.4-1 1-2 1.6-3.2 0.6-1 1.4-2 2.2-3 0.8-1 1.6-2 2.6-2.8 1-1 2-1.8 3-2.6s2.2-1.6 3.4-2.4c1.2-0.8 2.4-1.6 3.6-2.2s2.6-1.4 4-2l4.2-1.8c1.4-0.6 3-1 4.4-1.4 1.6-0.4 3-0.8 4.6-1.2 1.6-0.4 3.2-0.6 4.8-0.8 1.6-0.2 3.2-0.4 5-0.4 1.6-0.2 3.4-0.2 5-0.2s3.4 0 5 0.2 3.2 0.2 5 0.4c1.6 0.2 3.2 0.4 4.8 0.8 1.6 0.4 3.2 0.6 4.6 1.2 1.6 0.4 3 0.8 4.4 1.4 1.4 0.6 2.8 1 4.2 1.8 1.4 0.6 2.8 1.2 4 2 1.2 0.8 2.6 1.4 3.6 2.2 1.2 0.8 2.2 1.6 3.4 2.4 1 0.8 2 1.8 3 2.6 1 1 1.8 1.8 2.6 2.8 0.8 1 1.4 2 2.2 3 0.6 1 1.2 2 1.6 3.2 0.4 1 0.8 2.2 1.2 3.2 0.4 1 0.6 2.2 0.8 3.2s0.2 2.2 0.2 3.4zM441.8 592.8c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5c-0.2 1.6-0.4 3.2-0.8 4.8-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4s-1.4 2.6-2.2 3.6c-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3-1 1-1.8 1.8-2.8 2.6-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6-1 0.4-2.2 0.8-3.2 1.2-1 0.4-2.2 0.6-3.2 0.8s-2.2 0.2-3.4 0.2c-1.2 0-2.2 0-3.4-0.2-1-0.2-2.2-0.4-3.2-0.8s-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6-0.4-1.6-0.6-3.2-0.8-4.8-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5 0.4-3.2 0.8-4.8 0.6-3.2 1.2-4.6c0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4 0.8-1.2 1.4-2.6 2.2-3.6 0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8 1.2-0.2 2.2-0.2 3.4-0.2 1.2 0 2.2 0 3.4 0.2 1.2 0.2 2.2 0.4 3.2 0.8s2.2 0.8 3.2 1.2c1 0.4 2 1 3.2 1.6 1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6s0.6 3.2 0.8 4.8c0.2 1.6 0.4 3.2 0.4 5s0.2 3.2 0.2 5zM239.2 660.2c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5c-0.2 1.6-0.4 3.2-0.8 4.8-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4-0.8 1.2-1.4 2.6-2.2 3.6-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3-1 1-1.8 1.8-2.8 2.6-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6-1 0.4-2.2 0.8-3.2 1.2-1 0.4-2.2 0.6-3.2 0.8s-2.2 0.2-3.4 0.2c-1.2 0-2.2 0-3.4-0.2s-2.2-0.4-3.2-0.8-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6s-0.6-3.2-0.8-4.8c-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5c0.2-1.6 0.4-3.2 0.8-4.8s0.6-3.2 1.2-4.6c0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4 0.8-1.2 1.4-2.6 2.2-3.6 0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8s2.2-0.2 3.4-0.2c1.2 0 2.2 0 3.4 0.2s2.2 0.4 3.2 0.8 2.2 0.8 3.2 1.2c1 0.4 2 1 3.2 1.6 1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6 0.4 1.6 0.6 3.2 0.8 4.8 0.2 1.6 0.4 3.2 0.4 5 0.2 1.6 0.2 3.4 0.2 5zM644.2 592.8c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5c-0.2 1.6-0.4 3.2-0.8 4.8-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4-0.8 1.2-1.4 2.6-2.2 3.6-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3-1 1-1.8 1.8-2.8 2.6-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6-1 0.4-2.2 0.8-3.2 1.2-1 0.4-2.2 0.6-3.2 0.8-1.2 0.2-2.2 0.2-3.4 0.2s-2.2 0-3.4-0.2c-1.2-0.2-2.2-0.4-3.2-0.8s-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6s-0.6-3.2-0.8-4.8c-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5 0.4-3.2 0.8-4.8 0.6-3.2 1.2-4.6c0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4s1.4-2.6 2.2-3.6c0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8 1-0.2 2.2-0.2 3.4-0.2 1.2 0 2.2 0 3.4 0.2 1.2 0.2 2.2 0.4 3.2 0.8s2.2 0.8 3.2 1.2c1 0.4 2 1 3.2 1.6 1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6 0.4 1.6 0.6 3.2 0.8 4.8 0.2 1.6 0.4 3.2 0.4 5 0.2 1.6 0.2 3.2 0.2 5zM846.8 474.6c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5-0.4 3.2-0.8 4.8c-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4s-1.4 2.6-2.2 3.6c-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3s-1.8 1.8-2.8 2.6c-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6s-2.2 0.8-3.2 1.2c-1 0.4-2.2 0.6-3.2 0.8s-2.2 0.2-3.4 0.2-2.2 0-3.4-0.2c-1-0.2-2.2-0.4-3.2-0.8s-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6-0.4-1.6-0.6-3.2-0.8-4.8-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5c0.2-1.6 0.4-3.2 0.8-4.8 0.4-1.6 0.6-3.2 1.2-4.6 0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4 0.8-1.2 1.4-2.6 2.2-3.6 0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8 1.2-0.2 2.2-0.2 3.4-0.2s2.2 0 3.4 0.2c1.2 0.2 2.2 0.4 3.2 0.8s2.2 0.8 3.2 1.2c1 0.4 2 1 3.2 1.6 1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6 0.4 1.6 0.6 3.2 0.8 4.8 0.2 1.6 0.4 3.2 0.4 5 0 1.6 0.2 3.4 0.2 5zM644.2 778.4c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5c-0.2 1.6-0.4 3.2-0.8 4.8-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4-0.8 1.2-1.4 2.6-2.2 3.6-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3s-1.8 1.8-2.8 2.6c-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6-1 0.4-2.2 0.8-3.2 1.2-1 0.4-2.2 0.6-3.2 0.8-1.2 0.2-2.2 0.2-3.4 0.2s-2.2 0-3.4-0.2c-1.2-0.2-2.2-0.4-3.2-0.8s-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6-0.4-1.6-0.6-3.2-0.8-4.8-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5c0.2-1.6 0.4-3.2 0.8-4.8 0.4-1.6 0.6-3.2 1.2-4.6 0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4 0.8-1.2 1.4-2.6 2.2-3.6 0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8 1-0.2 2.2-0.2 3.4-0.2s2.2 0 3.4 0.2c1.2 0.2 2.2 0.4 3.2 0.8s2.2 0.8 3.2 1.2c1 0.4 2 1 3.2 1.6 1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6 0.4 1.6 0.6 3.2 0.8 4.8 0.2 1.6 0.4 3.2 0.4 5 0.2 1.6 0.2 3.2 0.2 5zM846.8 660.2c0 1.6 0 3.4-0.2 5s-0.2 3.2-0.4 5c-0.2 1.6-0.4 3.2-0.8 4.8-0.4 1.6-0.6 3.2-1.2 4.6-0.4 1.6-0.8 3-1.4 4.4-0.6 1.4-1 2.8-1.8 4.2-0.6 1.4-1.2 2.8-2 4s-1.4 2.6-2.2 3.6c-0.8 1.2-1.6 2.2-2.4 3.4-0.8 1-1.8 2-2.6 3-1 1-1.8 1.8-2.8 2.6-1 0.8-2 1.4-3 2.2-1 0.6-2 1.2-3.2 1.6s-2.2 0.8-3.2 1.2c-1 0.4-2.2 0.6-3.2 0.8s-2.2 0.2-3.4 0.2-2.2 0-3.4-0.2c-1-0.2-2.2-0.4-3.2-0.8s-2.2-0.8-3.2-1.2c-1-0.4-2-1-3.2-1.6-1-0.6-2-1.4-3-2.2-1-0.8-2-1.6-2.8-2.6-1-1-1.8-2-2.6-3s-1.6-2.2-2.4-3.4c-0.8-1.2-1.6-2.4-2.2-3.6-0.8-1.2-1.4-2.6-2-4l-1.8-4.2c-0.6-1.4-1-3-1.4-4.4-0.4-1.6-0.8-3-1.2-4.6-0.4-1.6-0.6-3.2-0.8-4.8-0.2-1.6-0.4-3.2-0.4-5-0.2-1.6-0.2-3.4-0.2-5s0-3.4 0.2-5 0.2-3.2 0.4-5c0.2-1.6 0.4-3.2 0.8-4.8s0.6-3.2 1.2-4.6c0.4-1.6 0.8-3 1.4-4.4 0.6-1.4 1-2.8 1.8-4.2 0.6-1.4 1.2-2.8 2-4 0.8-1.2 1.4-2.6 2.2-3.6 0.8-1.2 1.6-2.2 2.4-3.4 0.8-1 1.8-2 2.6-3 1-1 1.8-1.8 2.8-2.6 1-0.8 2-1.4 3-2.2 1-0.6 2-1.2 3.2-1.6 1-0.4 2.2-0.8 3.2-1.2 1-0.4 2.2-0.6 3.2-0.8 1.2-0.2 2.2-0.2 3.4-0.2s2.2 0 3.4 0.2c1.2 0.2 2.2 0.4 3.2 0.8s2.2 0.8 3.2 1.2 2 1 3.2 1.6c1 0.6 2 1.4 3 2.2 1 0.8 2 1.6 2.8 2.6 1 1 1.8 2 2.6 3s1.6 2.2 2.4 3.4c0.8 1.2 1.6 2.4 2.2 3.6 0.8 1.2 1.4 2.6 2 4l1.8 4.2c0.6 1.4 1 3 1.4 4.4 0.4 1.6 0.8 3 1.2 4.6 0.4 1.6 0.6 3.2 0.8 4.8 0.2 1.6 0.4 3.2 0.4 5 0 1.6 0.2 3.4 0.2 5z"
+                                                            p-id="10684" fill="currentColor"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div class="hint-text">最多8个字符</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 棋子个数设置 -->
+                                    <div class="piece-count-setting">
+                                        <h4>棋子个数</h4>
+                                        <div class="piece-count-selector">
+                                            <div class="piece-count-options">
+                                                <div class="piece-count-option" data-count="1">1</div>
+                                                <div class="piece-count-option" data-count="2">
+                                                    <div class="count-circle">2</div>
+                                                </div>
+                                                <div class="piece-count-option" data-count="3">
+                                                    <div class="count-circle">3</div>
+                                                </div>
+                                                <div class="piece-count-option selected" data-count="4">
+                                                    <div class="count-circle">4</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI玩家预览 -->
+                                    <div class="bot-players-preview">
+                                        <h4>AI玩家</h4>
+                                        <div class="bot-players">
+                                            <!-- AI选项将根据玩家选择的颜色动态生成 -->
+                                        </div>
+                                        <div class="hint-text">点击切换AI难度</div>
+                                    </div>
+
+                                    <!-- 道具模式设置 -->
+                                    <div class="skill-mode-setting">
+                                        <div class="toggle-option-group">
+                                            <div class="toggle-option-group-header">
+                                                <span>更多模式</span>
+                                                <span class="toggle-group-help" onclick="showModeRulesModal()">?</span>
+                                            </div>
+                                            <div class="toggle-option">
+                                                <span class="toggle-label-text">道具模式</span>
+                                                <label class="toggle-switch">
+                                                    <input type="checkbox" id="aiSkillModeCheckbox">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                            <!-- 欢乐模式设置 -->
+                                            <div class="toggle-option">
+                                                <span class="toggle-label-text">欢乐模式</span>
+                                                <label class="toggle-switch">
+                                                    <input type="checkbox" id="aiHappyModeCheckbox">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 开始游戏按钮 -->
+                                <div class="start-game-section">
+                                    <button id="startGame" class="control-btn">开始游戏</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 游戏规则面板 -->
+            <div class="control-panel" id="rulesPanelWrapper" style="display: none;">
+                <div class="control-content">
+                    <div class="control-section">
+                        <div class="config-header">
+                            <button class="back-btn" id="rulesBackBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <h3>游戏规则</h3>
+                        </div>
+                        <div class="game-rules-panel">
+                            <div class="rules-content">
+                                <div class="rule-section">
+                                    <h4>一、胜利条件与行进次序</h4>
+                                    <div class="rule-content">
+                                        <div class="mechanism-item win-item">
+                                            <div class="sub-content-item win-sub-item">
+                                                <p><strong>胜利条件：</strong>率先将自身所有棋子送入终点的玩家获胜。</p>
+                                            </div>
+                                            <div class="sub-content-item win-sub-item">
+                                                <p><strong>行进次序：</strong>开局按顺时针轮流投骰子，每回合1名玩家操作。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rule-section">
+                                    <h4>二、核心机制</h4>
+                                    <div class="rule-content">
+                                        <div class="mechanism-item launch-item">
+                                            <h5><span class="move-type-launch">起飞</span></h5>
+                                            <div class="sub-content-item launch-sub-item">
+                                                <p>初始棋子在基地，摇到偶数可让1颗棋子<span class="move-type-launch">[起飞]</span>至起飞点。
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mechanism-item move-item">
+                                            <h5><span class="move-type-move">移动</span></h5>
+                                            <div class="sub-content-item move-sub-item">
+                                                <p>棋子<span class="move-type-launch">[起飞]</span>后当前摇到的点数就是棋子可以前进的格数。</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mechanism-item bonus-item">
+                                            <h5><span class="consecutive-bonus">连投奖励</span></h5>
+                                            <div class="sub-content-item bonus-sub-item">
+                                                <p>摇到点数<span class="dice-special">6</span>获额外1次投骰子机会。</p>
+                                            </div>
+                                            <div class="sub-content-item bonus-sub-item">
+                                                <p>单次回合连投3次<span class="dice-special">6</span>，该玩家所有棋子回基地，回合结束。</p>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="mechanism-item jump-item">
+                                            <h5><span class="move-type-jump">跳子</span></h5>
+                                            <div class="sub-content-item jump-sub-item">
+                                                <p>棋子停在自身颜色格子时，向前<span class="move-type-jump">[跳子]</span>至下一个同色格子。
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mechanism-item fly-item">
+                                            <h5><span class="move-type-fly">飞棋</span></h5>
+                                            <div class="sub-content-item fly-sub-item">
+                                                <p>玩家进入"自身颜色+箭头指示"格子后可以触发<span
+                                                        class="move-type-fly">[飞棋]</span>，沿箭头移动至对面。
+                                                </p>
+                                            </div>
+                                            <div class="sub-content-item fly-sub-item">
+                                                <p>若非<span class="move-type-jump">[跳子]</span>进入<span
+                                                        class="move-type-fly">[飞棋]</span>格子：按箭头移动到前方首个同色格子，再额外<span
+                                                        class="move-type-jump">[跳子]</span>至下一个同色格子。</p>
+                                            </div>
+                                            <div class="sub-content-item fly-sub-item">
+                                                <p>若从上个同色格子<span class="move-type-jump">[跳子]</span>进入<span
+                                                        class="move-type-fly">[飞棋]</span>格子：按箭头移动到前方首个同色格子之后停下。
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mechanism-item stack-item">
+                                            <h5><span class="stack-text">叠子</span></h5>
+                                            <div class="sub-content-item stack-sub-item">
+                                                <p>多颗同色棋子叠在一格上时形成<span class="stack-text">[叠子]</span>。</p>
+                                            </div>
+                                            <div class="sub-content-item stack-sub-item">
+                                                <p>若行进时点数大于到前方<span class="stack-text">[叠子]</span>距离：先移动到<span
+                                                        class="stack-text">[叠子]</span>格，再回退多余点数的距离。</p>
+                                            </div>
+                                            <div class="sub-content-item stack-sub-item">
+                                                <p>若<span class="move-type-jump">[跳子]</span>路径有<span
+                                                        class="stack-text">[叠子]</span>：无法<span
+                                                        class="move-type-jump">[跳子]</span>，停在起跳点。</p>
+                                            </div>
+                                            <div class="sub-content-item stack-sub-item">
+                                                <p>若<span class="move-type-fly">[飞棋]</span>路径有<span
+                                                        class="stack-text">[叠子]</span>：无法<span
+                                                        class="move-type-fly">[飞棋]</span>，正常<span
+                                                        class="move-type-jump">[跳子]</span>来绕路。</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mechanism-item beat-item">
+                                            <h5><span class="crash-text">撞机</span></h5>
+                                            <div class="sub-content-item beat-sub-item">
+                                                <p><strong>1.常规<span class="crash-text">撞机</span></strong></p>
+                                                <p class="beat-detail">若棋子移动后停在有敌方单颗棋子的格子，则将其逐回基地。</p>
+                                            </div>
+
+                                            <div class="sub-content-item beat-sub-item">
+                                                <p><strong>2.<span class="move-type-jump">跳子</span>中的<span
+                                                            class="crash-text">撞机</span></strong></p>
+                                                <p class="beat-detail">若<span
+                                                        class="move-type-jump">[跳子]</span>跳前或跳后格子有敌方单颗棋子，则将其逐回基地。</p>
+                                            </div>
+
+                                            <div class="sub-content-item beat-sub-item">
+                                                <p><strong>3.<span class="move-type-fly">飞棋</span>中的<span
+                                                            class="crash-text">撞机</span></strong></p>
+                                                <p class="beat-detail">• 若<span
+                                                        class="move-type-fly">[飞棋]</span>飞前或飞后格子有敌方单颗棋子，则将其逐回基地。</p>
+                                                <p class="beat-detail">• 若<span
+                                                        class="move-type-fly">[飞棋]</span>路径与所经过的终点通道交叉点有单颗棋子，则将其逐回后继续完成<span
+                                                        class="move-type-fly">[飞棋]</span>。</p>
+                                            </div>
+
+                                            <div class="sub-content-item beat-sub-item">
+                                                <p><strong>4.<span class="stack-text">叠子</span>相关<span
+                                                            class="crash-text">撞机</span></strong></p>
+                                                <p class="beat-detail">• 若棋子移动后停在其他玩家的<span
+                                                        class="stack-text">[叠子]</span>上，则该棋子与该位置的<span
+                                                        class="stack-text">[叠子]</span>均返回各自基地。</p>
+                                                <p class="beat-detail">• 若受<span
+                                                        class="stack-text">[叠子]</span>阻拦回退后最终位置有敌方单颗棋子，则将其逐回基地。</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mechanism-item finish-item">
+                                            <h5><span class="finish-text">到达终点</span></h5>
+                                            <div class="sub-content-item finish-sub-item">
+                                                <p>棋子移动后刚好停在终点格子视为到达终点，否则将回退多余点数。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加入房间模态框 -->
+        <div id="joinRoomModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>加入房间</h2>
+                    <button id="closeJoinRoomModal" class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="room-code-input-section">
+                        <div class="room-code-inputs-container">
+                            <input type="text" class="room-code-digit-input" data-index="0" maxlength="1"
+                                autocomplete="off">
+                            <input type="text" class="room-code-digit-input" data-index="1" maxlength="1"
+                                autocomplete="off">
+                            <input type="text" class="room-code-digit-input" data-index="2" maxlength="1"
+                                autocomplete="off">
+                            <input type="text" class="room-code-digit-input" data-index="3" maxlength="1"
+                                autocomplete="off">
+                        </div>
+                        <div class="hint-text">请输入4位字母房间号</div>
+                    </div>
+                    <div id="joinRoomError" class="modal-error" style="display: none;">
+                        <div class="error-message">房间不存在或已满</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelJoinRoom" class="modal-btn secondary">取消</button>
+                    <button id="confirmJoinRoom" class="modal-btn primary">加入</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="index-footer">
+            <div class="footer-copyright">© 2026 极简飞行棋 Made with <a href="https://github.com/ZTMYO/MinimalistAeroplaneChess" class="heart" target="_blank"><svg
+                        t="1777825177386" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                        xmlns="http://www.w3.org/2000/svg" p-id="6361" width="14" height="14">
+                        <path
+                            d="M95.2 600.8l361.4 337.4c15 14 34.8 21.8 55.4 21.8s40.4-7.8 55.4-21.8l361.4-337.4c60.8-56.6 95.2-136 95.2-219v-11.6c0-139.8-101-259-238.8-282-91.2-15.2-184 14.6-249.2 79.8l-24 24-24-24c-65.2-65.2-158-95-249.2-79.8C101 111.2 0 230.4 0 370.2v11.6c0 83 34.4 162.4 95.2 219z"
+                            p-id="6362" fill="#f2687b"></path>
+                    </svg></a> by <a href="https://github.com/ZTMYO/MinimalistAeroplaneChess" target="_blank">@ZTMYO</a></div>
+        </div>
+    </div>
+
+    <!-- 拓展规则介绍弹窗 -->
+    <div class="mode-rules-overlay" id="modeRulesModal" style="display:none;" onclick="hideModeRulesModal()">
+        <div class="mode-rules-popup" onclick="event.stopPropagation()">
+            <div class="mode-rules-popup-header">
+                <h2>拓展规则介绍</h2>
+                <button class="mode-rules-close" onclick="hideModeRulesModal()" type="button">&times;</button>
+            </div>
+            <div class="mode-rules-popup-body">
+                <div class="mode-rule-section">
+                    <h3>道具模式</h3>
+                    <ul>
+                        <li>击败对手棋子可获得积分，积分上限 100。</li>
+                        <li>消耗积分兑换道具，在投掷前使用：</li>
+                        <li class="sub-item">盲盒（15分）— 随机获得最多 40 积分，积分 ≥ 40 时不可用，使用后跳过回合</li>
+                        <li class="sub-item">传送门（40分）— 将棋子随机传送到地图上的空位置，可能前进或后退</li>
+                        <li class="sub-item">多面骰子（50分）— 投掷 1~12 随机点数</li>
+                        <li class="sub-item">遥控骰子（70分）— 指定 1~6 任意点数</li>
+                    </ul>
+                </div>
+                <div class="mode-rule-section">
+                    <h3>欢乐模式</h3>
+                    <ul>
+                        <li>无终点反弹 / 叠子反弹 — 超过终点直接胜利。</li>
+                        <li>无连投惩罚 — 连续 3 次 6 不触发棋子回起点。</li>
+                        <li>无撞机 — 棋子之间不发生碰撞。</li>
+                        <li>碰撞奖励 — 落在其他玩家棋子上奖励前进敌方棋子数×2步。</li>
+                        <li>奖励可连锁触发 — 奖励落地后再次踩到继续奖励，过程中触发跳子/飞棋正常执行。</li>
+                        <li>道具模式下碰撞奖励同时获得积分奖励。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showModeRulesModal() {
+            document.getElementById('modeRulesModal').style.display = 'flex';
+        }
+        function hideModeRulesModal() {
+            document.getElementById('modeRulesModal').style.display = 'none';
+        }
+    </script>
+
+
+</body>
+</html>

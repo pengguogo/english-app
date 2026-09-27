@@ -7,19 +7,19 @@ import { useGameAccess } from '../composables/useGameAccess'
 
 const router = useRouter()
 const accessState = useGameAccess()
-const gameUrl = computed(() => `${import.meta.env.BASE_URL}vendor/openboard/index.html?game=ludo`)
+const gameUrl = computed(() => `${import.meta.env.BASE_URL}vendor/aeroplane-chess/index.html`)
 </script>
 
 <template>
   <main class="game-page">
-    <BackBar title="飞行棋 · Ludo Royale" @back="router.push('/games')" />
+    <BackBar title="中国飞行棋 · 极简飞行棋" @back="router.push('/games')" />
     <GameAccessGate
       :access="accessState.access.value" :is-loading="accessState.isLoading.value"
       :error-msg="accessState.errorMsg.value" :progress-percent="accessState.progressPercent.value"
       @retry="accessState.refreshAccess" @learn="router.push('/')"
     >
-      <section class="game-shell"><iframe :src="gameUrl" title="Ludo Royale 飞行棋" allow="autoplay; fullscreen" /></section>
-      <p class="source-note">支持人机与本地多人 · 3D 骰子 · 棋子动画 · 音效</p>
+      <section class="game-shell"><iframe :src="gameUrl" title="极简中国飞行棋" allow="autoplay; fullscreen" /></section>
+      <p class="source-note">中国飞行棋规则 · 人机与本地多人 · 跳飞动画 · AI 托管 · 音效</p>
     </GameAccessGate>
   </main>
 </template>
