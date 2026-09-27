@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞行棋 - 小虾米游戏乐园</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .home-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffa07a 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(255, 105, 180, 0.3);
+            text-decoration: none;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 16px rgba(255, 105, 180, 0.4);
+        }
+
+        h1 {
+            color: #ff69b4;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .board-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+        }
+
+        #boardImage {
+            /* 图片直接显示，不使用 object-fit */
+            width: 600px;
+            height: 600px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .piece {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            z-index: 10;
+            /* 默认使用transform居中对齐到坐标点 */
+            transform: translate(-50%, -50%);
+        }
+
+        .piece:hover {
+            transform: translate(-50%, -50%) scale(1.15);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        .piece.red { background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b); }
+        .piece.yellow { background: radial-gradient(circle at 30% 30%, #f9ca24, #d68910); }
+        .piece.blue { background: radial-gradient(circle at 30% 30%, #74b9ff, #2980b9); }
+        .piece.green { background: radial-gradient(circle at 30% 30%, #55efc4, #229954); }
+
+        /* 动物头像样式 - 保留彩色背景 */
+        .piece.animals {
+            font-size: 24px;
+        }
+
+        /* 完成状态 - 金色背景 */
+        .piece.finished {
+            background: linear-gradient(135deg, #ffd700, #ffaa00) !important;
+            border-color: #cc8800 !important;
+        }
+
+        /* 完成状态的红勾 */
+        .piece.finished::after {
+            content: '✓';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e74c3c;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            border: 2px solid white;
+        }
+
+        .piece.selectable {
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 15px 5px rgba(255, 255, 0, 0.7);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .piece.moving {
+            transition: all 0.5s ease-in-out;
+        }
+
+        .control-panel {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5ec 100%);
+            border: 3px solid #ffb6c1;
+            border-radius: 20px;
+            padding: 25px;
+            min-width: 280px;
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.2);
+        }
+
+        .current-player {
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border: 3px solid #ff69b4;
+        }
+
+        .current-player.red { color: #e74c3c; background: #ffe5e5; }
+        .current-player.yellow { color: #f39c12; background: #fff5e5; }
+        .current-player.blue { color: #3498db; background: #e5f1ff; }
+        .current-player.green { color: #27ae60; background: #e5ffe5; }
+
+        .player-info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .player-info h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+
+        .player-red { color: #e74c3c; }
+        .player-yellow { color: #f39c12; }
+        .player-blue { color: #3498db; }
+        .player-green { color: #27ae60; }
+
+        .dice-area {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .dice {
+            width: 90px;
+            height: 90px;
+            background: white;
+            border: 4px solid #ff69b4;
+            border-radius: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            color: #ff69b4;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .dice.rolling {
+            animation: diceRoll 0.5s ease-in-out;
+        }
+
+        @keyframes diceRoll {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(1.1); }
+        }
+
+        .roll-btn {
+            width: 100%;
+            padding: 18px;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffa07a 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.4em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(255, 105, 180, 0.3);
+        }
+
+        .roll-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 105, 180, 0.4);
+        }
+
+        .roll-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .game-message {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 1.05em;
+            border: 2px solid #ffb6c1;
+        }
+
+        .pieces-status {
+            margin-top: 10px;
+            font-size: 0.9em;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .piece-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .piece-dot.home { opacity: 0.6; }
+        .piece-dot.active { opacity: 1; }
+        .piece-dot.finished {
+            background: #e74c3c !important;
+            color: white !important;
+            font-weight: bold;
+            border: 2px solid #c0392b;
+        }
+
+        /* 玩家选择界面 */
+        .player-select-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .player-select-modal {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5ec 100%);
+            border: 4px solid #ff69b4;
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-select-modal h2 {
+            color: #ff69b4;
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+
+        .player-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .player-option-btn {
+            padding: 20px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #333;
+        }
+
+        .player-option-btn:hover {
+            border-color: #ff69b4;
+            transform: scale(1.05);
+        }
+
+        .player-option-btn.selected {
+            border-color: #ff69b4;
+            background: #fff5f5;
+            color: #ff69b4;
+        }
+
+        .start-game-btn {
+            padding: 18px 40px;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffa07a 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+        }
+
+        .start-game-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(255, 105, 180, 0.5);
+        }
+
+        .start-game-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* 游戏整体布局：左-中-右三列 */
+        .game-layout {
+            display: grid;
+            grid-template-columns: 200px 600px 200px;
+            gap: 30px;
+            align-items: start;
+            justify-items: center;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 600px;
+        }
+
+        .center-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .player-dice-panel {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5ec 100%);
+            border: 3px solid #ffb6c1;
+            border-radius: 20px;
+            padding: 20px;
+            min-width: 180px;
+            text-align: center;
+            transition: all 0.3s;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .player-dice-panel.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .player-dice-panel.red { border-color: #e74c3c; }
+        .player-dice-panel.yellow { border-color: #f39c12; }
+        .player-dice-panel.blue { border-color: #3498db; }
+        .player-dice-panel.green { border-color: #27ae60; }
+
+        .player-dice-panel.red.active { background: linear-gradient(135deg, #ffe5e5 0%, #fff0f0 100%); }
+        .player-dice-panel.yellow.active { background: linear-gradient(135deg, #fff5e5 0%, #fffaef 100%); }
+        .player-dice-panel.blue.active { background: linear-gradient(135deg, #e5f1ff 0%, #f0f5ff 100%); }
+        .player-dice-panel.green.active { background: linear-gradient(135deg, #e5ffe5 0%, #f0fff5 100%); }
+
+        .player-dice-panel h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+
+        .player-dice-panel .player-dice {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border: 3px solid #ff69b4;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2em;
+            font-weight: bold;
+            margin: 10px 0;
+            transition: transform 0.3s;
+        }
+
+        .player-dice-panel.red .player-dice { border-color: #e74c3c; color: #e74c3c; }
+        .player-dice-panel.yellow .player-dice { border-color: #f39c12; color: #f39c12; }
+        .player-dice-panel.blue .player-dice { border-color: #3498db; color: #3498db; }
+        .player-dice-panel.green .player-dice { border-color: #27ae60; color: #27ae60; }
+
+        .player-dice-panel .player-dice.rolling {
+            animation: diceRoll 0.5s ease-in-out;
+        }
+
+        .player-dice-panel .roll-dice-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffa07a 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .player-dice-panel.red .roll-dice-btn { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+        .player-dice-panel.yellow .roll-dice-btn { background: linear-gradient(135deg, #f39c12 0%, #d68910 100%); }
+        .player-dice-panel.blue .roll-dice-btn { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+        .player-dice-panel.green .roll-dice-btn { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+
+        .player-dice-panel .roll-dice-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .player-dice-panel .roll-dice-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .player-dice-panel .pieces-status {
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .center-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .message-panel {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5ec 100%);
+            border: 3px solid #ffb6c1;
+            border-radius: 15px;
+            padding: 15px 30px;
+            min-width: 300px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 1.05em;
+        }
+
+        .rules {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            font-size: 0.85em;
+            border: 2px solid #ffb6c1;
+        }
+
+        .rules h4 {
+            margin-top: 0;
+            color: #ff69b4;
+            margin-bottom: 10px;
+        }
+
+        .rules ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .rules li {
+            margin: 6px 0;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <a href="../../index.html" class="home-btn">🏠 返回游戏主页</a>
+
+    <!-- 玩家选择界面 -->
+    <div class="player-select-overlay" id="playerSelectOverlay">
+        <div class="player-select-modal">
+            <h2 id="gameTitle">🎲 飞行棋 🎲</h2>
+            <p id="selectPlayersText" style="margin-bottom: 20px; color: #666;">请选择玩家人数（2-4人）</p>
+
+            <!-- 设置选项 -->
+            <div class="settings-section" style="background: #f0f0f0; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 10px; color: #333; font-size: 1.1em;" id="settingsTitle">⚙️ 游戏设置</h3>
+
+                <!-- 语言选择 -->
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #666; margin-right: 10px;" id="languageLabel">语言 / Language:</label>
+                    <select id="languageSelect" style="padding: 8px; border-radius: 5px; border: 2px solid #ddd;">
+                        <option value="zh">中文</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+
+                <!-- 棋子样式选择 -->
+                <div>
+                    <label style="color: #666; margin-right: 10px;" id="pieceStyleLabel">棋子样式 / Piece Style:</label>
+                    <select id="pieceStyleSelect" style="padding: 8px; border-radius: 5px; border: 2px solid #ddd;">
+                        <option value="original">原始颜色 / Original Colors</option>
+                        <option value="animals">动物头像 / Animal Avatars</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="player-options">
+                <button class="player-option-btn" data-players="2" data-colors="red,yellow">
+                    🔴🟡 双人对战<br><small>红色 vs 黄色</small>
+                </button>
+                <button class="player-option-btn" data-players="2" data-colors="blue,green">
+                    🔵🟢 双人对战<br><small>蓝色 vs 绿色</small>
+                </button>
+                <button class="player-option-btn" data-players="3" data-colors="red,yellow,blue">
+                    🔴🟡🔵 三人游戏<br><small>红黄蓝</small>
+                </button>
+                <button class="player-option-btn" data-players="4" data-colors="red,green,yellow,blue">
+                    🔴🟢🟡🔵 四人游戏<br><small>全部玩家</small>
+                </button>
+            </div>
+
+            <button class="start-game-btn" id="startGameBtn" disabled onclick="startGame()">开始游戏</button>
+        </div>
+    </div>
+
+    <!-- 游戏主界面 -->
+    <h1>🎲 飞行棋 🎲</h1>
+
+    <div class="game-layout">
+        <!-- 左侧面板 -->
+        <div class="side-panel left">
+            <!-- 黄色 - 顶部 -->
+            <div class="player-dice-panel yellow" id="panel-yellow" data-color="yellow">
+                <h3>🟡 黄色玩家</h3>
+                <div class="player-dice" id="dice-yellow">🎲</div>
+                <button class="roll-dice-btn" id="rollBtn-yellow" onclick="rollDice('yellow')">掷骰子</button>
+                <div class="pieces-status" id="yellowPieces"></div>
+            </div>
+
+            <!-- 绿色 - 底部 -->
+            <div class="player-dice-panel green" id="panel-green" data-color="green">
+                <h3>🟢 绿色玩家</h3>
+                <div class="player-dice" id="dice-green">🎲</div>
+                <button class="roll-dice-btn" id="rollBtn-green" onclick="rollDice('green')">掷骰子</button>
+                <div class="pieces-status" id="greenPieces"></div>
+            </div>
+        </div>
+
+        <!-- 中间棋盘和消息 -->
+        <div class="center-area">
+            <div class="board-container">
+                <img src="img/xxx.jpg" alt="飞行棋棋盘" id="boardImage">
+                <!-- 棋子将通过JavaScript动态添加 -->
+            </div>
+
+            <div class="message-panel" id="gameMessage">
+                选择玩家开始游戏！
+            </div>
+        </div>
+
+        <!-- 右侧面板 -->
+        <div class="side-panel right">
+            <!-- 蓝色 - 顶部 -->
+            <div class="player-dice-panel blue" id="panel-blue" data-color="blue">
+                <h3>🔵 蓝色玩家</h3>
+                <div class="player-dice" id="dice-blue">🎲</div>
+                <button class="roll-dice-btn" id="rollBtn-blue" onclick="rollDice('blue')">掷骰子</button>
+                <div class="pieces-status" id="bluePieces"></div>
+            </div>
+
+            <!-- 红色 - 底部 -->
+            <div class="player-dice-panel red" id="panel-red" data-color="red">
+                <h3>🔴 红色玩家</h3>
+                <div class="player-dice" id="dice-red">🎲</div>
+                <button class="roll-dice-btn" id="rollBtn-red" onclick="rollDice('red')">掷骰子</button>
+                <div class="pieces-status" id="redPieces"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="ludo.js"></script>
+</body>
+</html>

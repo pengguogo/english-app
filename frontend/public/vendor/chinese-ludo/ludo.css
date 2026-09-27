@@ -1,0 +1,88 @@
+/* 飞行棋棋盘样式 */
+#ludoBoard {
+    border: 4px solid #333;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    background: white;
+    cursor: pointer;
+}
+
+/* 飞机棋子样式 */
+.plane {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.plane:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+.plane.selectable {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* 颜色定义 */
+.color-red { fill: #e74c3c; stroke: #c0392b; }
+.color-yellow { fill: #f39c12; stroke: #d68910; }
+.color-blue { fill: #3498db; stroke: #2980b9; }
+.color-green { fill: #27ae60; stroke: #229954; }
+
+.color-red-light { fill: #fadbd8; }
+.color-yellow-light { fill: #fdebd0; }
+.color-blue-light { fill: #d6eaf8; }
+.color-green-light { fill: #d5f4e6; }
+
+/* 棋盘格子样式 */
+.cell {
+    stroke: #333;
+    stroke-width: 1;
+}
+
+.cell-path {
+    fill: white;
+    stroke: #333;
+    stroke-width: 1;
+}
+
+.cell-home {
+    stroke: #333;
+    stroke-width: 2;
+}
+
+.cell-center {
+    stroke: #333;
+    stroke-width: 2;
+}
+
+/* 飞机图标 */
+.plane-icon {
+    font-size: 24px;
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3));
+}
+
+/* 动画效果 */
+@keyframes planeMove {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+.plane-moving {
+    animation: planeMove 0.5s ease-in-out;
+}
+
+@keyframes celebrate {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(-5deg); }
+    75% { transform: scale(1.1) rotate(5deg); }
+}
+
+.celebrating {
+    animation: celebrate 0.5s ease-in-out 3;
+}
