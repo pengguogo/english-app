@@ -53,6 +53,9 @@
   --game-sky: #DDF3FF;
   --game-track: #87CEEB;
   --game-red: #E94848;
+  --game-jungle: #B7D99A;
+  --game-path: #7BAE62;
+  --game-event: #FFF0B8;
 
   /* ===== 文字层级 ===== */
   --text-primary: #333333;

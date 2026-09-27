@@ -8,7 +8,9 @@ const router = useRouter()
 const accessState = useGameAccess()
 const games = [
   { name: '五子棋', route: '/games/gomoku', icon: '⚫', desc: '双人对弈，先连成五子获胜' },
-  { name: '飞行棋', route: '/games/flight-chess', icon: '✈️', desc: '掷骰前进，先到终点获胜' }
+  { name: '飞行棋', route: '/games/flight-chess', icon: '✈️', desc: '掷骰前进，先到终点获胜' },
+  { name: '冒险棋', route: '/games/adventure-chess', icon: '🗺️', desc: '穿越丛林，寻找宝藏城堡' },
+  { name: '九路围棋', route: '/games/go', icon: '⚪', desc: '围地提子，学习传统棋艺' }
 ]
 </script>
 
