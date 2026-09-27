@@ -55,7 +55,10 @@ async function submitPassword() {
       <label for="game-password">输入 6 位家长密码</label>
       <div class="password-row">
         <input id="game-password" v-model="password" type="password" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="off" placeholder="••••••" />
-        <AppButton :disabled="password.length !== 6 || isUnlocking">{{ isUnlocking ? '验证中…' : '解锁' }}</AppButton>
+        <AppButton
+          :disabled="password.length !== 6 || isUnlocking"
+          @click="submitPassword"
+        >{{ isUnlocking ? '验证中…' : '解锁' }}</AppButton>
       </div>
       <p v-if="passwordError" class="password-error" role="alert">{{ passwordError }}</p>
     </form>
