@@ -34,6 +34,7 @@ import CalculateLesson from '../components/lesson-templates/CalculateLesson.vue'
 import PhonicsLesson from '../components/lesson-templates/PhonicsLesson.vue'
 import DialogueLesson from '../components/lesson-templates/DialogueLesson.vue'
 import { findNextReadingLesson } from '../utils/continuousPlayback'
+import { useStudyTimer } from '../composables/useStudyTimer'
 
 const route = useRoute()
 const router = useRouter()
@@ -99,6 +100,8 @@ const totalItems = computed(() => {
 const isLastItem = computed(() => currentIndex.value >= totalItems.value - 1)
 const currentItemEngaged = computed(() => engagedItems.value[currentIndex.value] === true)
 const isFruitPilot = computed(() => Number(route.query.themeId) === 1)
+const isActivelyStudying = computed(() => !isLoading.value && !!lesson.value && !isComplete.value)
+useStudyTimer(isActivelyStudying)
 
 /**
  * 整个课时累计最佳分数（各 item 历史最佳成绩的平均值）。

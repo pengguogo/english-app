@@ -44,6 +44,16 @@
   --color-orange: #FF9800;
   --color-orange-hover: #F57C00;
 
+  /* ===== 游戏专区 ===== */
+  --game-board: #E7B96B;
+  --game-board-edge: #9B642E;
+  --game-grid: rgba(51, 51, 51, 0.58);
+  --game-stone-black: #202124;
+  --game-stone-white: #FAFAFA;
+  --game-sky: #DDF3FF;
+  --game-track: #87CEEB;
+  --game-red: #E94848;
+
   /* ===== 文字层级 ===== */
   --text-primary: #333333;
   --text-secondary: #666666;

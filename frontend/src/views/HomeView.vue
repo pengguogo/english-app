@@ -152,6 +152,22 @@ function startFruitAdventure() {
             </div>
           </div>
         </button>
+        <!-- 游戏专区入口 -->
+        <button
+          type="button"
+          class="quick-card"
+          :style="{ '--card-accent': 'var(--color-success)' }"
+          @click="router.push('/games')"
+        >
+          <div class="quick-left" :style="{ background: 'var(--color-success)' }"></div>
+          <div class="quick-body">
+            <span class="quick-icon">🎮</span>
+            <div class="quick-text">
+              <h3 class="quick-title">游戏专区</h3>
+              <p class="quick-sub">学习 5 分钟解锁</p>
+            </div>
+          </div>
+        </button>
       </div>
     </section>
 
@@ -348,7 +364,7 @@ function startFruitAdventure() {
 /* 快捷卡片网格:两个并排 */
 .quick-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: var(--space-3);
 }
 
