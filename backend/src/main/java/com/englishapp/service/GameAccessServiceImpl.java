@@ -2,6 +2,7 @@ package com.englishapp.service;
 
 import com.englishapp.domain.DailyStudyTime;
 import com.englishapp.dto.GameAccessDto;
+import com.englishapp.dto.GameUnlockDto;
 import com.englishapp.repository.DailyStudyTimeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 public class GameAccessServiceImpl implements GameAccessService {
     static final int REQUIRED_SECONDS = 300;
     private static final int DEFAULT_USER_ID = 1;
+    private static final String PARENT_PASSWORD = "000000";
     private final DailyStudyTimeRepository repository;
 
     public GameAccessServiceImpl(DailyStudyTimeRepository repository) {
@@ -37,6 +39,16 @@ public class GameAccessServiceImpl implements GameAccessService {
         record.setUpdatedAt(LocalDateTime.now());
         repository.save(record);
         return toAccess(record.getSeconds());
+    }
+
+    @Override
+    @Transactional
+    public GameUnlockDto unlockWithPassword(Integer userId, String password) {
+        if (!PARENT_PASSWORD.equals(password)) {
+            return new GameUnlockDto(false, "密码不正确", getTodayAccess(userId));
+        }
+        GameAccessDto access = recordStudyTime(userId, REQUIRED_SECONDS);
+        return new GameUnlockDto(true, "今日游戏已解锁", access);
     }
 
     private DailyStudyTime newRecord(Integer userId, LocalDate date) {

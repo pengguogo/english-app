@@ -3,6 +3,8 @@ package com.englishapp.controller;
 import com.englishapp.common.Result;
 import com.englishapp.dto.GameAccessDto;
 import com.englishapp.dto.StudyTimeRequest;
+import com.englishapp.dto.GameUnlockDto;
+import com.englishapp.dto.GameUnlockRequest;
 import com.englishapp.service.GameAccessService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -27,5 +29,12 @@ public class GameController {
             @Valid @RequestBody StudyTimeRequest request,
             @RequestParam(defaultValue = "1") Integer userId) {
         return Result.success(gameAccessService.recordStudyTime(userId, request.getSeconds()));
+    }
+
+    @PostMapping("/unlock")
+    public Result<GameUnlockDto> unlock(
+            @Valid @RequestBody GameUnlockRequest request,
+            @RequestParam(defaultValue = "1") Integer userId) {
+        return Result.success(gameAccessService.unlockWithPassword(userId, request.getPassword()));
     }
 }

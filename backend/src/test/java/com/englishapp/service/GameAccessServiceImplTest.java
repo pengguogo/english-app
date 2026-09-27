@@ -2,6 +2,7 @@ package com.englishapp.service;
 
 import com.englishapp.domain.DailyStudyTime;
 import com.englishapp.dto.GameAccessDto;
+import com.englishapp.dto.GameUnlockDto;
 import com.englishapp.repository.DailyStudyTimeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +58,32 @@ class GameAccessServiceImplTest {
 
         assertEquals(15, access.studiedSeconds());
         verify(repository).save(any(DailyStudyTime.class));
+    }
+
+    @Test
+    void should_密码解锁今日游戏_当_密码正确() {
+        DailyStudyTime record = studyTime(30);
+        when(repository.findByUserIdAndStudyDate(1, LocalDate.now()))
+                .thenReturn(Optional.of(record));
+
+        GameUnlockDto result = service.unlockWithPassword(1, "000000");
+
+        assertTrue(result.success());
+        assertTrue(result.access().unlocked());
+        assertEquals(300, record.getSeconds());
+        verify(repository).save(record);
+    }
+
+    @Test
+    void should_拒绝解锁_当_密码错误() {
+        when(repository.findByUserIdAndStudyDate(1, LocalDate.now()))
+                .thenReturn(Optional.empty());
+
+        GameUnlockDto result = service.unlockWithPassword(1, "123456");
+
+        assertFalse(result.success());
+        assertFalse(result.access().unlocked());
+        verify(repository, never()).save(any());
     }
 
     private DailyStudyTime studyTime(int seconds) {
