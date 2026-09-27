@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>九路围棋</title>
+  <link rel="stylesheet" href="css/besogo.css">
+  <link rel="stylesheet" href="css/board-flat.css">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; overflow-x: hidden; color: #f8fafc; background: radial-gradient(circle at top, #253657, #080d1c 68%); font-family: system-ui, sans-serif; }
+    body { display: grid; justify-items: center; align-content: start; gap: 18px; padding: 24px 16px 32px; }
+    header { width: min(92vw, 640px); display: flex; align-items: center; justify-content: space-between; }
+    h1 { margin: 0; font-size: clamp(22px, 5vw, 34px); }
+    .turn { padding: 9px 16px; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; background: rgba(255,255,255,.08); backdrop-filter: blur(12px); }
+    .turn::before { content: ''; display: inline-block; width: 14px; height: 14px; margin-right: 8px; border-radius: 50%; background: #111827; box-shadow: 0 2px 7px rgba(0,0,0,.45); vertical-align: -2px; }
+    .turn.white::before { background: #fff; }
+    #board { width: min(92vw, 640px); border: 10px solid rgba(255,255,255,.1); border-radius: 24px; overflow: hidden; box-shadow: 0 28px 70px rgba(0,0,0,.42); }
+    .besogo-container { background: #e0bb6c; }
+    .besogo-board { border-radius: 14px; }
+    .actions { width: min(92vw, 640px); display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    button { padding: 12px 8px; color: #f8fafc; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); border-radius: 12px; font: inherit; font-weight: 700; cursor: pointer; transition: transform .18s ease, background .18s ease; }
+    button:hover { background: rgba(255,255,255,.15); transform: translateY(-2px); }
+    .hint { margin: 0; color: #aebbd2; font-size: 13px; text-align: center; }
+    @media (prefers-reduced-motion: no-preference) { .besogo-real-stone { animation: stone-drop .22s cubic-bezier(.2,.8,.3,1.25); transform-box: fill-box; transform-origin: center; } @keyframes stone-drop { from { opacity: 0; transform: scale(1.7); } to { opacity: 1; transform: scale(1); } } }
+    @media (max-width: 480px) { body { padding: 14px 8px 24px; } #board { border-width: 6px; } .actions { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+  <script src="js/besogo.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/gameRoot.js"></script>
+  <script src="js/svgUtil.js"></script>
+  <script src="js/parseSgf.js"></script>
+  <script src="js/loadSgf.js"></script>
+  <script src="js/saveSgf.js"></script>
+  <script src="js/boardDisplay.js"></script>
+  <script src="js/coord.js"></script>
+  <script src="js/toolPanel.js"></script>
+  <script src="js/filePanel.js"></script>
+  <script src="js/controlPanel.js"></script>
+  <script src="js/namesPanel.js"></script>
+  <script src="js/commentPanel.js"></script>
+  <script src="js/treePanel.js"></script>
+</head>
+<body>
+  <header><h1>九路围棋</h1><div id="turn" class="turn">黑方落子</div></header>
+  <div id="board"></div>
+  <div class="actions">
+    <button id="pass">停一手</button><button id="undo">悔棋</button>
+    <button id="redo">重做</button><button id="restart">重新开始</button>
+  </div>
+  <p class="hint">点击交叉点落子 · 支持提子和打劫 · 连续停一手后可自行数目</p>
+  <script>
+    var board = document.getElementById('board')
+    besogo.create(board, {
+      size: 9, realstones: 'on', shadows: 'on', coord: 'western',
+      panels: '', resize: 'auto', maxwidth: 640
+    })
+    var editor = board.besogoEditor
+    var turn = document.getElementById('turn')
+    function updateTurn() {
+      var isWhite = editor.getCurrent().nextMove() > 0
+      turn.textContent = isWhite ? '白方落子' : '黑方落子'
+      turn.className = isWhite ? 'turn white' : 'turn'
+    }
+    editor.addListener(updateTurn)
+    document.getElementById('pass').onclick = function () { editor.click(0, 0, false); updateTurn() }
+    document.getElementById('undo').onclick = function () { editor.prevNode(1); updateTurn() }
+    document.getElementById('redo').onclick = function () { editor.nextNode(1); updateTurn() }
+    document.getElementById('restart').onclick = function () { window.location.reload() }
+  </script>
+</body>
+</html>
