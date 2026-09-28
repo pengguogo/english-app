@@ -7,6 +7,9 @@ import { useGameAccess } from '../composables/useGameAccess'
 const router = useRouter()
 const accessState = useGameAccess()
 const games = [
+  { name: '动物翻翻乐', route: '/games/memory-match', icon: '🐱', desc: '适合 6 岁 · 翻开卡片，找到相同动物' },
+  { name: '图案接龙', route: '/games/pattern-play', icon: '🧩', desc: '适合 6 岁 · 找到规律，选出下一个图案' },
+  { name: '亲子井字棋', route: '/games/tic-tac-toe', icon: '⭕', desc: '亲子双人 · 轮流点击，三个连成一线' },
   { name: '五子棋', route: '/games/gomoku', icon: '⚫', desc: '双人对弈，先连成五子获胜' },
   { name: '飞行棋', route: '/games/flight-chess', icon: '✈️', desc: '掷骰前进，先到终点获胜' },
   { name: '冒险棋', route: '/games/adventure-chess', icon: '🗺️', desc: '穿越丛林，寻找宝藏城堡' },
