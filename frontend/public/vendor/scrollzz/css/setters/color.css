@@ -1,0 +1,24 @@
+:root {
+  --bege-primary: #d9a583b3;
+  --bege-secondary: #d9a58366;
+
+  --green-primary: #7ab498b3;
+  --green-secondary: #7ab49866;
+
+  --brown-primary: #9b6e74b3;
+  --brown-secondary: #9b6e7466;
+
+  --red-primary: #c8515bb3;
+  --red-secondary: #c8515b66;
+
+  --purple-primary: #866daeb3;
+  --purple-secondary: #866dae66;
+
+  --light: #acacbd;
+  --dark: #262639;
+  --grey: #acacbd66;
+
+  --background-color: var(--dark);
+  --text-color: var(--light);
+  --accent-color: #5353a0a1;
+}

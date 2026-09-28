@@ -1,0 +1,39 @@
+#b01:hover .tile:nth-child(4),
+#b02:hover .tile:nth-child(3) {
+  -webkit-animation: highlight 1200ms infinite;
+          animation: highlight 1200ms infinite;
+}
+
+@media (pointer: coarse)  {
+  #b01:hover .tile:nth-child(4),
+  #b02:hover .tile:nth-child(3) {
+    -webkit-animation: unset;
+            animation: unset;
+  }
+}
+
+@-webkit-keyframes highlight {
+  0%, 100% {
+    background-color: var(--accent-color);
+  }
+  55% {
+    background-color: transparent;
+  }
+}
+
+@keyframes highlight {
+  0%, 100% {
+    background-color: var(--accent-color);
+  }
+  55% {
+    background-color: transparent;
+  }
+}
+
+#b01 {
+  position: relative;
+}
+
+#level--home__block-container {
+  margin-top: 1ex;
+}

@@ -1,0 +1,196 @@
+/*
+  Automatically generated file
+  Generator: https://github.com/refusado/scrollzz-generator
+*/
+
+#b31 .tile:nth-child(3),
+#b32 .tile:nth-child(3),
+#b33 .tile:nth-child(11),
+#b34 .tile:nth-child(8),
+#b35 .tile:nth-child(3),
+#b36 .tile:nth-child(12),
+#b37 .tile:nth-child(3),
+#b38 .tile:nth-child(1),
+#b39 .tile:nth-child(5),
+#b310 .tile:nth-child(10),
+#b311 .tile:nth-child(12),
+#b312 .tile:nth-child(6) {
+  -webkit-mask-image: var(--cube-1);
+          mask-image: var(--cube-1);
+}
+
+#b31 .tile:nth-child(6),
+#b32 .tile:nth-child(10),
+#b33 .tile:nth-child(5),
+#b34 .tile:nth-child(12),
+#b35 .tile:nth-child(2),
+#b36 .tile:nth-child(3),
+#b37 .tile:nth-child(9),
+#b38 .tile:nth-child(10),
+#b39 .tile:nth-child(9),
+#b310 .tile:nth-child(1),
+#b311 .tile:nth-child(3),
+#b312 .tile:nth-child(5) {
+  -webkit-mask-image: var(--cube-2);
+          mask-image: var(--cube-2);
+}
+
+#b31 .tile:nth-child(10),
+#b32 .tile:nth-child(8),
+#b33 .tile:nth-child(4),
+#b34 .tile:nth-child(1),
+#b35 .tile:nth-child(9),
+#b36 .tile:nth-child(10),
+#b37 .tile:nth-child(6),
+#b38 .tile:nth-child(11),
+#b39 .tile:nth-child(4),
+#b310 .tile:nth-child(2),
+#b311 .tile:nth-child(10),
+#b312 .tile:nth-child(2) {
+  -webkit-mask-image: var(--cube-3);
+          mask-image: var(--cube-3);
+}
+
+#b31 .tile:nth-child(5),
+#b32 .tile:nth-child(5),
+#b33 .tile:nth-child(1),
+#b34 .tile:nth-child(9),
+#b35 .tile:nth-child(4),
+#b36 .tile:nth-child(4),
+#b37 .tile:nth-child(5),
+#b38 .tile:nth-child(4),
+#b39 .tile:nth-child(6),
+#b310 .tile:nth-child(8),
+#b311 .tile:nth-child(8),
+#b312 .tile:nth-child(9) {
+  -webkit-mask-image: var(--cube-4);
+          mask-image: var(--cube-4);
+}
+
+#b31 .tile:nth-child(9),
+#b32 .tile:nth-child(2),
+#b33 .tile:nth-child(2),
+#b34 .tile:nth-child(2),
+#b35 .tile:nth-child(6),
+#b36 .tile:nth-child(2),
+#b37 .tile:nth-child(2),
+#b38 .tile:nth-child(12),
+#b39 .tile:nth-child(1),
+#b310 .tile:nth-child(11),
+#b311 .tile:nth-child(6),
+#b312 .tile:nth-child(4) {
+  -webkit-mask-image: var(--cube-5);
+          mask-image: var(--cube-5);
+}
+
+#b31 .tile:nth-child(1),
+#b32 .tile:nth-child(6),
+#b33 .tile:nth-child(3),
+#b34 .tile:nth-child(10),
+#b35 .tile:nth-child(7),
+#b36 .tile:nth-child(9),
+#b37 .tile:nth-child(8),
+#b38 .tile:nth-child(5),
+#b39 .tile:nth-child(3),
+#b310 .tile:nth-child(5),
+#b311 .tile:nth-child(9),
+#b312 .tile:nth-child(3) {
+  -webkit-mask-image: var(--cube-6);
+          mask-image: var(--cube-6);
+}
+
+#b31 .tile:nth-child(4),
+#b32 .tile:nth-child(11),
+#b33 .tile:nth-child(12),
+#b34 .tile:nth-child(5),
+#b35 .tile:nth-child(1),
+#b36 .tile:nth-child(11),
+#b37 .tile:nth-child(11),
+#b38 .tile:nth-child(9),
+#b39 .tile:nth-child(2),
+#b310 .tile:nth-child(9),
+#b311 .tile:nth-child(2),
+#b312 .tile:nth-child(11) {
+  -webkit-mask-image: var(--cube-7);
+          mask-image: var(--cube-7);
+}
+
+#b31 .tile:nth-child(8),
+#b32 .tile:nth-child(9),
+#b33 .tile:nth-child(6),
+#b34 .tile:nth-child(11),
+#b35 .tile:nth-child(11),
+#b36 .tile:nth-child(8),
+#b37 .tile:nth-child(4),
+#b38 .tile:nth-child(7),
+#b39 .tile:nth-child(7),
+#b310 .tile:nth-child(6),
+#b311 .tile:nth-child(11),
+#b312 .tile:nth-child(1) {
+  -webkit-mask-image: var(--cube-8);
+          mask-image: var(--cube-8);
+}
+
+#b31 .tile:nth-child(12),
+#b32 .tile:nth-child(1),
+#b33 .tile:nth-child(9),
+#b34 .tile:nth-child(6),
+#b35 .tile:nth-child(8),
+#b36 .tile:nth-child(6),
+#b37 .tile:nth-child(7),
+#b38 .tile:nth-child(2),
+#b39 .tile:nth-child(11),
+#b310 .tile:nth-child(3),
+#b311 .tile:nth-child(5),
+#b312 .tile:nth-child(7) {
+  -webkit-mask-image: var(--cube-9);
+          mask-image: var(--cube-9);
+}
+
+#b31 .tile:nth-child(2),
+#b32 .tile:nth-child(4),
+#b33 .tile:nth-child(8),
+#b34 .tile:nth-child(7),
+#b35 .tile:nth-child(5),
+#b36 .tile:nth-child(5),
+#b37 .tile:nth-child(10),
+#b38 .tile:nth-child(8),
+#b39 .tile:nth-child(10),
+#b310 .tile:nth-child(4),
+#b311 .tile:nth-child(1),
+#b312 .tile:nth-child(12) {
+  -webkit-mask-image: var(--cube-10);
+          mask-image: var(--cube-10);
+}
+
+#b31 .tile:nth-child(11),
+#b32 .tile:nth-child(7),
+#b33 .tile:nth-child(7),
+#b34 .tile:nth-child(3),
+#b35 .tile:nth-child(12),
+#b36 .tile:nth-child(7),
+#b37 .tile:nth-child(1),
+#b38 .tile:nth-child(3),
+#b39 .tile:nth-child(8),
+#b310 .tile:nth-child(12),
+#b311 .tile:nth-child(7),
+#b312 .tile:nth-child(10) {
+  -webkit-mask-image: var(--cube-11);
+          mask-image: var(--cube-11);
+}
+
+#b31 .tile:nth-child(7),
+#b32 .tile:nth-child(12),
+#b33 .tile:nth-child(10),
+#b34 .tile:nth-child(4),
+#b35 .tile:nth-child(10),
+#b36 .tile:nth-child(1),
+#b37 .tile:nth-child(12),
+#b38 .tile:nth-child(6),
+#b39 .tile:nth-child(12),
+#b310 .tile:nth-child(7),
+#b311 .tile:nth-child(4),
+#b312 .tile:nth-child(8) {
+  -webkit-mask-image: var(--cube-12);
+          mask-image: var(--cube-12);
+}

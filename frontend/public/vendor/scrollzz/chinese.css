@@ -1,0 +1,22 @@
+/* 本地中文适配；保留上游几何素材和配色。 */
+#language__en:checked ~ #container {
+  --home: "玩法";
+  --home-description: "在每一小格里上下滑动，找到正确图块，拼成完整的几何图案。";
+  --home-bottom: "先试试上面的四角星，再选择 1～5 关。后面的关卡可以和爸爸妈妈一起挑战。";
+  --about: "来源";
+  --about-subtitle: "关于游戏";
+  --about-content: "Scrollzz 由 Refu 制作，采用 MIT 开源许可证。本站提供中文适配，保留原作者署名与许可证。";
+  --about-contact: "作者";
+  --about-repo: "源码：";
+  --about-version: "版本：";
+  --lang: "中文";
+}
+#menu-selection__btn--lang, #select-language--first { display: none !important; }
+#tutorial__description, #tutorial__bottom { line-height: 1.6; }
+.block { overscroll-behavior: contain; touch-action: pan-y; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+:root { --selectors-height: 44px; }
+#level--home__block-container { --shape-color: var(--green-primary); --outline-color: var(--green-secondary); }

@@ -7,6 +7,8 @@ import { useGameAccess } from '../composables/useGameAccess'
 const router = useRouter()
 const accessState = useGameAccess()
 const games = [
+  { name: '童话拼图', route: '/games/picture-puzzle', image: `${import.meta.env.BASE_URL}images/games/woodland-puzzle.png`, desc: '手机精选 · 精美森林插画，4 / 9 / 16 块拼图' },
+  { name: '几何转转拼图', route: '/games/shape-puzzle', image: `${import.meta.env.BASE_URL}vendor/scrollzz/images/demo.png`, desc: '手机精选 · 滑动图块，拼出星星和几何图案' },
   { name: '动物翻翻乐', route: '/games/memory-match', icon: '🐱', desc: '适合 6 岁 · 翻开卡片，找到相同动物' },
   { name: '图案接龙', route: '/games/pattern-play', icon: '🧩', desc: '适合 6 岁 · 找到规律，选出下一个图案' },
   { name: '亲子井字棋', route: '/games/tic-tac-toe', icon: '⭕', desc: '亲子双人 · 轮流点击，三个连成一线' },
@@ -32,7 +34,8 @@ const games = [
       <div class="success-tip">✅ 今日学习任务已完成，尽情玩吧！</div>
       <section class="game-grid">
         <button v-for="game in games" :key="game.route" class="game-card" type="button" @click="router.push(game.route)">
-          <span class="game-icon">{{ game.icon }}</span>
+          <img v-if="game.image" class="game-cover" :src="game.image" :alt="game.name" loading="lazy" />
+          <span v-else class="game-icon">{{ game.icon }}</span>
           <h2>{{ game.name }}</h2><p>{{ game.desc }}</p><strong>开始游戏 →</strong>
         </button>
       </section>
@@ -50,6 +53,7 @@ const games = [
 .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
 .game-card { padding: var(--space-6); text-align: left; background: var(--bg-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); transition: transform var(--duration-fast) var(--ease-bounce); }
 .game-card:hover { transform: translateY(-4px); }
+.game-cover { width: 100%; height: 180px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: var(--space-3); }
 .game-icon { display: block; margin-bottom: var(--space-3); font-size: 48px; }
 .game-card h2 { color: var(--text-primary); margin-bottom: var(--space-2); }
 .game-card p { color: var(--text-secondary); margin-bottom: var(--space-4); }

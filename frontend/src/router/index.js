@@ -10,6 +10,8 @@ import { normalizeRouterBase } from '../utils/routerBase'
 
 // 路由表：home / subject / theme / unit / lesson 五级学习流 + 错题集/我学过的快捷入口
 const routes = [
+  { path: '/games/picture-puzzle', name: 'picture-puzzle', component: () => import('../views/PicturePuzzleView.vue') },
+  { path: '/games/shape-puzzle', name: 'shape-puzzle', component: () => import('../views/ShapePuzzleView.vue') },
   { path: '/games/memory-match', name: 'memory-match', component: () => import('../views/MemoryMatchView.vue') },
   { path: '/games/pattern-play', name: 'pattern-play', component: () => import('../views/PatternPlayView.vue') },
   { path: '/games/tic-tac-toe', name: 'tic-tac-toe', component: () => import('../views/TicTacToeView.vue') },
