@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绘本小火车适配版</title>
+    <style id="theme-vars">
+:root {
+  --color-primary: #6b7cff;
+  --color-primary-deep: #4f61da;
+  --color-primary-soft: #eef2ff;
+  --color-accent: #ffd93d;
+  --color-accent-soft: #fff7d6;
+  --color-success: #4cd964;
+  --color-success-soft: #edf8f0;
+  --color-warning: #ff6b6b;
+  --color-warning-soft: #ffefef;
+  --color-orange: #ff9800;
+  --color-orange-soft: #fff3e1;
+  --color-teal: #5fc8c2;
+  --color-teal-soft: #e8fbf9;
+  --color-ink: #27314d;
+  --color-ink-soft: #5f6883;
+  --color-muted: #9098ae;
+  --color-border: #e6eaf5;
+  --color-border-strong: #d8dff0;
+  --bg-page: #fff8f0;
+  --bg-page-soft: #fffdf9;
+  --bg-card: #ffffff;
+  --bg-card-soft: #f8fbff;
+  --bg-card-warm: #fffaf2;
+  --color-background: var(--bg-page);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--bg-card);
+  --shadow-card: 0 12px 30px rgba(39, 49, 77, 0.06);
+  --shadow-hover: 0 16px 36px rgba(79, 97, 218, 0.12);
+  --shadow-soft: 0 8px 20px rgba(39, 49, 77, 0.04);
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --color-radius-sm: var(--radius-sm);
+  --color-radius-md: var(--radius-md);
+  --color-radius-lg: var(--radius-lg);
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 40px;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 24px;
+  --text-xl: 32px;
+  --font-sans: "PingFang SC", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-bounce: cubic-bezier(0.22, 1, 0.36, 1);
+  --page-gradient: linear-gradient(180deg, #fffdf8 0%, #fff6eb 100%);
+  --hero-gradient: linear-gradient(135deg, #6b7cff 0%, #8ea1ff 100%);
+  --warm-gradient: linear-gradient(180deg, #fffdf6 0%, #fff3df 100%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--page-gradient);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(255, 217, 61, 0.12), transparent 28%),
+    radial-gradient(circle at left 20%, rgba(107, 124, 255, 0.1), transparent 24%);
+  pointer-events: none;
+}
+
+a,
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.app-shell {
+  position: relative;
+  width: min(100%, 800px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: var(--space-3);
+}
+
+.mobile-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: 104px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-content: space-between;
+}
+
+.topbar-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.back-link,
+.ghost-chip,
+.tab-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow-soft);
+  text-decoration: none;
+  transition:
+    transform var(--duration-fast) var(--ease-bounce),
+    box-shadow var(--duration-fast) ease;
+}
+
+.back-link:active,
+.ghost-chip:active,
+.tab-chip:active,
+.primary-button:active,
+.secondary-button:active,
+.panel-link:active,
+.feature-link:active,
+.station-link:active,
+.section-button:active {
+  transform: scale(0.98);
+}
+
+.page-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  letter-spacing: 0.04em;
+}
+
+.kicker-primary {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-deep);
+}
+
+.kicker-accent {
+  background: var(--color-accent-soft);
+  color: #b68700;
+}
+
+.kicker-success {
+  background: var(--color-success-soft);
+  color: #31964a;
+}
+
+.kicker-warning {
+  background: var(--color-warning-soft);
+  color: #d55353;
+}
+
+.panel-card,
+.hero-card,
+.feature-card,
+.station-card,
+.detail-card,
+.mini-card {
+  background: var(--bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.hero-card,
+.panel-card,
+.detail-card {
+  padding: var(--space-4);
+}
+
+.page-title {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--font-bold);
+}
+
+.page-subtitle,
+.muted-copy,
+.card-copy,
+.mini-copy,
+.helper-text {
+  margin: 0;
+  color: var(--color-ink-soft);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.hero-card {
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.96)), var(--bg-card);
+}
+
+.hero-surface {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.hero-surface::after {
+  content: "";
+  position: absolute;
+  top: -24px;
+  right: -18px;
+  width: 132px;
+  height: 132px;
+  border-radius: 32px;
+  background: linear-gradient(180deg, rgba(255, 217, 61, 0.2), rgba(255, 217, 61, 0));
+  pointer-events: none;
+}
+
+.hero-title {
+  margin: 0;
+  font-size: clamp(28px, 7vw, 36px);
+  line-height: 1.18;
+}
+
+.hero-actions,
+.button-stack {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.primary-button,
+.secondary-button,
+.section-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 54px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  font-weight: var(--font-bold);
+  transition:
+    transform var(--duration-fast) var(--ease-bounce),
+    box-shadow var(--duration-fast) ease;
+}
+
+.primary-button {
+  color: #ffffff;
+  background: var(--hero-gradient);
+  box-shadow: 0 14px 24px rgba(79, 97, 218, 0.2);
+}
+
+.secondary-button,
+.section-button {
+  background: #ffffff;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-primary-deep);
+}
+
+.status-row,
+.badge-row,
+.feature-grid,
+.mini-grid,
+.station-list,
+.theme-list,
+.game-list,
+.hall-grid {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.status-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.status-pill,
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  width: fit-content;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+}
+
+.badge-primary {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-deep);
+}
+
+.badge-success {
+  background: var(--color-success-soft);
+  color: #31964a;
+}
+
+.badge-warning {
+  background: var(--color-warning-soft);
+  color: #d55353;
+}
+
+.badge-accent {
+  background: var(--color-accent-soft);
+  color: #b68700;
+}
+
+.status-pill {
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 58px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--color-border-strong);
+  background: var(--bg-card-soft);
+  color: var(--color-ink);
+}
+
+.status-number {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-right: 12px;
+  border-radius: 14px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-deep);
+  font-weight: var(--font-bold);
+}
+
+.status-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.status-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+}
+
+.status-desc {
+  color: var(--color-ink-soft);
+  font-size: var(--text-xs);
+}
+
+.feature-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.feature-card,
+.mini-card,
+.station-card,
+.game-card,
+.theme-card,
+.hall-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-link,
+.mini-link,
+.station-link,
+.theme-link,
+.game-link,
+.hall-link {
+  display: block;
+  height: 100%;
+  padding: var(--space-4);
+  text-decoration: none;
+}
+
+.feature-link {
+  min-height: 188px;
+}
+
+.mini-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mini-link {
+  min-height: 124px;
+}
+
+.label-block,
+.sticker-block {
+  display: inline-grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  letter-spacing: 0.04em;
+  box-shadow: var(--shadow-soft);
+}
+
+.sticker-blue {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-deep);
+}
+
+.sticker-yellow {
+  background: var(--color-accent-soft);
+  color: #b68700;
+}
+
+.sticker-green {
+  background: var(--color-success-soft);
+  color: #31964a;
+}
+
+.sticker-red {
+  background: var(--color-warning-soft);
+  color: #d55353;
+}
+
+.sticker-orange {
+  background: var(--color-orange-soft);
+  color: #c46d00;
+}
+
+.card-title,
+.mini-title,
+.feature-title,
+.section-title {
+  margin: 0;
+  font-weight: var(--font-bold);
+  color: var(--color-ink);
+}
+
+.feature-title {
+  font-size: 22px;
+}
+
+.card-title,
+.section-title {
+  font-size: 20px;
+}
+
+.mini-title {
+  font-size: var(--text-base);
+}
+
+.feature-meta,
+.mini-meta,
+.station-meta,
+.tiny-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.feature-card::after,
+.station-card::after,
+.theme-card::after,
+.game-card::after,
+.hall-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -20px -26px auto;
+  width: 112px;
+  height: 112px;
+  border-radius: 28px;
+  opacity: 0.26;
+  transform: rotate(16deg);
+}
+
+.feature-subject::after,
+.theme-feature::after {
+  background: var(--color-primary-soft);
+}
+
+.feature-books::after,
+.station-feature::after {
+  background: var(--color-accent-soft);
+}
+
+.feature-games::after,
+.game-card::after {
+  background: var(--color-success-soft);
+}
+
+.feature-models::after,
+.hall-card::after {
+  background: var(--color-teal-soft);
+}
+
+.mini-wrong::after {
+  background: var(--color-warning-soft);
+}
+
+.mini-learned::after {
+  background: var(--color-orange-soft);
+}
+
+.tabbar {
+  position: sticky;
+  bottom: var(--space-2);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-1);
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--color-border);
+  border-radius: 28px;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(12px);
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  border-radius: 18px;
+  text-decoration: none;
+  color: var(--color-ink-soft);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+}
+
+.tab-item.active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-deep);
+}
+
+.route-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.route-dot {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--color-border-strong);
+}
+
+.route-dot.active {
+  width: 48px;
+  border-radius: var(--radius-pill);
+  background: var(--hero-gradient);
+}
+
+.theme-list,
+.station-list,
+.game-list,
+.hall-grid {
+  grid-template-columns: 1fr;
+}
+
+.theme-feature,
+.station-feature {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.theme-card .theme-link,
+.station-card .station-link,
+.game-card .game-link,
+.hall-card .hall-link {
+  min-height: 148px;
+}
+
+.theme-card.ghost-theme .theme-link,
+.station-card.side-station .station-link {
+  min-height: 118px;
+}
+
+.theme-order,
+.station-order {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  font-weight: var(--font-bold);
+  background: var(--bg-card-soft);
+  color: var(--color-primary-deep);
+}
+
+.theme-card {
+  border-style: solid;
+}
+
+.theme-feature {
+  border-color: rgba(107, 124, 255, 0.2);
+}
+
+.ghost-theme {
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.park-badges,
+.unlock-steps,
+.hall-tabs {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.unlock-card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: linear-gradient(180deg, #ffffff 0%, #f3fff2 100%);
+}
+
+.unlock-steps {
+  align-items: stretch;
+}
+
+.unlock-step {
+  flex: 1 1 110px;
+  min-height: 90px;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border-strong);
+  background: var(--bg-card-soft);
+}
+
+.unlock-step strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--text-base);
+}
+
+.game-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f7fff8 100%);
+}
+
+.game-card.locked-lite {
+  background: linear-gradient(180deg, #ffffff 0%, #fffaf1 100%);
+}
+
+.more-box {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-card-warm);
+  border: 1px dashed var(--color-border-strong);
+}
+
+.track-line {
+  position: relative;
+  padding-left: 22px;
+}
+
+.track-line::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 10px;
+  bottom: 10px;
+  width: 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, var(--color-accent) 0%, rgba(255, 217, 61, 0.15) 100%);
+}
+
+.station-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fffdf3 100%);
+}
+
+.station-stop {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.station-highlight {
+  border-color: rgba(255, 217, 61, 0.34);
+}
+
+.station-mini-group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.hall-tabs {
+  margin-top: var(--space-2);
+}
+
+.tab-chip {
+  min-height: 48px;
+  padding: 0 18px;
+  font-weight: var(--font-bold);
+}
+
+.tab-chip.targeted {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-deep);
+}
+
+.hall-grid {
+  gap: var(--space-3);
+}
+
+.hall-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f6fffd 100%);
+}
+
+.hall-card:target,
+.theme-card:target,
+.station-card:target,
+.game-card:target {
+  border-color: rgba(107, 124, 255, 0.42);
+  box-shadow: var(--shadow-hover);
+}
+
+.fact-row {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.fact-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-card-soft);
+  color: var(--color-ink-soft);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+}
+
+.hero-figure,
+.shape-cluster {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-end;
+}
+
+.shape-cluster span,
+.hero-figure span {
+  display: block;
+  border-radius: 20px;
+}
+
+.shape-a {
+  width: 64px;
+  height: 84px;
+  background: var(--color-primary-soft);
+}
+
+.shape-b {
+  width: 48px;
+  height: 60px;
+  background: var(--color-accent-soft);
+}
+
+.shape-c {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px !important;
+  background: var(--color-success-soft);
+}
+
+.helper-panel {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border-strong);
+  background: var(--bg-card-soft);
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.section-heading .section-title {
+  margin-bottom: 4px;
+}
+
+@media (max-width: 480px) {
+  .app-shell {
+    padding: var(--space-2);
+  }
+
+  .hero-card,
+  .panel-card,
+  .detail-card {
+    padding: var(--space-3);
+  }
+
+  .feature-grid,
+  .mini-grid,
+  .status-row {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-link {
+    min-height: 168px;
+  }
+
+  .hero-title {
+    font-size: 28px;
+  }
+
+  .tabbar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--color-background);
+    --color-foreground: var(--color-foreground);
+    --color-card: var(--color-card);
+    --color-primary: var(--color-primary);
+    --color-muted: var(--color-muted);
+    --color-accent: var(--color-accent);
+    --color-border: var(--color-border);
+    --radius-sm: var(--color-radius-sm);
+    --radius-md: var(--color-radius-md);
+    --radius-lg: var(--color-radius-lg);
+  }
+  @layer base {
+    body { background: var(--color-background); color: var(--color-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--color-background); }
+      .text-background { color: var(--color-background); }
+      .border-background { border-color: var(--color-background); }
+      .ring-background { --tw-ring-color: var(--color-background); }
+      .bg-foreground { background-color: var(--color-foreground); }
+      .text-foreground { color: var(--color-foreground); }
+      .border-foreground { border-color: var(--color-foreground); }
+      .ring-foreground { --tw-ring-color: var(--color-foreground); }
+      .bg-card { background-color: var(--color-card); }
+      .text-card { color: var(--color-card); }
+      .border-card { border-color: var(--color-card); }
+      .ring-card { --tw-ring-color: var(--color-card); }
+      .bg-primary { background-color: var(--color-primary); }
+      .text-primary { color: var(--color-primary); }
+      .border-primary { border-color: var(--color-primary); }
+      .ring-primary { --tw-ring-color: var(--color-primary); }
+      .bg-muted { background-color: var(--color-muted); }
+      .text-muted { color: var(--color-muted); }
+      .border-muted { border-color: var(--color-muted); }
+      .ring-muted { --tw-ring-color: var(--color-muted); }
+      .bg-accent { background-color: var(--color-accent); }
+      .text-accent { color: var(--color-accent); }
+      .border-accent { border-color: var(--color-accent); }
+      .ring-accent { --tw-ring-color: var(--color-accent); }
+      .bg-border { background-color: var(--color-border); }
+      .text-border { color: var(--color-border); }
+      .border-border { border-color: var(--color-border); }
+      .ring-border { --tw-ring-color: var(--color-border); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+  <body>
+    <main class="app-shell">
+      <div class="mobile-page">
+        <header class="topbar">
+          <div class="topbar-main">
+            <a class="back-link" data-dom-id="back-home" href="home-latest-adapted.html">返回首页</a>
+            <div>
+              <span class="page-kicker kicker-accent">PICTUREBOOK</span>
+              <h1 class="page-title">绘本小火车</h1>
+            </div>
+          </div>
+          <span class="ghost-chip">一站一故事</span>
+        </header>
+
+        <section class="hero-card" aria-labelledby="book-hero-title">
+          <div class="hero-surface">
+            <span class="page-kicker kicker-warning">旅程开始</span>
+            <div>
+              <h2 id="book-hero-title" class="hero-title">今天坐上小火车，去一个故事站</h2>
+              <p class="page-subtitle">把原来的普通列表改成站点旅程：第一站最突出，后面的站点轻一点，孩子只要先做一个选择。</p>
+            </div>
+
+            <div class="track-line">
+              <div class="helper-panel">
+                <div class="badge-row">
+                  <span class="badge badge-accent">看图</span>
+                  <span class="badge badge-primary">听故事</span>
+                  <span class="badge badge-success">跟着说</span>
+                </div>
+                <p class="helper-text">路线像火车站一样往前走，视觉比“纯列表”更像旅程。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel-card" aria-labelledby="station-list-title">
+          <div class="section-heading">
+            <div>
+              <h2 id="station-list-title" class="section-title">绘本站点列表</h2>
+              <p class="card-copy">先推第一站，后面站点弱化展示。</p>
+            </div>
+            <span class="badge badge-accent">本站列表</span>
+          </div>
+
+          <div class="station-list track-line">
+            <article id="station-1" class="station-card station-feature station-highlight">
+              <a class="station-link" data-dom-id="open-book-1" href="#station-1">
+                <div class="station-stop">
+                  <span class="station-order">01</span>
+                  <p class="feature-meta">今日主推</p>
+                  <h3 class="feature-title">苹果车站</h3>
+                  <p class="card-copy">跟着列车员看苹果、听单词，再听一小段英语故事。</p>
+                  <div class="fact-row">
+                    <span class="fact-pill">第一站</span>
+                    <span class="fact-pill">适合先听</span>
+                  </div>
+                </div>
+              </a>
+            </article>
+
+            <div class="station-mini-group">
+              <article class="station-card side-station">
+                <a class="station-link" href="home-latest-adapted.html">
+                  <span class="station-order">02</span>
+                  <h3 class="card-title">动物车站</h3>
+                  <p class="card-copy">听听谁在车窗外打招呼。</p>
+                </a>
+              </article>
+
+              <article class="station-card side-station">
+                <a class="station-link" href="home-latest-adapted.html">
+                  <span class="station-order">03</span>
+                  <h3 class="card-title">颜色车站</h3>
+                  <p class="card-copy">看看车厢里藏着什么颜色。</p>
+                </a>
+              </article>
+
+              <article class="station-card side-station">
+                <a class="station-link" href="subject-latest-adapted.html">
+                  <span class="station-order">04</span>
+                  <h3 class="card-title">问候车站</h3>
+                  <p class="card-copy">学会简单打招呼再出发。</p>
+                </a>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="detail-card" aria-labelledby="listen-story-title">
+          <div class="section-heading">
+            <div>
+              <h2 id="listen-story-title" class="section-title">开始听故事</h2>
+              <p class="card-copy">第一站给一个明确的主按钮，避免每站都在抢点击。</p>
+            </div>
+            <span class="badge badge-success">主按钮</span>
+          </div>
+          <div class="button-stack">
+            <a class="primary-button" href="#station-1">从苹果车站出发</a>
+            <a class="secondary-button" href="home-latest-adapted.html">先回首页看今天任务</a>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

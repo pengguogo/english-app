@@ -1,0 +1,537 @@
+{
+  "data": [
+    {
+      "id": "page-home-redesign",
+      "title": "学习旅程首页",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1956,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-0b859154",
+          "measuredAt": 1790647770725
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/home-redesign.html",
+        "interactions": [
+          {
+            "domId": "go-theme",
+            "targetPageId": "page-theme-redesign",
+            "transitionLabel": "进入主题"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-theme-redesign",
+      "title": "水果乐园总览",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 309,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 2625,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-aea2fd50",
+          "measuredAt": 1790647770725
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/theme-redesign.html",
+        "interactions": [
+          {
+            "domId": "back-home",
+            "targetPageId": "page-home-redesign",
+            "hideEdge": true,
+            "transitionLabel": "返回首页"
+          },
+          {
+            "domId": "open-unit-1",
+            "targetPageId": "page-unit-redesign",
+            "transitionLabel": "进入单元"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-unit-redesign",
+      "title": "单元课时列表",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 618,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 2199,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-7ff4c1f8",
+          "measuredAt": 1790647770725
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/unit-redesign.html",
+        "interactions": [
+          {
+            "domId": "back-theme",
+            "targetPageId": "page-theme-redesign",
+            "hideEdge": true,
+            "transitionLabel": "返回主题"
+          },
+          {
+            "domId": "open-lesson-1",
+            "targetPageId": "page-lesson-redesign",
+            "transitionLabel": "开始学习"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-lesson-redesign",
+      "title": "单课时练习",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 927,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 2023,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-17cc6941",
+          "measuredAt": 1790647770725
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/lesson-redesign.html",
+        "interactions": [
+          {
+            "domId": "back-unit",
+            "targetPageId": "page-unit-redesign",
+            "hideEdge": true,
+            "transitionLabel": "返回单元"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-home-kid-simple",
+      "title": "学习旅程首页·简化版",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790648183938,
+      "canvasData": {
+        "x": 0,
+        "y": 877,
+        "group": 1
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/home-kid-simple.html",
+        "interactions": [
+          {
+            "domId": "go-theme",
+            "targetPageId": "page-theme-kid-simple",
+            "transitionLabel": "进入主题"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-theme-kid-simple",
+      "title": "水果乐园总览·简化版",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790648183938,
+      "canvasData": {
+        "x": 309,
+        "y": 877,
+        "group": 1
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/theme-kid-simple.html",
+        "interactions": [
+          {
+            "domId": "back-home",
+            "targetPageId": "page-home-kid-simple",
+            "hideEdge": true,
+            "transitionLabel": "返回首页"
+          },
+          {
+            "domId": "open-unit-1",
+            "targetPageId": "page-unit-kid-simple",
+            "transitionLabel": "进入第一章"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-unit-kid-simple",
+      "title": "单元课时列表·简化版",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790648183938,
+      "canvasData": {
+        "x": 618,
+        "y": 877,
+        "group": 1
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/unit-kid-simple.html",
+        "interactions": [
+          {
+            "domId": "back-theme",
+            "targetPageId": "page-theme-kid-simple",
+            "hideEdge": true,
+            "transitionLabel": "返回主题"
+          },
+          {
+            "domId": "open-lesson-1",
+            "targetPageId": "page-lesson-kid-simple",
+            "transitionLabel": "开始这一节"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-lesson-kid-simple",
+      "title": "单课时练习·简化版",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790648183938,
+      "canvasData": {
+        "x": 927,
+        "y": 877,
+        "group": 1
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/lesson-kid-simple.html",
+        "interactions": [
+          {
+            "domId": "back-unit",
+            "targetPageId": "page-unit-kid-simple",
+            "hideEdge": true,
+            "transitionLabel": "返回单元"
+          }
+        ]
+      }
+    },
+    {
+      "id": "image-001",
+      "title": "水果主视觉",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 0,
+        "y": 3255,
+        "naturalSize": {
+          "width": 960,
+          "height": 960
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/hero-fruit-apple.jpg"
+      }
+    },
+    {
+      "id": "image-002",
+      "title": "欢迎小老鼠 Mimi",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 309,
+        "y": 3255,
+        "naturalSize": {
+          "width": 1024,
+          "height": 1024
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/mascot-welcome.jpg"
+      }
+    },
+    {
+      "id": "image-003",
+      "title": "陪伴小老鼠 Mimi",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 618,
+        "y": 3255,
+        "naturalSize": {
+          "width": 1024,
+          "height": 1024
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/mascot-companion.jpg"
+      }
+    },
+    {
+      "id": "image-004",
+      "title": "庆祝小老鼠 Mimi",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 927,
+        "y": 3255,
+        "naturalSize": {
+          "width": 1024,
+          "height": 1024
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/mascot-celebrate.jpg"
+      }
+    },
+    {
+      "id": "image-005",
+      "title": "水果市集单元图",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 1236,
+        "y": 3255,
+        "naturalSize": {
+          "width": 320,
+          "height": 320
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/unit-fruit-market.webp"
+      }
+    },
+    {
+      "id": "image-006",
+      "title": "农场采摘单元图",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 1545,
+        "y": 3255,
+        "naturalSize": {
+          "width": 320,
+          "height": 320
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/unit-farm.webp"
+      }
+    },
+    {
+      "id": "image-007",
+      "title": "野餐挑战单元图",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1790647701049,
+      "canvasData": {
+        "x": 1854,
+        "y": 3255,
+        "naturalSize": {
+          "width": 320,
+          "height": 320
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/unit-picnic.webp"
+      }
+    },
+    {
+      "id": "page-home-latest-adapted",
+      "title": "首页中枢·最新适配版",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790648943765,
+      "canvasData": {
+        "x": 0,
+        "y": 1855,
+        "group": 2
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/home-latest-adapted.html",
+        "interactions": [
+          {
+            "domId": "open-subjects",
+            "targetPageId": "page-subject-latest-adapted",
+            "transitionLabel": "打开学科乐园"
+          },
+          {
+            "domId": "open-games",
+            "targetPageId": "page-games-latest-adapted",
+            "transitionLabel": "打开游戏专区"
+          },
+          {
+            "domId": "open-picturebooks",
+            "targetPageId": "page-picturebooks-latest-adapted",
+            "transitionLabel": "打开绘本小火车"
+          },
+          {
+            "domId": "open-models",
+            "targetPageId": "page-models-latest-adapted",
+            "transitionLabel": "打开交通工具馆"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-subject-latest-adapted",
+      "title": "学科乐园·最新适配版",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790648943765,
+      "canvasData": {
+        "x": 309,
+        "y": 1855,
+        "group": 2
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/subject-latest-adapted.html",
+        "interactions": [
+          {
+            "domId": "back-home",
+            "targetPageId": "page-home-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "返回首页"
+          },
+          {
+            "domId": "open-theme-1",
+            "targetPageId": "page-subject-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "查看主题"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-games-latest-adapted",
+      "title": "游戏专区·最新适配版",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790648943765,
+      "canvasData": {
+        "x": 309,
+        "y": 2205,
+        "group": 2
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/games-latest-adapted.html",
+        "interactions": [
+          {
+            "domId": "back-home",
+            "targetPageId": "page-home-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "返回首页"
+          },
+          {
+            "domId": "open-game-1",
+            "targetPageId": "page-games-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "开始游戏"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-picturebooks-latest-adapted",
+      "title": "绘本小火车·最新适配版",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790648943765,
+      "canvasData": {
+        "x": 309,
+        "y": 2555,
+        "group": 2
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/picturebooks-latest-adapted.html",
+        "interactions": [
+          {
+            "domId": "back-home",
+            "targetPageId": "page-home-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "返回首页"
+          },
+          {
+            "domId": "open-book-1",
+            "targetPageId": "page-picturebooks-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "开始听故事"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-models-latest-adapted",
+      "title": "交通工具馆·最新适配版",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790648943765,
+      "canvasData": {
+        "x": 309,
+        "y": 2905,
+        "group": 2
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/models-latest-adapted.html",
+        "interactions": [
+          {
+            "domId": "back-home",
+            "targetPageId": "page-home-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "返回首页"
+          },
+          {
+            "domId": "pick-train",
+            "targetPageId": "page-models-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "查看火车"
+          },
+          {
+            "domId": "pick-road-air",
+            "targetPageId": "page-models-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "查看公路与航空"
+          },
+          {
+            "domId": "pick-structure",
+            "targetPageId": "page-models-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "查看结构小百科"
+          },
+          {
+            "domId": "open-model-viewer",
+            "targetPageId": "page-models-latest-adapted",
+            "hideEdge": true,
+            "transitionLabel": "开始观察"
+          }
+        ]
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "mobile",
+    "projectName": "英语学习 App UI 重构稿",
+    "visualEditorEnabled": true
+  }
+}

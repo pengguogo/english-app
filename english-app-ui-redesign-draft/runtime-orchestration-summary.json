@@ -1,0 +1,658 @@
+{
+  "skillProvenance": {
+    "name": "solo-design",
+    "version": "2026.07.06.8",
+    "version_source": "skill-release-manifest.json",
+    "read_status": "ok"
+  },
+  "designSource": {
+    "operatingMode": "free-explore"
+  },
+  "project": {
+    "resolvedLane": "existing_edit_add_comparison",
+    "selectedIntentWorkflowRead": true,
+    "duplicateProjectPath": "/Users/dawn/Desktop/english_app/english-app-ui-redesign-draft",
+    "intentProfile": {
+      "caseFamily": "free_exploration"
+    },
+    "contextRequirementsLoaded": [
+      {
+        "path": "intent-workflows/intent-project-mutation/INTENT_WORKFLOW.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "shared-runtime/runtime-boundaries/lane-runtime-contracts.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "shared-runtime/agent-dispatch-runtime/lane-dispatch-index.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "shared-runtime/agent-dispatch-runtime/shared-page-rendering-kernel.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "delivery-quality/page-rendering-quality-gate.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "delivery-quality/design-artifact-validation.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "delivery-quality/delivery-evidence-contract.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "intent-workflows/intent-project-mutation/comparison-page-contract.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      }
+    ],
+    "contextReadScope": [
+      "frontend/src/views/HomeView.vue",
+      "frontend/src/views/SubjectView.vue",
+      "frontend/src/views/GamesView.vue",
+      "frontend/src/views/PicturebooksView.vue",
+      "frontend/src/views/ModelsView.vue",
+      "frontend/src/views/ThemeView.vue",
+      "frontend/src/views/UnitView.vue",
+      "frontend/src/views/LessonView.vue",
+      "frontend/src/router/index.js",
+      "frontend/src/styles/tokens.css",
+      "docs/superpowers/specs/2026-07-20-ui-beautify-design.md"
+    ],
+    "validationRunDiscipline": {
+      "maxFullValidationRuns": 2,
+      "softWarningsTriggerRepair": false,
+      "blockingRepairMode": "targeted-once",
+      "forbiddenRepairTriggers": [
+        "soft-warning-only",
+        "provenance-warning-only",
+        "style-warning-only"
+      ]
+    },
+    "lowValueCallWatchdog": {
+      "noProgressNextAction": "run-final-validation"
+    },
+    "mutationMode": "existing-edit-add-comparison",
+    "sourcePageId": "page-home-redesign",
+    "sourceHtmlSrc": "pages/home-redesign.html",
+    "derivationType": "comparison-page",
+    "inPlaceEditAllowed": false,
+    "sourceProjectLaneHeritage": null,
+    "dispatchPreflightManifest": [
+      {
+        "nodeId": "page-home-kid-simple",
+        "packetType": "ExistingEditPagePacket",
+        "htmlSrc": "pages/home-kid-simple.html",
+        "allowedWritePaths": [
+          "pages/home-kid-simple.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/home-kid-simple.html"
+          ]
+        }
+      },
+      {
+        "nodeId": "page-theme-kid-simple",
+        "packetType": "ExistingEditPagePacket",
+        "htmlSrc": "pages/theme-kid-simple.html",
+        "allowedWritePaths": [
+          "pages/theme-kid-simple.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/theme-kid-simple.html"
+          ]
+        }
+      },
+      {
+        "nodeId": "page-unit-kid-simple",
+        "packetType": "ExistingEditPagePacket",
+        "htmlSrc": "pages/unit-kid-simple.html",
+        "allowedWritePaths": [
+          "pages/unit-kid-simple.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/unit-kid-simple.html"
+          ]
+        }
+      },
+      {
+        "nodeId": "page-lesson-kid-simple",
+        "packetType": "ExistingEditPagePacket",
+        "htmlSrc": "pages/lesson-kid-simple.html",
+        "allowedWritePaths": [
+          "pages/lesson-kid-simple.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/lesson-kid-simple.html"
+          ]
+        }
+      },
+      {
+        "nodeId": "page-home-latest-adapted",
+        "packetType": "ExistingEditPagePacket",
+        "htmlSrc": "pages/home-latest-adapted.html",
+        "allowedWritePaths": [
+          "pages/home-latest-adapted.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/home-latest-adapted.html"
+          ]
+        }
+      },
+      {
+        "nodeId": "page-subject-latest-adapted",
+        "packetType": "ExistingEditPagePacket",
+        "htmlSrc": "pages/subject-latest-adapted.html",
+        "allowedWritePaths": [
+          "pages/subject-latest-adapted.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/subject-latest-adapted.html"
+          ]
+        }
+      },
+      {
+        "nodeId": "page-games-latest-adapted",
+        "packetType": "ExistingEditPagePacket",
+        "htmlSrc": "pages/games-latest-adapted.html",
+        "allowedWritePaths": [
+          "pages/games-latest-adapted.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/games-latest-adapted.html"
+          ]
+        }
+      },
+      {
+        "nodeId": "page-picturebooks-latest-adapted",
+        "packetType": "ExistingEditPagePacket",
+        "htmlSrc": "pages/picturebooks-latest-adapted.html",
+        "allowedWritePaths": [
+          "pages/picturebooks-latest-adapted.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/picturebooks-latest-adapted.html"
+          ]
+        }
+      },
+      {
+        "nodeId": "page-models-latest-adapted",
+        "packetType": "ExistingEditPagePacket",
+        "htmlSrc": "pages/models-latest-adapted.html",
+        "allowedWritePaths": [
+          "pages/models-latest-adapted.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/models-latest-adapted.html"
+          ]
+        }
+      }
+    ],
+    "expectedDispatches": [
+      {
+        "nodeId": "page-home-kid-simple",
+        "packetType": "ExistingEditPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/home-kid-simple.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "kid-simple-home-v1",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        }
+      },
+      {
+        "nodeId": "page-theme-kid-simple",
+        "packetType": "ExistingEditPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/theme-kid-simple.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "kid-simple-theme-v1",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        }
+      },
+      {
+        "nodeId": "page-unit-kid-simple",
+        "packetType": "ExistingEditPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/unit-kid-simple.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "kid-simple-unit-v1",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        }
+      },
+      {
+        "nodeId": "page-lesson-kid-simple",
+        "packetType": "ExistingEditPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/lesson-kid-simple.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "kid-simple-lesson-v1",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        }
+      },
+      {
+        "nodeId": "page-home-latest-adapted",
+        "packetType": "ExistingEditPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/home-latest-adapted.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "latest-hub-home-v1",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        }
+      },
+      {
+        "nodeId": "page-subject-latest-adapted",
+        "packetType": "ExistingEditPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/subject-latest-adapted.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "latest-hub-subject-v1",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        }
+      },
+      {
+        "nodeId": "page-games-latest-adapted",
+        "packetType": "ExistingEditPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/games-latest-adapted.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "latest-hub-games-v1",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        }
+      },
+      {
+        "nodeId": "page-picturebooks-latest-adapted",
+        "packetType": "ExistingEditPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/picturebooks-latest-adapted.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "latest-hub-picturebooks-v1",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        }
+      },
+      {
+        "nodeId": "page-models-latest-adapted",
+        "packetType": "ExistingEditPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/models-latest-adapted.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "latest-hub-models-v1",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        }
+      }
+    ],
+    "comparisonPageSet": [
+      {
+        "sourcePageId": "page-home-redesign",
+        "sourceHtmlSrc": "pages/home-redesign.html",
+        "targetPageId": "page-home-kid-simple",
+        "targetHtmlSrc": "pages/home-kid-simple.html",
+        "derivationType": "comparison-page"
+      },
+      {
+        "sourcePageId": "page-theme-redesign",
+        "sourceHtmlSrc": "pages/theme-redesign.html",
+        "targetPageId": "page-theme-kid-simple",
+        "targetHtmlSrc": "pages/theme-kid-simple.html",
+        "derivationType": "comparison-page"
+      },
+      {
+        "sourcePageId": "page-unit-redesign",
+        "sourceHtmlSrc": "pages/unit-redesign.html",
+        "targetPageId": "page-unit-kid-simple",
+        "targetHtmlSrc": "pages/unit-kid-simple.html",
+        "derivationType": "comparison-page"
+      },
+      {
+        "sourcePageId": "page-lesson-redesign",
+        "sourceHtmlSrc": "pages/lesson-redesign.html",
+        "targetPageId": "page-lesson-kid-simple",
+        "targetHtmlSrc": "pages/lesson-kid-simple.html",
+        "derivationType": "comparison-page"
+      },
+      {
+        "sourcePageId": "page-home-kid-simple",
+        "sourceHtmlSrc": "pages/home-kid-simple.html",
+        "targetPageId": "page-home-latest-adapted",
+        "targetHtmlSrc": "pages/home-latest-adapted.html",
+        "derivationType": "comparison-page"
+      },
+      {
+        "sourcePageId": "page-home-kid-simple",
+        "sourceHtmlSrc": "pages/home-kid-simple.html",
+        "targetPageId": "page-subject-latest-adapted",
+        "targetHtmlSrc": "pages/subject-latest-adapted.html",
+        "derivationType": "comparison-page"
+      },
+      {
+        "sourcePageId": "page-home-kid-simple",
+        "sourceHtmlSrc": "pages/home-kid-simple.html",
+        "targetPageId": "page-games-latest-adapted",
+        "targetHtmlSrc": "pages/games-latest-adapted.html",
+        "derivationType": "comparison-page"
+      },
+      {
+        "sourcePageId": "page-home-kid-simple",
+        "sourceHtmlSrc": "pages/home-kid-simple.html",
+        "targetPageId": "page-picturebooks-latest-adapted",
+        "targetHtmlSrc": "pages/picturebooks-latest-adapted.html",
+        "derivationType": "comparison-page"
+      },
+      {
+        "sourcePageId": "page-home-kid-simple",
+        "sourceHtmlSrc": "pages/home-kid-simple.html",
+        "targetPageId": "page-models-latest-adapted",
+        "targetHtmlSrc": "pages/models-latest-adapted.html",
+        "derivationType": "comparison-page"
+      }
+    ],
+    "generationTree": {
+      "root": {
+        "id": "project-root",
+        "type": "project-shell",
+        "status": "generated",
+        "children": [
+          {
+            "id": "page-home-redesign",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/home-redesign.html"
+          },
+          {
+            "id": "page-theme-redesign",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/theme-redesign.html"
+          },
+          {
+            "id": "page-unit-redesign",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/unit-redesign.html"
+          },
+          {
+            "id": "page-lesson-redesign",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/lesson-redesign.html"
+          },
+          {
+            "id": "page-home-kid-simple",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/home-kid-simple.html"
+          },
+          {
+            "id": "page-theme-kid-simple",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/theme-kid-simple.html"
+          },
+          {
+            "id": "page-unit-kid-simple",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/unit-kid-simple.html"
+          },
+          {
+            "id": "page-lesson-kid-simple",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/lesson-kid-simple.html"
+          },
+          {
+            "id": "page-home-latest-adapted",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/home-latest-adapted.html"
+          },
+          {
+            "id": "page-subject-latest-adapted",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/subject-latest-adapted.html"
+          },
+          {
+            "id": "page-games-latest-adapted",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/games-latest-adapted.html"
+          },
+          {
+            "id": "page-picturebooks-latest-adapted",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/picturebooks-latest-adapted.html"
+          },
+          {
+            "id": "page-models-latest-adapted",
+            "type": "page",
+            "status": "generated",
+            "htmlSrc": "pages/models-latest-adapted.html"
+          }
+        ]
+      }
+    }
+  },
+  "pages": [
+    {
+      "nodeId": "page-home-redesign",
+      "title": "学习旅程首页",
+      "htmlSrc": "pages/home-redesign.html"
+    },
+    {
+      "nodeId": "page-theme-redesign",
+      "title": "水果乐园总览",
+      "htmlSrc": "pages/theme-redesign.html"
+    },
+    {
+      "nodeId": "page-unit-redesign",
+      "title": "单元课时列表",
+      "htmlSrc": "pages/unit-redesign.html"
+    },
+    {
+      "nodeId": "page-lesson-redesign",
+      "title": "单课时练习",
+      "htmlSrc": "pages/lesson-redesign.html"
+    },
+    {
+      "nodeId": "page-home-kid-simple",
+      "title": "学习旅程首页·简化版",
+      "htmlSrc": "pages/home-kid-simple.html",
+      "sourcePageId": "page-home-redesign",
+      "sourceHtmlSrc": "pages/home-redesign.html",
+      "derivationType": "comparison-page",
+      "inPlaceEditAllowed": false
+    },
+    {
+      "nodeId": "page-theme-kid-simple",
+      "title": "水果乐园总览·简化版",
+      "htmlSrc": "pages/theme-kid-simple.html",
+      "sourcePageId": "page-theme-redesign",
+      "sourceHtmlSrc": "pages/theme-redesign.html",
+      "derivationType": "comparison-page",
+      "inPlaceEditAllowed": false
+    },
+    {
+      "nodeId": "page-unit-kid-simple",
+      "title": "单元课时列表·简化版",
+      "htmlSrc": "pages/unit-kid-simple.html",
+      "sourcePageId": "page-unit-redesign",
+      "sourceHtmlSrc": "pages/unit-redesign.html",
+      "derivationType": "comparison-page",
+      "inPlaceEditAllowed": false
+    },
+    {
+      "nodeId": "page-lesson-kid-simple",
+      "title": "单课时练习·简化版",
+      "htmlSrc": "pages/lesson-kid-simple.html",
+      "sourcePageId": "page-lesson-redesign",
+      "sourceHtmlSrc": "pages/lesson-redesign.html",
+      "derivationType": "comparison-page",
+      "inPlaceEditAllowed": false
+    },
+    {
+      "nodeId": "page-home-latest-adapted",
+      "title": "首页中枢·最新适配版",
+      "htmlSrc": "pages/home-latest-adapted.html",
+      "sourcePageId": "page-home-kid-simple",
+      "sourceHtmlSrc": "pages/home-kid-simple.html",
+      "derivationType": "comparison-page",
+      "inPlaceEditAllowed": false
+    },
+    {
+      "nodeId": "page-subject-latest-adapted",
+      "title": "学科乐园·最新适配版",
+      "htmlSrc": "pages/subject-latest-adapted.html",
+      "sourcePageId": "page-home-kid-simple",
+      "sourceHtmlSrc": "pages/home-kid-simple.html",
+      "derivationType": "comparison-page",
+      "inPlaceEditAllowed": false
+    },
+    {
+      "nodeId": "page-games-latest-adapted",
+      "title": "游戏专区·最新适配版",
+      "htmlSrc": "pages/games-latest-adapted.html",
+      "sourcePageId": "page-home-kid-simple",
+      "sourceHtmlSrc": "pages/home-kid-simple.html",
+      "derivationType": "comparison-page",
+      "inPlaceEditAllowed": false
+    },
+    {
+      "nodeId": "page-picturebooks-latest-adapted",
+      "title": "绘本小火车·最新适配版",
+      "htmlSrc": "pages/picturebooks-latest-adapted.html",
+      "sourcePageId": "page-home-kid-simple",
+      "sourceHtmlSrc": "pages/home-kid-simple.html",
+      "derivationType": "comparison-page",
+      "inPlaceEditAllowed": false
+    },
+    {
+      "nodeId": "page-models-latest-adapted",
+      "title": "交通工具馆·最新适配版",
+      "htmlSrc": "pages/models-latest-adapted.html",
+      "sourcePageId": "page-home-kid-simple",
+      "sourceHtmlSrc": "pages/home-kid-simple.html",
+      "derivationType": "comparison-page",
+      "inPlaceEditAllowed": false
+    }
+  ]
+}

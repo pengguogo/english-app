@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水果乐园总览</title>
+    <style id="theme-vars">
+:root {
+  --color-primary: #6b7cff;
+  --color-primary-deep: #5162df;
+  --color-primary-soft: #eef1ff;
+  --color-accent: #ffd93d;
+  --color-accent-soft: #fff7c7;
+  --color-success: #52c874;
+  --color-success-soft: #e9f8ee;
+  --color-warning: #ff9f43;
+  --color-warning-soft: #fff1df;
+  --color-danger: #ff7a7a;
+  --color-danger-soft: #ffeaea;
+  --color-ink: #2d3552;
+  --color-ink-soft: #5e6684;
+  --color-muted: #8f96b2;
+  --color-border: #e9e6f5;
+  --color-border-strong: #d8d3ef;
+  --color-page: #fff8f0;
+  --color-page-strong: #fff1e2;
+  --color-card: #ffffff;
+  --color-card-soft: #fffdf8;
+  --color-track: #f2efff;
+  --color-background: var(--color-page);
+  --color-foreground: var(--color-ink);
+  --shadow-card: 0 16px 36px rgba(96, 103, 160, 0.12);
+  --shadow-soft: 0 10px 24px rgba(96, 103, 160, 0.08);
+  --shadow-press: 0 8px 20px rgba(81, 98, 223, 0.18);
+  --radius-xs: 10px;
+  --radius-sm: 16px;
+  --radius-md: 24px;
+  --radius-lg: 32px;
+  --radius-pill: 999px;
+  --color-radius-sm: var(--radius-sm);
+  --color-radius-md: var(--radius-md);
+  --color-radius-lg: var(--radius-lg);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 24px;
+  --text-xl: 32px;
+  --text-2xl: 40px;
+  --font-sans: "PingFang SC", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --hero-glow: radial-gradient(circle at top right, rgba(255, 217, 61, 0.34), transparent 42%);
+  --hero-warm: linear-gradient(180deg, #fff8ef 0%, #fff0dc 100%);
+  --primary-gradient: linear-gradient(135deg, #6b7cff 0%, #8592ff 100%);
+  --accent-gradient: linear-gradient(135deg, #ffd93d 0%, #ffcb3d 100%);
+  --success-gradient: linear-gradient(135deg, #52c874 0%, #7ad28e 100%);
+  --page-gradient: linear-gradient(180deg, #fffaf3 0%, #fff4e9 100%);
+  --chapter-gradient: linear-gradient(180deg, #f7f4ff 0%, #fffaf4 100%);
+  --lesson-highlight: linear-gradient(145deg, #fff4d8 0%, #fff9ef 100%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background:
+    var(--hero-glow),
+    var(--page-gradient);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+a {
+  color: inherit;
+  font: inherit;
+}
+
+.app-shell {
+  width: min(100%, 800px);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.mobile-frame {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.9)),
+    var(--hero-warm);
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.hero-card,
+.surface-card,
+.summary-card,
+.chapter-card,
+.lesson-card,
+.word-card,
+.reward-strip,
+.banner-card,
+.stats-card,
+.path-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.surface-card {
+  padding: var(--space-5);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.back-button,
+.ghost-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-ink);
+  text-decoration: none;
+  box-shadow: var(--shadow-soft);
+}
+
+.back-button::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-left: 2px solid var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+  transform: rotate(45deg);
+  margin-top: -1px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  min-height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-deep);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.page-title {
+  margin: 0;
+  font-size: clamp(28px, 6vw, 38px);
+  line-height: 1.15;
+}
+
+.page-subtitle,
+.section-note,
+.muted-text {
+  margin: 0;
+  color: var(--color-ink-soft);
+  line-height: 1.6;
+}
+
+.hero-card {
+  position: relative;
+  padding: var(--space-6);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 250, 243, 0.96)),
+    var(--color-card);
+}
+
+.hero-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 140px;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.hero-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: fit-content;
+  padding: 0 var(--space-3);
+  min-height: 34px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.mascot-sticker,
+.hero-mascot,
+.companion-avatar {
+  border-radius: 28px;
+  background: var(--color-card);
+  border: 8px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(255, 217, 61, 0.28),
+    0 18px 30px rgba(255, 184, 73, 0.18);
+}
+
+.hero-mascot {
+  justify-self: end;
+  width: 100%;
+  max-width: 132px;
+}
+
+.companion-avatar {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.stats-card {
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.stats-label,
+.metric-label,
+.chip-label,
+.lesson-meta,
+.chapter-meta,
+.mini-label {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.stats-value,
+.metric-value {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.path-card {
+  padding: var(--space-6) var(--space-5);
+  background: var(--chapter-gradient);
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.section-title {
+  margin: 0;
+  font-size: 22px;
+}
+
+.journey-track {
+  position: relative;
+  display: grid;
+  gap: var(--space-5);
+}
+
+.journey-track::before {
+  content: "";
+  position: absolute;
+  left: 31px;
+  top: 24px;
+  bottom: 24px;
+  width: 2px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      var(--color-primary) 0 10px,
+      transparent 10px 18px
+    );
+  opacity: 0.42;
+}
+
+.path-node {
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.path-badge {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.path-badge::before,
+.tab-icon::before,
+.mini-glyph::before {
+  content: "";
+  display: block;
+  border-radius: 999px;
+}
+
+.path-badge.is-primary::before {
+  width: 30px;
+  height: 30px;
+  background: var(--accent-gradient);
+}
+
+.path-badge.is-secondary::before {
+  width: 30px;
+  height: 22px;
+  background: var(--primary-gradient);
+  border-radius: 12px 12px 18px 18px;
+}
+
+.path-badge.is-third::before {
+  width: 32px;
+  height: 18px;
+  background: var(--success-gradient);
+  box-shadow: 0 10px 0 -6px var(--color-success-soft);
+}
+
+.node-card {
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(233, 230, 245, 0.9);
+}
+
+.node-title {
+  margin: 0 0 var(--space-2);
+  font-size: 18px;
+}
+
+.node-row,
+.meta-row,
+.button-row,
+.inline-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.pill.is-accent {
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+}
+
+.pill.is-primary {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-deep);
+}
+
+.pill.is-success {
+  background: var(--color-success-soft);
+  color: #347847;
+}
+
+.pill.is-warning {
+  background: var(--color-warning-soft);
+  color: #a55d11;
+}
+
+.pill.is-soft {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--color-border);
+  color: var(--color-ink-soft);
+}
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  width: 100%;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  border: none;
+  text-decoration: none;
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-bold);
+  transition:
+    transform var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth);
+}
+
+.primary-button {
+  color: var(--color-card);
+  background: var(--primary-gradient);
+  box-shadow: var(--shadow-press);
+}
+
+.secondary-button {
+  color: var(--color-primary-deep);
+  background: var(--color-primary-soft);
+}
+
+.tabbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.9);
+  border-top: 1px solid rgba(233, 230, 245, 0.9);
+  backdrop-filter: blur(14px);
+}
+
+.tab-item {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  text-decoration: none;
+}
+
+.tab-item.is-active {
+  color: var(--color-primary-deep);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tab-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 20px;
+}
+
+.tab-item.is-home .tab-icon::before {
+  width: 16px;
+  height: 16px;
+  background: var(--color-primary-soft);
+  border: 2px solid currentColor;
+  transform: rotate(45deg);
+  border-radius: 4px;
+}
+
+.tab-item.is-theme .tab-icon::before {
+  width: 18px;
+  height: 12px;
+  background: transparent;
+  border: 2px solid currentColor;
+  border-radius: 10px;
+}
+
+.tab-item.is-progress .tab-icon::before {
+  width: 18px;
+  height: 18px;
+  background:
+    linear-gradient(
+      to top,
+      currentColor 0 30%,
+      transparent 30% 100%
+    );
+  border: 2px solid currentColor;
+}
+
+.tab-item.is-profile .tab-icon::before {
+  width: 16px;
+  height: 16px;
+  background: transparent;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  box-shadow: 0 10px 0 -5px currentColor;
+}
+
+.banner-card {
+  overflow: hidden;
+  padding: var(--space-5);
+  background:
+    linear-gradient(135deg, rgba(107, 124, 255, 0.1), rgba(255, 217, 61, 0.12)),
+    var(--color-card);
+}
+
+.banner-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.banner-image-stack {
+  display: grid;
+  grid-template-columns: 1fr 96px;
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.cover-image,
+.small-sticker {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+}
+
+.chapter-list,
+.lesson-list {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.chapter-card {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-4);
+}
+
+.chapter-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 8px;
+  border-radius: 0 12px 12px 0;
+  background: var(--primary-gradient);
+}
+
+.chapter-layout {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.chapter-thumb {
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--color-page-strong);
+}
+
+.chapter-content {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.chapter-title-row,
+.lesson-title-row,
+.reward-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-3);
+}
+
+.chapter-title,
+.lesson-title {
+  margin: 0;
+  font-size: 20px;
+}
+
+.progress-group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.progress-track {
+  overflow: hidden;
+  height: 10px;
+  background: var(--color-track);
+  border-radius: var(--radius-pill);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary-gradient);
+}
+
+.progress-fill.is-success {
+  background: var(--success-gradient);
+}
+
+.chapter-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-ink-soft);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.status-dot.is-success {
+  background: var(--color-success);
+}
+
+.summary-card {
+  padding: var(--space-5);
+  background:
+    linear-gradient(180deg, rgba(255, 248, 214, 0.9), rgba(255, 255, 255, 0.95)),
+    var(--color-card);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.summary-figure {
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.lesson-card {
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.lesson-card.is-current {
+  background: var(--lesson-highlight);
+  border-color: rgba(255, 217, 61, 0.45);
+}
+
+.lesson-card.is-complete {
+  background: linear-gradient(180deg, rgba(234, 248, 238, 0.95), rgba(255, 255, 255, 0.92));
+}
+
+.lesson-layout {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.lesson-index {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 20px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-deep);
+  font-size: 22px;
+  font-weight: var(--font-weight-bold);
+}
+
+.lesson-card.is-current .lesson-index {
+  background: var(--accent-gradient);
+  color: var(--color-ink);
+}
+
+.lesson-card.is-complete .lesson-index {
+  background: var(--success-gradient);
+  color: var(--color-card);
+}
+
+.badge-with-glyph {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.mini-glyph {
+  width: 14px;
+  height: 14px;
+}
+
+.badge-with-glyph.is-complete .mini-glyph::before {
+  width: 14px;
+  height: 14px;
+  background: var(--success-gradient);
+  clip-path: polygon(48% 8%, 60% 34%, 88% 38%, 68% 58%, 74% 88%, 48% 72%, 22% 88%, 28% 58%, 8% 38%, 36% 34%);
+}
+
+.badge-with-glyph.is-current .mini-glyph::before {
+  width: 14px;
+  height: 14px;
+  background: var(--accent-gradient);
+  border-radius: 50%;
+}
+
+.badge-with-glyph.is-next .mini-glyph::before {
+  width: 14px;
+  height: 14px;
+  background: var(--primary-gradient);
+  clip-path: polygon(20% 12%, 84% 50%, 20% 88%);
+}
+
+.word-card {
+  overflow: hidden;
+}
+
+.word-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.word-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.word-content {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.word-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.word-en {
+  margin: 0;
+  font-size: clamp(38px, 10vw, 52px);
+  line-height: 1;
+}
+
+.word-pronunciation {
+  color: var(--color-primary-deep);
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.score-panel,
+.reward-strip {
+  padding: var(--space-5);
+}
+
+.score-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 240, 220, 0.9), rgba(255, 255, 255, 0.96)),
+    var(--color-card);
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.score-box {
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.score-number {
+  font-size: 30px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-warning);
+}
+
+.feedback-card {
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-soft);
+}
+
+.reward-strip {
+  display: grid;
+  gap: var(--space-3);
+  background:
+    linear-gradient(135deg, rgba(255, 217, 61, 0.16), rgba(107, 124, 255, 0.1)),
+    var(--color-card);
+}
+
+.reward-glyphs {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.reward-token {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 217, 61, 0.3);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-soft);
+}
+
+.reward-token.is-star {
+  background:
+    radial-gradient(circle at center, rgba(255, 217, 61, 0.8) 0 30%, transparent 32%),
+    rgba(255, 255, 255, 0.85);
+}
+
+.reward-token.is-ribbon {
+  background:
+    linear-gradient(180deg, rgba(107, 124, 255, 0.78) 0 55%, transparent 55%),
+    linear-gradient(135deg, transparent 62%, rgba(107, 124, 255, 0.78) 62% 70%, transparent 70%),
+    rgba(255, 255, 255, 0.85);
+}
+
+.reward-token.is-path {
+  background:
+    repeating-linear-gradient(135deg, rgba(82, 200, 116, 0.8) 0 6px, transparent 6px 12px),
+    rgba(255, 255, 255, 0.85);
+}
+
+.spacer-bottom {
+  height: 92px;
+}
+
+@media (max-width: 479px) {
+  .app-shell {
+    padding: var(--space-3);
+  }
+
+  .hero-layout,
+  .banner-grid,
+  .summary-grid,
+  .chapter-layout,
+  .score-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-mascot {
+    justify-self: center;
+    max-width: 120px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .banner-image-stack {
+    grid-template-columns: 1fr 80px;
+  }
+}
+
+@media (min-width: 480px) {
+  .journey-track {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .journey-track::before {
+    left: 56px;
+    right: 56px;
+    top: 44px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+    background:
+      repeating-linear-gradient(
+        to right,
+        var(--color-primary) 0 12px,
+        transparent 12px 22px
+      );
+  }
+
+  .path-node {
+    grid-template-columns: 1fr;
+    align-content: start;
+  }
+
+  .path-badge {
+    margin: 0 auto;
+  }
+
+  .node-card {
+    min-height: 188px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-mascot,
+  .companion-avatar {
+    animation: floatY 3.2s ease-in-out infinite;
+  }
+
+  .primary-button:hover,
+  .secondary-button:hover,
+  .chapter-card:hover,
+  .lesson-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes floatY {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--color-background);
+    --color-foreground: var(--color-foreground);
+    --color-card: var(--color-card);
+    --color-primary: var(--color-primary);
+    --color-muted: var(--color-muted);
+    --color-accent: var(--color-accent);
+    --color-border: var(--color-border);
+    --radius-sm: var(--color-radius-sm);
+    --radius-md: var(--color-radius-md);
+    --radius-lg: var(--color-radius-lg);
+  }
+  @layer base {
+    body { background: var(--color-background); color: var(--color-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--color-background); }
+      .text-background { color: var(--color-background); }
+      .border-background { border-color: var(--color-background); }
+      .ring-background { --tw-ring-color: var(--color-background); }
+      .bg-foreground { background-color: var(--color-foreground); }
+      .text-foreground { color: var(--color-foreground); }
+      .border-foreground { border-color: var(--color-foreground); }
+      .ring-foreground { --tw-ring-color: var(--color-foreground); }
+      .bg-card { background-color: var(--color-card); }
+      .text-card { color: var(--color-card); }
+      .border-card { border-color: var(--color-card); }
+      .ring-card { --tw-ring-color: var(--color-card); }
+      .bg-primary { background-color: var(--color-primary); }
+      .text-primary { color: var(--color-primary); }
+      .border-primary { border-color: var(--color-primary); }
+      .ring-primary { --tw-ring-color: var(--color-primary); }
+      .bg-muted { background-color: var(--color-muted); }
+      .text-muted { color: var(--color-muted); }
+      .border-muted { border-color: var(--color-muted); }
+      .ring-muted { --tw-ring-color: var(--color-muted); }
+      .bg-accent { background-color: var(--color-accent); }
+      .text-accent { color: var(--color-accent); }
+      .border-accent { border-color: var(--color-accent); }
+      .ring-accent { --tw-ring-color: var(--color-accent); }
+      .bg-border { background-color: var(--color-border); }
+      .text-border { color: var(--color-border); }
+      .border-border { border-color: var(--color-border); }
+      .ring-border { --tw-ring-color: var(--color-border); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+  <body>
+    <main class="app-shell mobile-frame">
+      <div class="page-stack">
+        <header class="topbar">
+          <a class="back-button" data-dom-id="back-home" href="home-redesign.html">返回首页</a>
+          <span class="pill is-soft">水果主题总览</span>
+        </header>
+
+        <section class="banner-card">
+          <div class="banner-grid">
+            <div class="hero-copy">
+              <span class="eyebrow">主题地图 · 水果乐园</span>
+              <div>
+                <h1 class="page-title">从认识水果，到自然开口</h1>
+                <p class="page-subtitle">
+                  这一章把图像认知、生活表达和跟读练习连接成一条连续路线，让孩子在熟悉的场景中建立英文语感。
+                </p>
+              </div>
+              <div class="meta-row">
+                <span class="pill is-accent">共 3 个单元</span>
+                <span class="pill is-primary">总进度 42%</span>
+              </div>
+            </div>
+            <div class="banner-image-stack">
+              <div class="chapter-thumb">
+                <img class="cover-image" src="../assets/hero-fruit-apple.jpg" alt="水果乐园主视觉" />
+              </div>
+              <img
+                class="small-sticker mascot-sticker"
+                src="../assets/mascot-companion.jpg"
+                alt="Mimi 在旁边陪伴学习"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section class="chapter-list" aria-label="主题单元列表">
+          <article class="chapter-card">
+            <div class="chapter-layout">
+              <div class="chapter-thumb">
+                <img class="cover-image" src="../assets/unit-fruit-market.webp" alt="水果市场单元封面" />
+              </div>
+              <div class="chapter-content">
+                <div class="chapter-title-row">
+                  <div>
+                    <p class="mini-label">第一章</p>
+                    <h2 class="chapter-title">水果市场见面啦</h2>
+                  </div>
+                  <span class="pill is-success">进行中</span>
+                </div>
+                <p class="page-subtitle">
+                  先从最熟悉的苹果、香蕉和梨开始，在市场对话中认识颜色、数量与名称。
+                </p>
+                <div class="progress-group">
+                  <div class="meta-row">
+                    <span class="chapter-meta">已学习 3 / 8 节</span>
+                    <span class="chapter-meta">课时 8 节</span>
+                  </div>
+                  <div class="progress-track" aria-label="水果市场学习进度">
+                    <div class="progress-fill" style="width: 42%;"></div>
+                  </div>
+                </div>
+                <div class="chapter-status">
+                  <span class="status-dot" aria-hidden="true"></span>
+                  <span>正在前往第 4 节，学习节奏保持得很好。</span>
+                </div>
+                <a class="secondary-button" data-dom-id="open-unit-1" href="unit-redesign.html">进入这一章</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chapter-card">
+            <div class="chapter-layout">
+              <div class="chapter-thumb">
+                <img class="cover-image" src="../assets/unit-farm.webp" alt="果园农场单元封面" />
+              </div>
+              <div class="chapter-content">
+                <div class="chapter-title-row">
+                  <div>
+                    <p class="mini-label">第二章</p>
+                    <h2 class="chapter-title">果园农场小探险</h2>
+                  </div>
+                  <span class="pill is-primary">待开启</span>
+                </div>
+                <p class="page-subtitle">
+                  走进农场场景，学习“这是什么”“它在哪里”等更完整的描述句式。
+                </p>
+                <div class="progress-group">
+                  <div class="meta-row">
+                    <span class="chapter-meta">已解锁 0 / 6 节</span>
+                    <span class="chapter-meta">课时 6 节</span>
+                  </div>
+                  <div class="progress-track" aria-label="果园农场学习进度">
+                    <div class="progress-fill" style="width: 8%;"></div>
+                  </div>
+                </div>
+                <div class="chapter-status">
+                  <span class="status-dot" aria-hidden="true"></span>
+                  <span>完成上一章的关键练习后即可进入。</span>
+                </div>
+                <a class="secondary-button" href="unit-redesign.html">查看路线</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="chapter-card">
+            <div class="chapter-layout">
+              <div class="chapter-thumb">
+                <img class="cover-image" src="../assets/unit-picnic.webp" alt="野餐聚会单元封面" />
+              </div>
+              <div class="chapter-content">
+                <div class="chapter-title-row">
+                  <div>
+                    <p class="mini-label">第三章</p>
+                    <h2 class="chapter-title">野餐时间开口说</h2>
+                  </div>
+                  <span class="pill is-warning">准备奖励</span>
+                </div>
+                <p class="page-subtitle">
+                  在野餐情境里把词汇和句型组合起来，尝试做出更完整的表达与回应。
+                </p>
+                <div class="progress-group">
+                  <div class="meta-row">
+                    <span class="chapter-meta">预览已开启</span>
+                    <span class="chapter-meta">课时 5 节</span>
+                  </div>
+                  <div class="progress-track" aria-label="野餐学习进度">
+                    <div class="progress-fill is-success" style="width: 16%;"></div>
+                  </div>
+                </div>
+                <div class="chapter-status">
+                  <span class="status-dot is-success" aria-hidden="true"></span>
+                  <span>完成后可领取新的路线贴纸与结算勋带。</span>
+                </div>
+                <a class="secondary-button" href="unit-redesign.html">预览单元</a>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <div class="spacer-bottom" aria-hidden="true"></div>
+      </div>
+    </main>
+  </body>
+</html>

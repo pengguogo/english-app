@@ -1,0 +1,167 @@
+{
+  "success": true,
+  "outcome": "passed",
+  "repairable": true,
+  "terminalViolations": [],
+  "terminalBlockingSummary": null,
+  "skillProvenance": {
+    "name": "solo-design",
+    "version": "2026.07.06.8",
+    "version_source": "skill-release-manifest.json",
+    "runtime_skill_dir": null,
+    "recorded_at": null,
+    "expected_version": "2026.07.22.00.00.00",
+    "status": "mismatch",
+    "read_status": "ok"
+  },
+  "operatingMode": "free-explore",
+  "renderBlockingErrorCount": 0,
+  "softWarningCount": 14,
+  "renderBlockingErrors": [],
+  "errorSignatures": [],
+  "softWarnings": [
+    "[html-quality] colors_and_type.css: free-explore brand CSS must use one primary hue only; forbidden secondary/accent brand variables found (--color-accent, --color-accent-soft, --accent-gradient). Use --state-success/warning/error/info only for semantic states.",
+    "[html-quality] colors_and_type.css: free-explore radius tokens must stay within the restrained 2/4/8/12/16px scale; oversized or forbidden radius tokens found (--radius-md: 24px, --radius-lg: 32px). Do not use 20px+ radii unless the user explicitly requested large rounded shapes.",
+    "[html-quality] colors_and_type.css: ordinary/static shadow tokens must keep every shadow alpha <= 0.05; deeper shadows are allowed only for floating-layer tokens such as modal/popover/dropdown/drawer/overlay (--shadow-card: 0 16px 36px rgba(96, 103, 160, 0.12), --shadow-soft: 0 10px 24px rgba(96, 103, 160, 0.08), --shadow-press: 0 8px 20px rgba(81, 98, 223, 0.18)).",
+    "[html-quality] games-latest-adapted.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] home-latest-adapted.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] home-redesign.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] lesson-kid-simple.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+    "[html-quality] lesson-redesign.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] models-latest-adapted.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] picturebooks-latest-adapted.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] subject-latest-adapted.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] theme-redesign.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] unit-kid-simple.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+    "[html-quality] unit-redesign.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states."
+  ],
+  "repairPlanHints": [
+    {
+      "errorClass": "hardcoded-color-in-body",
+      "owner": "sub-agent",
+      "repairScope": "targeted-token-replace",
+      "strategy": "targeted_token_replace_once",
+      "affectedFiles": [
+        "lesson-kid-simple.html"
+      ],
+      "repairReportPath": null,
+      "repairAlreadyAttempted": false,
+      "allowSourceRead": "no-full-html-read",
+      "maxValidationRuns": 2
+    },
+    {
+      "errorClass": "hardcoded-color-in-body",
+      "owner": "sub-agent",
+      "repairScope": "targeted-token-replace",
+      "strategy": "targeted_token_replace_once",
+      "affectedFiles": [
+        "unit-kid-simple.html"
+      ],
+      "repairReportPath": null,
+      "repairAlreadyAttempted": false,
+      "allowSourceRead": "no-full-html-read",
+      "maxValidationRuns": 2
+    }
+  ],
+  "repairActionTable": [],
+  "errorCount": 0,
+  "warningCount": 14,
+  "errors": [],
+  "warnings": [
+    "[html-quality] colors_and_type.css: free-explore brand CSS must use one primary hue only; forbidden secondary/accent brand variables found (--color-accent, --color-accent-soft, --accent-gradient). Use --state-success/warning/error/info only for semantic states.",
+    "[html-quality] colors_and_type.css: free-explore radius tokens must stay within the restrained 2/4/8/12/16px scale; oversized or forbidden radius tokens found (--radius-md: 24px, --radius-lg: 32px). Do not use 20px+ radii unless the user explicitly requested large rounded shapes.",
+    "[html-quality] colors_and_type.css: ordinary/static shadow tokens must keep every shadow alpha <= 0.05; deeper shadows are allowed only for floating-layer tokens such as modal/popover/dropdown/drawer/overlay (--shadow-card: 0 16px 36px rgba(96, 103, 160, 0.12), --shadow-soft: 0 10px 24px rgba(96, 103, 160, 0.08), --shadow-press: 0 8px 20px rgba(81, 98, 223, 0.18)).",
+    "[html-quality] games-latest-adapted.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] home-latest-adapted.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] home-redesign.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] lesson-kid-simple.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+    "[html-quality] lesson-redesign.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] models-latest-adapted.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] picturebooks-latest-adapted.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] subject-latest-adapted.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] theme-redesign.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] unit-kid-simple.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+    "[html-quality] unit-redesign.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states."
+  ],
+  "validationRunDisciplineStatus": {
+    "declared": true,
+    "restoreMode": false,
+    "maxFullValidationRuns": 2,
+    "validationHistoryCount": 0,
+    "repairLedgerCount": 0,
+    "softWarningsTriggerRepair": false,
+    "terminalState": null,
+    "nextAction": null,
+    "violations": [],
+    "success": true
+  },
+  "terminalState": null,
+  "nextCheck": {
+    "type": "finish-readiness",
+    "command": "node '/Users/dawn/.trae/builtin/design/default/skills/solo-design/shared-runtime/deterministic-tooling/validate-finish-readiness.mjs' '/Users/dawn/Desktop/english_app/english-app-ui-redesign-draft' --check=all",
+    "fullValidationAllowed": false,
+    "reason": "workspace validation passed; run complete finish readiness before final delivery"
+  },
+  "repairBatch": [],
+  "repairContextPacket": {
+    "schema_version": "1.0",
+    "purpose": "small-context repair packet; read this before full validation-report.json",
+    "success": true,
+    "terminalState": null,
+    "skillProvenance": {
+      "name": "solo-design",
+      "version": "2026.07.06.8",
+      "version_source": "skill-release-manifest.json",
+      "runtime_skill_dir": null,
+      "recorded_at": null,
+      "expected_version": "2026.07.22.00.00.00",
+      "status": "mismatch",
+      "read_status": "ok"
+    },
+    "renderBlockingErrorCount": 0,
+    "softWarningCount": 14,
+    "renderBlockingErrors": [],
+    "repairActionTable": [],
+    "nextCheck": {
+      "type": "finish-readiness",
+      "command": "node '/Users/dawn/.trae/builtin/design/default/skills/solo-design/shared-runtime/deterministic-tooling/validate-finish-readiness.mjs' '/Users/dawn/Desktop/english_app/english-app-ui-redesign-draft' --check=all",
+      "fullValidationAllowed": false,
+      "reason": "workspace validation passed; run complete finish readiness before final delivery"
+    },
+    "forbidden": [
+      "do not read validator source",
+      "do not rerun full validation when nextCheck.fullValidationAllowed=false",
+      "do not start preview/browser unless user explicitly asks",
+      "do not hand-edit repair ledger fields"
+    ]
+  },
+  "projectFileHashes": {
+    "english-app-ui-redesign-draft.design": "1cfa65cc23fa344032273acbca497f99d173491c4a9ee63349fdc14468673939",
+    "colors_and_type.css": "d8c6713293ced1201ecfcbefbb9e7d90b7343af598ff108e54c22ef85ea6fd02",
+    "runtime-orchestration-summary.json": "4d307d4b1fa4c9ca101c348dfde6673aa8b466978c717f34af7098efefb029db",
+    "pages/games-latest-adapted.html": "d3326c29eb709a208e5cc6d3a4c9bea9288372cd83e97324118bf74b2c932595",
+    "pages/home-kid-simple.html": "913c0e96f91b686013b6b08604ac12b6611d9fb6646bc3722797dfb24f55d5bc",
+    "pages/home-latest-adapted.html": "3c0fb7ab05fe4249e7613ece1c3e154efaac29b59c554d1803b6d127adfc3ca1",
+    "pages/home-redesign.html": "2f8324481d5547bf11d3aa373a5472e5a7b3d12be8267ead7d6c76dfd653dc1d",
+    "pages/lesson-kid-simple.html": "8dc8bad4d148924650e5be3edc5bc3023b73100396f8879f673678c3deb2811c",
+    "pages/lesson-redesign.html": "d88d837068f38ab85e6520ffe521a239c8164e5e63dd7e40a1866ebbf2d607c9",
+    "pages/models-latest-adapted.html": "399062f66c97ddfea24b97ad2db27dfa69aba3f9c9f05c993c0f3e0e64eff7ab",
+    "pages/picturebooks-latest-adapted.html": "79abd88e43ad30f2a802dcde332ec485650ccb192a63c2059094dac927b853ae",
+    "pages/subject-latest-adapted.html": "a78ddcf1912adb4d5cc5d4e5fcfb63766031e4763b75208db1c922a0e1e52472",
+    "pages/theme-kid-simple.html": "7230a75808c4fad48935bd4ef39f601e4b7c238b509a0db1e1daf21b75d82a0b",
+    "pages/theme-redesign.html": "667723795061c20050ce948b65cee02a234b69257f4911c655e716d66d8d08ca",
+    "pages/unit-kid-simple.html": "e928e2530e67faa7f4fc4f2716d052d409c332d24e4676475d93dcf645074dec",
+    "pages/unit-redesign.html": "6cde9ed463226eea456bd8b79dcfde95343dd1d93653cd6195de00981fec98c9",
+    "assets/hero-fruit-apple.jpg": "95e3bb1a4787e10fa4a08191456b5ba0f21fc0cbfbfed77f1adaa7b2f91d4ff5",
+    "assets/mascot-celebrate.jpg": "5abb04ba6fd04e4e7854d36d6a0efb5ade500cb9373994c9e0512da373537772",
+    "assets/mascot-companion.jpg": "3d2ebc389bbbfc4c03f8a3dc1c1315a0c99bcef7d823972e75f2d6c2bed525fa",
+    "assets/mascot-welcome.jpg": "590221c4bec9c039aba19a18052d872bf13b4aabfd27a000d5a6717d617a0e11",
+    "assets/unit-farm.webp": "798be3aaaa765fc3fd353e17c004dac8f686cfc9a4fbd747e709b0580f3bbd58",
+    "assets/unit-fruit-market.webp": "fce59b9c826856ee45d28d8b8a0770b93033a75f363a73266ce74a0d19170d88",
+    "assets/unit-picnic.webp": "90b1fc7cd99f5ff5c0cf5b58ec0a8f77f794628d375e71b3af7c9a22ebc26840"
+  },
+  "designDir": "/Users/dawn/Desktop/english_app/english-app-ui-redesign-draft",
+  "expectedPages": 13,
+  "requireInteractions": "go-theme:home-redesign.html,back-home:theme-redesign.html,open-unit-1:theme-redesign.html,back-theme:unit-redesign.html,open-lesson-1:unit-redesign.html,back-unit:lesson-redesign.html,go-theme:home-kid-simple.html,back-home:theme-kid-simple.html,open-unit-1:theme-kid-simple.html,back-theme:unit-kid-simple.html,open-lesson-1:unit-kid-simple.html,back-unit:lesson-kid-simple.html,open-subjects:home-latest-adapted.html,open-games:home-latest-adapted.html,open-picturebooks:home-latest-adapted.html,open-models:home-latest-adapted.html,back-home:subject-latest-adapted.html,open-theme-1:subject-latest-adapted.html,back-home:games-latest-adapted.html,open-game-1:games-latest-adapted.html,back-home:picturebooks-latest-adapted.html,open-book-1:picturebooks-latest-adapted.html,back-home:models-latest-adapted.html,pick-train:models-latest-adapted.html,pick-road-air:models-latest-adapted.html,pick-structure:models-latest-adapted.html,open-model-viewer:models-latest-adapted.html",
+  "checkedAt": "2026-09-29T02:31:22.575Z"
+}

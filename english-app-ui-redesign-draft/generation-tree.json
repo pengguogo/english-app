@@ -1,0 +1,100 @@
+{
+  "root": {
+    "id": "project-root",
+    "type": "project-shell",
+    "status": "generated",
+    "children": [
+      {
+        "id": "page-home-redesign",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/home-redesign.html",
+        "children": []
+      },
+      {
+        "id": "page-theme-redesign",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/theme-redesign.html",
+        "children": []
+      },
+      {
+        "id": "page-unit-redesign",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/unit-redesign.html",
+        "children": []
+      },
+      {
+        "id": "page-lesson-redesign",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/lesson-redesign.html",
+        "children": []
+      },
+      {
+        "id": "page-home-kid-simple",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/home-kid-simple.html",
+        "children": []
+      },
+      {
+        "id": "page-theme-kid-simple",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/theme-kid-simple.html",
+        "children": []
+      },
+      {
+        "id": "page-unit-kid-simple",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/unit-kid-simple.html",
+        "children": []
+      },
+      {
+        "id": "page-lesson-kid-simple",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/lesson-kid-simple.html",
+        "children": []
+      },
+      {
+        "id": "page-home-latest-adapted",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/home-latest-adapted.html",
+        "children": []
+      },
+      {
+        "id": "page-subject-latest-adapted",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/subject-latest-adapted.html",
+        "children": []
+      },
+      {
+        "id": "page-games-latest-adapted",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/games-latest-adapted.html",
+        "children": []
+      },
+      {
+        "id": "page-picturebooks-latest-adapted",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/picturebooks-latest-adapted.html",
+        "children": []
+      },
+      {
+        "id": "page-models-latest-adapted",
+        "type": "page",
+        "status": "generated",
+        "htmlSrc": "pages/models-latest-adapted.html",
+        "children": []
+      }
+    ]
+  }
+}
