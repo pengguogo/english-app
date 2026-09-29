@@ -137,6 +137,11 @@
   --gradient-primary: linear-gradient(135deg, #6B7CFF 0%, #8A96FF 100%);
   --gradient-warm: linear-gradient(135deg, #FFF3E0 0%, #FFF8E1 100%);
   --gradient-success: linear-gradient(135deg, #4CD964 0%, #5BDB73 100%);
+  --gradient-adventure: linear-gradient(120deg, #FFF8CF 0%, #FFF0D8 55%, #FFE4E4 100%);
+  --gradient-fruit-quest: linear-gradient(145deg, #FFFDF2 0%, #FFF4DC 100%);
+  --fruit-border: rgba(255, 152, 0, 0.35);
+  --overlay-dark: rgba(50, 50, 50, 0.72);
+  --shadow-fruit-pulse: 0 8px 24px rgba(255, 152, 0, 0.28);
 
   /* ===== 汪汪队主题视觉 ===== */
   --paw-banner-fallback: #36B7EA;
