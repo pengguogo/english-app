@@ -96,6 +96,10 @@ const currentText = computed(() => {
   return props.currentItem.word || ''
 })
 
+const formattedPhonetic = computed(() => {
+  return String(props.currentItem?.phonetic || '').replace(/^\/+|\/+$/g, '')
+})
+
 /**
  * 进度百分比（0-100）。
  */
@@ -139,7 +143,7 @@ const isPawPatrolImage = computed(() => {
       </div>
       <div v-else class="emoji">{{ currentItem.emoji }}</div>
       <h1 class="word">{{ currentText }}</h1>
-      <p v-if="currentItem.phonetic" class="phonetic">/{{ currentItem.phonetic }}/</p>
+      <p v-if="formattedPhonetic" class="phonetic">/{{ formattedPhonetic }}/</p>
       <p class="translation">{{ currentItem.translation }}</p>
     </div>
 
