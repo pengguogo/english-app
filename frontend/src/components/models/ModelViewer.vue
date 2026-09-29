@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AppButton from '../AppButton.vue'
 import { createModelScene } from './modelScene'
 import { dieselParts } from './dieselTrain'
@@ -28,7 +28,7 @@ function contextLost(event) {
   error.value = '3D 显示暂时中断，请重新加载模型。'
 }
 function start() {
-  if (isExternalVehicle(props.model)) return
+  if (isExternal.value) return
   scene?.dispose()
   scene = undefined
   host.value.replaceChildren()
@@ -42,8 +42,27 @@ function start() {
     console.error('加载火车模型失败', cause)
   }
 }
+
+// 外部模型（Sketchfab）懒加载：点击占位后才挂载 iframe，避免首屏加载重型 3D
+const isExternal = computed(() => isExternalVehicle(props.model))
+const externalLoaded = ref(false)
+const externalPlaceholderIcons = {
+  gp7: '🚂', deltic: '🚂', cc206: '🚂',
+  porsche: '🚗', motorcycle: '🏍️', fighter: '✈️', ship: '🚢'
+}
+const placeholderIcon = computed(() => externalPlaceholderIcons[props.model] || '⚙️')
+
+function loadExternal() {
+  externalLoaded.value = true
+}
+
+// 切换模型时重置懒加载状态，让新模型重新等一次点击
+watch(() => props.model, () => {
+  externalLoaded.value = false
+})
+
 onMounted(() => {
-  if (isExternalVehicle(props.model)) return
+  if (isExternal.value) return
   host.value.addEventListener('webglcontextlost', contextLost, true)
   start()
 })
@@ -54,8 +73,16 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="isExternalVehicle(model)" class="viewer external-viewer" :aria-label="`${externalVehicleModels[model].title} 真实交通工具模型查看器`">
+  <section v-if="isExternal" class="viewer external-viewer" :aria-label="`${externalVehicleModels[model].title} 真实交通工具模型查看器`">
+    <!-- 点击占位后才挂载 iframe：首屏不加载网络 3D，由孩子主动点开 -->
+    <div v-if="!externalLoaded" class="external-placeholder">
+      <span class="external-placeholder-icon" aria-hidden="true">{{ placeholderIcon }}</span>
+      <p class="external-placeholder-title">{{ externalVehicleModels[model].title }}</p>
+      <AppButton size="lg" @click="loadExternal">点一下，打开 3D 模型</AppButton>
+      <p class="external-placeholder-hint">模型从网络来，稍等几秒就能动起来。</p>
+    </div>
     <iframe
+      v-else
       :title="`${externalVehicleModels[model].viewerTitle} 交互式三维模型`"
       :src="`https://sketchfab.com/models/${externalVehicleModels[model].uid}/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0`"
       allow="autoplay; fullscreen; xr-spatial-tracking"
@@ -108,6 +135,21 @@ onBeforeUnmount(() => {
 .hint { text-align: center; color: var(--text-secondary); font-size: var(--text-sm); padding: 0 var(--space-4) var(--space-5); }
 .error { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); padding: var(--space-6); background: var(--model-stage); text-align: center; }
 .external-viewer iframe { display: block; width: 100%; height: clamp(420px, 60vw, 620px); border: 0; background: var(--model-stage); }
+/* 占位区与 iframe 同高，避免点开后布局跳动 */
+.external-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: clamp(420px, 60vw, 620px);
+  padding: var(--space-6);
+  background: var(--model-stage);
+  text-align: center;
+}
+.external-placeholder-icon { font-size: 64px; line-height: 1; }
+.external-placeholder-title { color: var(--text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); }
+.external-placeholder-hint { color: var(--text-secondary); font-size: var(--text-sm); }
 .model-credit { padding: var(--space-3) var(--space-4); text-align: center; color: var(--text-secondary); font-size: var(--text-xs); }
 .model-credit a { color: var(--color-primary-hover); }
 @media (max-width: 480px) { .toolbar { gap: var(--space-1); padding: var(--space-3); } }

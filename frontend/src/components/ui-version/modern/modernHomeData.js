@@ -1,36 +1,36 @@
 /**
- * @description 新版首页入口配置。
+ * @description 新版首页入口配置。文案面向 6 岁儿童：短句、直白、说结果不说概念。
  */
 export const featuredRoutes = [
   {
     title: '学科乐园',
-    description: '先去英语主题站，完成今天的第一小步。',
+    description: '今天的英语学习，从这里开始。',
     route: '/subject/1',
-    kicker: '主线学习',
+    kicker: '先学习',
     accent: 'var(--color-primary)',
     icon: 'A'
   },
   {
     title: '绘本小火车',
-    description: '一边看图，一边听故事，把单词装进旅程。',
+    description: '看图听故事，边玩边学单词。',
     route: '/picturebooks',
-    kicker: '故事陪伴',
+    kicker: '读故事',
     accent: 'var(--color-accent)',
     icon: '绘'
   },
   {
     title: '游戏专区',
-    description: '先认真学习，再把小游戏奖励收入囊中。',
+    description: '认真学习，就能解锁好玩的小游戏。',
     route: '/games',
-    kicker: '奖励解锁',
+    kicker: '玩游戏',
     accent: 'var(--color-success)',
     icon: '玩'
   },
   {
     title: '交通工具馆',
-    description: '走进 3D 模型，看看火车、公路和航空世界。',
+    description: '转一转 3D 小火车和汽车！',
     route: '/models',
-    kicker: '观察探索',
+    kicker: '看模型',
     accent: 'var(--color-orange)',
     icon: '模'
   }
@@ -39,13 +39,13 @@ export const featuredRoutes = [
 export const supportRoutes = [
   {
     title: '错题本',
-    description: '把今天还没记牢的地方，再轻轻复习一遍。',
+    description: '再练一遍还没记住的题。',
     route: '/wrong-answers',
     accent: 'var(--color-warning)'
   },
   {
     title: '学习记录',
-    description: '看看最近学过哪些内容，给自己一点鼓励。',
+    description: '看看学了哪些课，攒了多少星星。',
     route: '/learned',
     accent: 'var(--color-primary-light)'
   }

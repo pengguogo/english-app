@@ -7,6 +7,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { getThemes } from '../../../api/theme'
 import { getUnitsByTheme } from '../../../api/unit'
 import { getLessonsByUnit } from '../../../api/lesson'
 import { getUnitProgress } from '../../../api/progress'
@@ -30,11 +31,13 @@ const { safeBack } = useSafeBack()
 const units = ref([])
 const isLoading = ref(true)
 const errorMsg = ref('')
+// 直链进入时路由里没有主题名，反查成功前保持为空，由主题视觉配置兜底
+const resolvedThemeName = ref('')
 
 const themeId = computed(() => Number(route.params.themeId))
 const subjectId = computed(() => Number(route.query.subjectId || 0))
 const subjectName = computed(() => String(route.query.subjectName || ''))
-const themeName = computed(() => String(route.query.themeName || ''))
+const themeName = computed(() => String(route.query.themeName || resolvedThemeName.value))
 const themeVisual = computed(() => getThemeConfig(themeId.value, themeName.value))
 const themeAccent = computed(() => themeVisual.value.scenes[0]?.color || 'var(--color-primary)')
 
@@ -54,33 +57,55 @@ async function loadUnits() {
   errorMsg.value = ''
 
   try {
-    const unitList = await getUnitsByTheme(themeId.value)
-    units.value = await Promise.all(unitList.map(async (unit) => {
-      const [lessons, progressList] = await Promise.all([
-        getLessonsByUnit(unit.id),
-        getUnitProgress(unit.id).catch(() => [])
-      ])
-      const progressMap = new Map(progressList.map(progress => [progress.lessonId, progress]))
-      const lessonsWithProgress = lessons.map(lesson => ({
-        ...lesson,
-        progress: progressMap.get(lesson.id)
-      }))
-      const completedLessons = lessonsWithProgress.filter(item => item.progress?.status === 'COMPLETED').length
-
-      return {
-        ...unit,
-        lessons: lessonsWithProgress,
-        totalLessons: lessonsWithProgress.length,
-        completedLessons,
-        suggestedLesson: getRecommendedLesson(lessonsWithProgress)
-      }
-    }))
+    // 主题名反查与单元加载互不依赖，并发执行减少直链等待
+    await Promise.all([resolveThemeName(), loadUnitList()])
   } catch (error) {
-    errorMsg.value = '主题旅程加载失败，请稍后再试。'
-    console.error('加载主题旅程失败:', error)
+    errorMsg.value = '主题内容加载失败，请稍后再试。'
+    console.error('加载主题内容失败:', error)
   } finally {
     isLoading.value = false
   }
+}
+
+/**
+ * 直链进入时通过全量主题列表反查真实主题名。
+ * 为什么不直接用配置兜底：主题配置只覆盖少数 id，新主题直链时会显示默认名，孩子会认不出来。
+ */
+async function resolveThemeName() {
+  if (route.query.themeName) return
+  try {
+    const themes = await getThemes()
+    const matched = themes.find(theme => theme.id === themeId.value)
+    if (matched) resolvedThemeName.value = matched.name
+  } catch (error) {
+    // 反查失败不阻塞页面，主题视觉配置仍提供兜底标题
+    console.warn('反查主题名失败:', error)
+  }
+}
+
+/** 加载主题下全部单元及课时进度 */
+async function loadUnitList() {
+  const unitList = await getUnitsByTheme(themeId.value)
+  units.value = await Promise.all(unitList.map(async (unit) => {
+    const [lessons, progressList] = await Promise.all([
+      getLessonsByUnit(unit.id),
+      getUnitProgress(unit.id).catch(() => [])
+    ])
+    const progressMap = new Map(progressList.map(progress => [progress.lessonId, progress]))
+    const lessonsWithProgress = lessons.map(lesson => ({
+      ...lesson,
+      progress: progressMap.get(lesson.id)
+    }))
+    const completedLessons = lessonsWithProgress.filter(item => item.progress?.status === 'COMPLETED').length
+
+    return {
+      ...unit,
+      lessons: lessonsWithProgress,
+      totalLessons: lessonsWithProgress.length,
+      completedLessons,
+      suggestedLesson: getRecommendedLesson(lessonsWithProgress)
+    }
+  }))
 }
 
 function getSceneConfig(index) {
@@ -93,9 +118,16 @@ function goBack() {
   safeBack(fallback)
 }
 
+/** 判断某课时是否为当前推荐课，用于在列表里做「从这里开始」高亮 */
+function isSuggestedLesson(lesson) {
+  return lesson.id === featuredSuggestedLesson.value?.id
+}
+
 function openLesson(unit, lesson) {
   const query = {
     unitId: String(unit.id),
+    // 透传单元名，避免单元页直链或刷新时标题回退成「第 N 单元」
+    unitName: unit.name,
     themeId: String(themeId.value),
     themeName: themeVisual.value.title
   }
@@ -108,6 +140,20 @@ function openLesson(unit, lesson) {
     query
   })
 }
+
+/** 进入单元任务板：其余单元在主题页收成摘要卡，点这里进单元页看全部课时 */
+function openUnit(unit) {
+  const query = {
+    themeId: String(themeId.value),
+    themeName: themeVisual.value.title,
+    unitName: unit.name
+  }
+
+  if (subjectId.value) query.subjectId = String(subjectId.value)
+  if (subjectName.value) query.subjectName = subjectName.value
+
+  router.push({ path: `/unit/${unit.id}`, query })
+}
 </script>
 
 <template>
@@ -116,17 +162,17 @@ function openLesson(unit, lesson) {
 
     <section class="modern-brand-card modern-brand-hero theme-hero">
       <div class="theme-hero-copy">
-        <p class="modern-brand-kicker">主题旅程页</p>
+        <p class="modern-brand-kicker">学习地图</p>
         <h1 class="modern-brand-title">{{ themeVisual.emoji }} {{ themeVisual.title }}</h1>
         <p class="modern-brand-desc">
-          {{ themeVisual.description }}。先完成最上面的重点单元，再把整条主题路线继续走完。
+          {{ themeVisual.description }}。从第一站开始，一课一课往前走。
         </p>
         <div class="modern-brand-badges">
           <span class="modern-brand-badge modern-brand-badge--solid">
             已完成 {{ completedLessonCount }} / {{ totalLessonCount }} 课
           </span>
-          <span class="modern-brand-badge">完成单元 {{ completedUnitCount }} / {{ units.length }}</span>
-          <span class="modern-brand-badge">{{ subjectName || '当前学科' }}</span>
+          <span class="modern-brand-badge">走完单元 {{ completedUnitCount }} / {{ units.length }}</span>
+          <span v-if="subjectName" class="modern-brand-badge">{{ subjectName }}</span>
         </div>
         <div class="modern-brand-progress" aria-label="主题进度">
           <div class="modern-brand-progress-fill" :style="{ width: `${journeyPercent}%` }"></div>
@@ -136,22 +182,22 @@ function openLesson(unit, lesson) {
       <div class="theme-hero-side">
         <div class="modern-brand-sticker" aria-hidden="true">
           <span>{{ themeVisual.emoji }}</span>
-          <strong>第 1 站</strong>
+          <strong>出发喽</strong>
         </div>
-        <p class="modern-brand-caption">把第一单元做完，后面的旅程会更顺。</p>
+        <p class="modern-brand-caption">学完一课，就点亮一颗星星！</p>
       </div>
     </section>
 
     <section v-if="isLoading" class="modern-brand-card modern-brand-state" role="status">
-      正在整理主题旅程...
+      正在准备地图...
     </section>
     <section v-else-if="errorMsg" class="modern-brand-card modern-brand-state" role="alert">
       <p>{{ errorMsg }}</p>
-      <AppButton variant="ghost" @click="loadUnits">重新加载</AppButton>
+      <AppButton variant="ghost" @click="loadUnits">再试一次</AppButton>
     </section>
     <section v-else-if="units.length === 0" class="modern-brand-card modern-brand-state">
-      <p>这个主题暂时还没有学习内容。</p>
-      <AppButton variant="ghost" @click="goBack">返回学科页</AppButton>
+      <p>这一站的内容马上就来。</p>
+      <AppButton variant="ghost" @click="goBack">回到学科页</AppButton>
     </section>
 
     <template v-else>
@@ -160,12 +206,12 @@ function openLesson(unit, lesson) {
           <div class="featured-unit-top">
             <div class="featured-unit-copy">
               <span class="modern-brand-chip">
-                {{ getSceneConfig(0).icon }} {{ getSceneConfig(0).label }}
+                {{ getSceneConfig(0).icon }} 第 1 站
               </span>
               <h2 class="modern-brand-section-title">{{ featuredUnit.name }}</h2>
               <p class="modern-brand-note">
-                本单元已完成 {{ featuredUnit.completedLessons }} / {{ featuredUnit.totalLessons }} 课，
-                建议先从“{{ featuredSuggestedLesson?.name || '第一课' }}”开始。
+                已完成 {{ featuredUnit.completedLessons }} / {{ featuredUnit.totalLessons }} 课。
+                点下面带「从这里开始」的那一课。
               </p>
             </div>
 
@@ -180,32 +226,13 @@ function openLesson(unit, lesson) {
             </div>
           </div>
 
-          <div v-if="featuredSuggestedLesson" class="suggested-lesson modern-brand-surface">
-            <div>
-              <p class="modern-brand-kicker">优先开始</p>
-              <h3>{{ featuredSuggestedLesson.name }}</h3>
-              <p class="modern-brand-note">
-                {{ getLessonTypeText(featuredSuggestedLesson.type) }} · {{ featuredSuggestedCopy.label }}
-              </p>
-            </div>
-            <div class="suggested-lesson-right">
-              <StarBar
-                v-if="featuredSuggestedLesson.progress?.status === 'COMPLETED'"
-                :stars="featuredSuggestedLesson.progress?.stars || 0"
-                size="sm"
-              />
-              <AppButton size="lg" @click="openLesson(featuredUnit, featuredSuggestedLesson)">
-                {{ featuredSuggestedCopy.action }}
-              </AppButton>
-            </div>
-          </div>
-
           <div class="featured-lesson-list">
             <button
               v-for="(lesson, lessonIndex) in featuredUnit.lessons"
               :key="lesson.id"
               type="button"
               class="modern-brand-card modern-brand-list-card featured-lesson-card"
+              :class="{ 'featured-lesson-card--recommended': isSuggestedLesson(lesson) }"
               @click="openLesson(featuredUnit, lesson)"
             >
               <span class="modern-brand-index">{{ lessonIndex + 1 }}</span>
@@ -217,12 +244,15 @@ function openLesson(unit, lesson) {
                 <p class="modern-brand-note">{{ getLessonTypeText(lesson.type) }}</p>
               </div>
               <div class="featured-lesson-meta">
+                <span v-if="isSuggestedLesson(lesson)" class="recommended-chip">
+                  从这里开始 · {{ featuredSuggestedCopy.action }}
+                </span>
                 <StarBar
                   v-if="lesson.progress?.status === 'COMPLETED'"
                   :stars="lesson.progress?.stars || 0"
                   size="sm"
                 />
-                <span v-else class="modern-brand-caption">{{ getLessonStatusCopy(lesson.progress).action }}</span>
+                <span v-else-if="!isSuggestedLesson(lesson)" class="modern-brand-caption">{{ getLessonStatusCopy(lesson.progress).action }}</span>
               </div>
             </button>
           </div>
@@ -232,51 +262,30 @@ function openLesson(unit, lesson) {
       <section class="other-units-section" aria-labelledby="other-units-title">
         <div class="modern-brand-section-head">
           <div>
-            <p class="modern-brand-kicker">后续章节</p>
-            <h2 id="other-units-title" class="modern-brand-section-title">其余单元</h2>
+            <p class="modern-brand-kicker">继续往前走</p>
+            <h2 id="other-units-title" class="modern-brand-section-title">后面的单元</h2>
           </div>
-          <p class="modern-brand-section-note">第一单元更突出，其余单元保持轻量卡片，方便继续扩展。</p>
         </div>
 
-        <div class="modern-brand-grid modern-brand-grid--two">
-          <section
+        <div class="unit-summary-list">
+          <button
             v-for="(unit, index) in otherUnits"
             :key="unit.id"
-            class="modern-brand-card modern-brand-panel unit-card"
+            type="button"
+            class="modern-brand-card modern-brand-list-card unit-summary-card"
             :style="{ '--brand-accent': getSceneConfig(index + 1).color }"
+            @click="openUnit(unit)"
           >
-            <div class="unit-card-head">
-              <div>
-                <span class="modern-brand-chip">{{ getSceneConfig(index + 1).icon }} 第 {{ index + 2 }} 单元</span>
-                <h3>{{ unit.name }}</h3>
-                <p class="modern-brand-note">已完成 {{ unit.completedLessons }} / {{ unit.totalLessons }} 课</p>
-              </div>
-              <span class="modern-brand-badge">{{ unit.suggestedLesson ? getLessonStatusCopy(unit.suggestedLesson.progress).label : '待开始' }}</span>
+            <span class="modern-brand-index">{{ getSceneConfig(index + 1).icon }}</span>
+            <div class="unit-summary-copy">
+              <h3>{{ unit.name }}</h3>
+              <p class="modern-brand-note">已完成 {{ unit.completedLessons }} / {{ unit.totalLessons }} 课</p>
             </div>
-
-            <div class="modern-brand-progress" aria-hidden="true">
-              <div
-                class="modern-brand-progress-fill"
-                :style="{ width: `${toPercent(unit.completedLessons, unit.totalLessons)}%` }"
-              ></div>
-            </div>
-
-            <div class="unit-card-lessons">
-              <button
-                v-for="(lesson, lessonIndex) in unit.lessons.slice(0, 3)"
-                :key="lesson.id"
-                type="button"
-                class="modern-brand-surface mini-lesson"
-                @click="openLesson(unit, lesson)"
-              >
-                <span>{{ lessonIndex + 1 }}</span>
-                <div>
-                  <strong>{{ lesson.name }}</strong>
-                  <small>{{ getLessonTypeText(lesson.type) }}</small>
-                </div>
-              </button>
-            </div>
-          </section>
+            <span class="unit-summary-status">
+              {{ unit.suggestedLesson ? getLessonStatusCopy(unit.suggestedLesson.progress).label : '还没开始' }}
+            </span>
+            <span class="unit-summary-arrow" aria-hidden="true">→</span>
+          </button>
         </div>
       </section>
     </template>
@@ -335,9 +344,8 @@ function openLesson(unit, lesson) {
 }
 
 .featured-unit-copy h2,
-.suggested-lesson h3,
 .featured-lesson-card h3,
-.unit-card h3 {
+.unit-summary-card h3 {
   color: var(--text-primary);
 }
 
@@ -359,20 +367,6 @@ function openLesson(unit, lesson) {
   font-size: 72px;
 }
 
-.suggested-lesson {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-4);
-}
-
-.suggested-lesson-right {
-  display: grid;
-  gap: var(--space-3);
-  justify-items: end;
-}
-
 .featured-lesson-list {
   display: grid;
   gap: var(--space-3);
@@ -380,6 +374,13 @@ function openLesson(unit, lesson) {
 
 .featured-lesson-card {
   padding: var(--space-4);
+}
+
+/* 推荐课高亮：黄色描边 + 浅黄底，让「下一课学什么」一眼可见 */
+.featured-lesson-card--recommended {
+  border: 2px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 14%, var(--bg-card));
+  box-shadow: var(--shadow-soft);
 }
 
 .featured-lesson-info {
@@ -397,60 +398,54 @@ function openLesson(unit, lesson) {
 
 .featured-lesson-meta {
   display: grid;
+  gap: var(--space-2);
   align-items: center;
   justify-items: end;
-  min-width: 86px;
+  min-width: 96px;
+}
+
+.recommended-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-2);
+  color: color-mix(in srgb, var(--color-accent) 56%, var(--text-primary));
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  white-space: nowrap;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
 }
 
 .other-units-section {
   padding-bottom: var(--space-8);
 }
 
-.unit-card {
-  display: grid;
-  gap: var(--space-4);
-}
-
-.unit-card-head {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.unit-card-lessons {
+.unit-summary-list {
   display: grid;
   gap: var(--space-3);
 }
 
-.mini-lesson {
-  display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
-  gap: var(--space-3);
+.unit-summary-card {
   align-items: center;
-  width: 100%;
-  padding: var(--space-3);
-  text-align: left;
+  padding: var(--space-4);
 }
 
-.mini-lesson span {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  color: var(--text-on-primary);
+.unit-summary-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.unit-summary-status {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.unit-summary-arrow {
+  color: var(--brand-accent);
+  font-size: var(--text-lg);
   font-weight: var(--font-bold);
-  border-radius: var(--radius-pill);
-  background: var(--brand-accent);
-}
-
-.mini-lesson strong {
-  display: block;
-  color: var(--text-primary);
-}
-
-.mini-lesson small {
-  color: var(--text-tertiary);
 }
 
 @media (max-width: 720px) {
@@ -459,20 +454,26 @@ function openLesson(unit, lesson) {
     grid-template-columns: 1fr;
   }
 
-  .theme-hero-side,
-  .suggested-lesson-right {
+  .theme-hero-side {
     justify-items: start;
-  }
-
-  .suggested-lesson,
-  .unit-card-head,
-  .featured-lesson-head {
-    flex-direction: column;
-    align-items: start;
   }
 
   .featured-lesson-card {
     align-items: center;
+  }
+
+  .featured-lesson-head,
+  .featured-lesson-meta {
+    flex-direction: column;
+  }
+
+  .featured-lesson-meta {
+    justify-items: start;
+    min-width: 0;
+  }
+
+  .unit-summary-status {
+    display: none;
   }
 }
 </style>

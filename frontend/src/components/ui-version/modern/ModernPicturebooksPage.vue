@@ -73,9 +73,9 @@ function openPicturebook(unitId) {
     <BackBar title="绘本小火车" @back="router.push('/')" />
 
     <section class="modern-brand-card modern-brand-hero picturebooks-hero">
-      <p class="modern-brand-kicker">站点旅程卡</p>
-      <h1 class="modern-brand-title">先到第一站，再慢慢把整条故事线走完</h1>
-      <p class="modern-brand-desc">每一站都保留真实课程数据，点击后就会进入对应绘本内容。</p>
+      <p class="modern-brand-kicker">绘本小火车</p>
+      <h1 class="modern-brand-title">坐上小火车，一个故事一个故事听</h1>
+      <p class="modern-brand-desc">小火车会带你去一个一个故事站，点一站就能听故事。</p>
     </section>
 
     <section v-if="loading" class="modern-brand-card modern-brand-state" role="status">正在整理今天的列车站点…</section>
@@ -111,10 +111,10 @@ function openPicturebook(unitId) {
       <section class="picturebooks-section" aria-labelledby="picturebooks-stations-title">
         <div class="modern-brand-section-head">
           <div>
-            <p class="modern-brand-kicker">后续站点</p>
-            <h2 id="picturebooks-stations-title" class="modern-brand-section-title">其他站点</h2>
+            <p class="modern-brand-kicker">后面的小站</p>
+            <h2 id="picturebooks-stations-title" class="modern-brand-section-title">下一站去哪儿</h2>
           </div>
-          <p class="modern-brand-section-note">第一站突出显示，其余站点保持收束，方便继续扩展。</p>
+          <p class="modern-brand-section-note">先听完第一站，再坐小火车去下一站。</p>
         </div>
 
         <div class="modern-brand-grid">

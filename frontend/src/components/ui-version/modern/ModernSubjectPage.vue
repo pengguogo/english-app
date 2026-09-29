@@ -73,8 +73,8 @@ function goBack() {
 
     <section class="modern-brand-card modern-brand-hero subject-hero">
       <p class="modern-brand-kicker">学科乐园</p>
-      <h1 class="modern-brand-title">{{ subjectName }}的今天路线</h1>
-      <p class="modern-brand-desc">先完成最推荐的主题，再挑一个你想继续探索的小站点。</p>
+      <h1 class="modern-brand-title">{{ subjectName }}乐园</h1>
+      <p class="modern-brand-desc">先点最上面的大卡片，学完再看下面的。</p>
       <div v-if="!isLoading && !errorMsg" class="modern-brand-badges">
         <span class="modern-brand-badge modern-brand-badge--solid">{{ themes.length }} 个主题</span>
         <span class="modern-brand-badge">{{ subjectName }}学科</span>
@@ -89,22 +89,21 @@ function goBack() {
     <section v-else-if="themes.length === 0" class="modern-brand-card modern-brand-state">这个学科暂时还没有主题。</section>
 
     <template v-else>
-      <!-- 优先推荐主题：整页唯一主动作，右侧贴纸本身就是进入按钮 -->
+      <!-- 优先推荐主题：整页唯一主动作，右侧贴纸只做装饰不参与点击 -->
       <section class="modern-brand-card modern-brand-hero--split subject-featured">
         <div class="modern-brand-hero-copy">
-          <p class="modern-brand-kicker">优先推荐</p>
+          <p class="modern-brand-kicker">从这里开始</p>
           <h2 class="modern-brand-title">{{ featuredTheme.name }}</h2>
-          <p class="modern-brand-desc">从这个主题开始最顺手，进入后就能接着走真实学习路径。</p>
+          <p class="modern-brand-desc">从这个主题开始学，一站一站往前走。</p>
           <div class="modern-brand-actions">
-            <AppButton size="lg" @click="openTheme(featuredTheme)">开始这个主题</AppButton>
+            <AppButton size="lg" @click="openTheme(featuredTheme)">开始学习</AppButton>
           </div>
         </div>
 
         <div class="modern-brand-hero-side">
-          <button type="button" class="modern-brand-sticker subject-sticker" @click="openTheme(featuredTheme)">
+          <div class="modern-brand-sticker subject-sticker" aria-hidden="true">
             <span>{{ getThemeEmoji(featuredTheme) }}</span>
-            <strong>进入</strong>
-          </button>
+          </div>
         </div>
       </section>
 
@@ -112,9 +111,9 @@ function goBack() {
         <div class="modern-brand-section-head">
           <div>
             <p class="modern-brand-kicker">继续探索</p>
-            <h2 id="subject-secondary-title" class="modern-brand-section-title">其余主题</h2>
+            <h2 id="subject-secondary-title" class="modern-brand-section-title">其他主题</h2>
           </div>
-          <p class="modern-brand-section-note">结构已经兼容其他学科，后续只需继续补充真实主题数据。</p>
+          <p class="modern-brand-section-note">点一个喜欢的，进去看看。</p>
         </div>
 
         <div class="modern-brand-grid">
@@ -128,7 +127,7 @@ function goBack() {
             <span class="modern-brand-media-icon subject-theme-icon">{{ getThemeEmoji(theme) }}</span>
             <div>
               <h3>{{ theme.name }}</h3>
-              <p class="modern-brand-note">点击进入真实主题页</p>
+              <p class="modern-brand-note">点这里进去 →</p>
             </div>
           </button>
         </div>
@@ -157,13 +156,10 @@ function goBack() {
   padding-bottom: var(--space-8);
 }
 
-/* 推荐主题贴纸同时是进入按钮：补齐按钮态并放大点击热区 */
+/* 推荐主题贴纸已改为纯装饰：保持尺寸撑起 hero 右侧视觉，不再有按钮态 */
 .subject-sticker {
   min-width: 120px;
   min-height: 120px;
-  font: inherit;
-  border: none;
-  cursor: pointer;
 }
 
 /* 行卡图标略缩小，与列表密度更协调 */
@@ -174,12 +170,14 @@ function goBack() {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* 装饰贴纸保留轻微呼吸感，呼应儿童界面的活力但不参与交互 */
   .subject-sticker {
-    transition: transform var(--duration-fast) var(--ease-bounce);
+    animation: subject-sticker-float 3s var(--ease-bounce) infinite alternate;
   }
+}
 
-  .subject-sticker:hover {
-    transform: rotate(-6deg) scale(1.05);
-  }
+@keyframes subject-sticker-float {
+  from { transform: translateY(-4px); }
+  to { transform: translateY(4px); }
 }
 </style>

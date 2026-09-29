@@ -8,7 +8,6 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BackBar from '../../BackBar.vue'
-import AppButton from '../../AppButton.vue'
 import ModelViewer from '../../models/ModelViewer.vue'
 import { modelCategories, modelHeadline } from './modelsModernData'
 
@@ -40,11 +39,6 @@ function selectCategory(categoryId) {
         {{ currentHeadline.title }} <span class="models-english">{{ currentHeadline.english }}</span>
       </h1>
       <p class="modern-brand-desc">{{ currentHeadline.description }}</p>
-      <div class="modern-brand-actions">
-        <AppButton size="lg" @click="selectCategory(currentCategory.id)">
-          查看 {{ currentCategory.title }} 代表模型
-        </AppButton>
-      </div>
     </section>
 
     <section class="modern-brand-grid modern-brand-grid--three models-category" aria-label="模型大类">

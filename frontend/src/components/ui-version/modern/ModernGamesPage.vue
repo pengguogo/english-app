@@ -1,10 +1,11 @@
 <!--
   ModernGamesPage.vue - 新版游戏页
-  用途: 强调先学习再解锁，只重点展示 3 个推荐游戏并提示更多内容。
+  用途: 强调先学习再解锁；游戏列表常显（锁定时灰显），孩子始终能看到有哪些游戏。
   作者: TRAE Agent
   创建日期: 2026-09-29
 -->
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import BackBar from '../../BackBar.vue'
 import GameAccessGate from '../../games/GameAccessGate.vue'
@@ -22,7 +23,11 @@ const recommendedGames = [
 
 const hiddenGamesCount = 6
 
+// 是否已解锁：未加载完成或出错时按未解锁展示，避免点了没反应
+const isUnlocked = computed(() => accessState.access.value?.unlocked === true)
+
 function openGame(route) {
+  if (!isUnlocked.value) return
   router.push(route)
 }
 </script>
@@ -36,11 +41,12 @@ function openGame(route) {
     <BackBar title="游戏专区" @back="router.push('/')" />
 
     <section class="modern-brand-card modern-brand-hero games-hero">
-      <p class="modern-brand-kicker">奖励解锁</p>
-      <h1 class="modern-brand-title">先学习，再把小游戏一个个点亮</h1>
-      <p class="modern-brand-desc">今天认真学习 5 分钟，就能解锁推荐游戏。先完成主线，奖励会自己打开。</p>
+      <p class="modern-brand-kicker">奖励小屋</p>
+      <h1 class="modern-brand-title">认真学习，就能打开小游戏</h1>
+      <p class="modern-brand-desc">先去学一会儿英语，学完游戏就会一个个亮起来。</p>
     </section>
 
+    <!-- 门禁只负责状态提示：锁定时给进度与"去学习"按钮，解锁后给开玩横幅 -->
     <GameAccessGate
       :access="accessState.access.value"
       :is-loading="accessState.isLoading.value"
@@ -49,45 +55,53 @@ function openGame(route) {
       @retry="accessState.refreshAccess"
       @learn="router.push('/')"
     >
-      <!-- 已解锁后的主动作横幅：左文案右按钮，一步开玩 -->
       <section class="modern-brand-card modern-brand-hero--split games-reward">
         <div class="modern-brand-hero-copy">
           <p class="modern-brand-kicker">已解锁</p>
-          <h2 class="modern-brand-title">今天的推荐游戏已经准备好啦</h2>
-          <p class="modern-brand-desc">先从三款精选开始，剩下的小游戏会在后面继续等你。</p>
+          <h2 class="modern-brand-title">游戏全部打开啦，选一个开玩</h2>
+          <p class="modern-brand-desc">先从下面三个开始，都很好玩。</p>
         </div>
         <div class="modern-brand-hero-side">
           <AppButton size="lg" variant="success" @click="openGame(recommendedGames[0].route)">马上开玩</AppButton>
         </div>
       </section>
-
-      <section class="modern-brand-grid modern-brand-grid--three games-grid" aria-label="推荐游戏">
-        <button
-          v-for="game in recommendedGames"
-          :key="game.route"
-          type="button"
-          class="modern-brand-card modern-brand-media-card"
-          @click="openGame(game.route)"
-        >
-          <img
-            v-if="game.image"
-            :src="game.image"
-            :alt="game.name"
-            class="modern-brand-media-cover"
-            loading="lazy"
-          />
-          <span v-else class="modern-brand-media-icon" aria-hidden="true">{{ game.icon }}</span>
-          <h3>{{ game.name }}</h3>
-          <p class="modern-brand-note">{{ game.desc }}</p>
-          <strong class="modern-brand-tile-cta">进入游戏 →</strong>
-        </button>
-      </section>
-
-      <section class="modern-brand-card modern-brand-state games-more" aria-label="更多小游戏">
-        <h3 class="modern-brand-section-title">后面还有 {{ hiddenGamesCount }} 个小游戏</h3>
-        <p class="modern-brand-note">新版先把推荐内容收得更清楚，后续可以继续往下拓展。</p>
-      </section>
     </GameAccessGate>
+
+    <!-- 游戏列表放在门禁外常显：锁定时灰显禁用，孩子仍能看见有什么可玩 -->
+    <section
+      class="modern-brand-grid modern-brand-grid--three games-grid"
+      :class="{ 'games-grid--locked': !isUnlocked }"
+      aria-label="推荐游戏"
+    >
+      <button
+        v-for="game in recommendedGames"
+        :key="game.route"
+        type="button"
+        class="modern-brand-card modern-brand-media-card"
+        :disabled="!isUnlocked"
+        :aria-label="isUnlocked ? `${game.name}，进入游戏` : `${game.name}，还没解锁`"
+        @click="openGame(game.route)"
+      >
+        <img
+          v-if="game.image"
+          :src="game.image"
+          :alt="game.name"
+          class="modern-brand-media-cover"
+          loading="lazy"
+        />
+        <span v-else class="modern-brand-media-icon" aria-hidden="true">{{ game.icon }}</span>
+        <h3>{{ game.name }}</h3>
+        <p class="modern-brand-note">{{ game.desc }}</p>
+        <strong class="modern-brand-tile-cta">
+          {{ isUnlocked ? '进入游戏 →' : '🔒 学完今天的课就解锁' }}
+        </strong>
+      </button>
+    </section>
+
+    <section class="modern-brand-card modern-brand-state games-more" aria-label="更多小游戏">
+      <h3 class="modern-brand-section-title">还有 {{ hiddenGamesCount }} 个游戏在排队</h3>
+      <p class="modern-brand-note">每天多学一会儿，它们也会慢慢亮起来。</p>
+    </section>
   </main>
 </template>
 
@@ -103,5 +117,12 @@ function openGame(route) {
 .games-reward,
 .games-grid {
   margin-bottom: var(--space-5);
+}
+
+/* 锁定态：整组游戏灰显降饱和，禁用点击，保留"看得见"的期待感 */
+.games-grid--locked .modern-brand-media-card {
+  opacity: 0.55;
+  filter: grayscale(0.85);
+  cursor: not-allowed;
 }
 </style>

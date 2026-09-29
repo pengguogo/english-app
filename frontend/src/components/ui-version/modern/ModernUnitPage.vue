@@ -7,6 +7,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { getUnitsByTheme } from '../../../api/unit'
 import { getLessonsByUnit } from '../../../api/lesson'
 import { getUnitProgress } from '../../../api/progress'
 import { useSafeBack } from '../../../composables/useSafeBack'
@@ -28,12 +29,15 @@ const { safeBack } = useSafeBack()
 const lessons = ref([])
 const isLoading = ref(true)
 const errorMsg = ref('')
+// 直链或刷新进入时路由里没有单元名，反查成功前保持为空，最后才回退到编号
+const resolvedUnitName = ref('')
 
 const themeId = computed(() => Number(route.query.themeId || 0))
 const themeName = computed(() => String(route.query.themeName || ''))
 const subjectId = computed(() => Number(route.query.subjectId || 0))
 const subjectName = computed(() => String(route.query.subjectName || ''))
-const unitDisplayName = computed(() => String(route.query.unitName || `第 ${route.params.unitId} 单元`))
+// 兜底链：query 透传名 → 主题反查名 → 中性文案（不暴露内部单元编号）
+const unitDisplayName = computed(() => String(route.query.unitName || resolvedUnitName.value || '这一单元'))
 const unitAccent = computed(() => {
   if (themeId.value === 1) return 'var(--color-warning)'
   if (themeId.value === 2) return 'var(--color-success)'
@@ -48,9 +52,8 @@ const suggestedLesson = computed(() => getRecommendedLesson(lessons.value))
 const mainLesson = computed(() => suggestedLesson.value || lessons.value[0] || null)
 const secondaryLessons = computed(() => lessons.value.filter(lesson => lesson.id !== mainLesson.value?.id))
 const boardHint = computed(() => {
-  if (!mainLesson.value) return '单元内容准备中'
-  const statusCopy = getLessonStatusCopy(mainLesson.value.progress)
-  return `建议先学“${mainLesson.value.name}”，当前状态：${statusCopy.label}`
+  if (!mainLesson.value) return '这一单元的内容马上就来。'
+  return `先学“${mainLesson.value.name}”这一课，学完点亮小星星！`
 })
 
 onMounted(loadLessons)
@@ -60,9 +63,11 @@ async function loadLessons() {
   errorMsg.value = ''
 
   try {
+    // 课时加载、进度加载、单元名反查互不依赖，并发执行减少等待
     const [lessonList, progressList] = await Promise.all([
       getLessonsByUnit(route.params.unitId),
-      getUnitProgress(route.params.unitId).catch(() => [])
+      getUnitProgress(route.params.unitId).catch(() => []),
+      resolveUnitName()
     ])
 
     const progressMap = new Map(progressList.map(progress => [progress.lessonId, progress]))
@@ -78,8 +83,28 @@ async function loadLessons() {
   }
 }
 
+/**
+ * 直链或刷新进入时路由里没有单元名，通过主题单元列表反查真实名称。
+ * 为什么不用「第 N 单元」兜底：纯编号对孩子没有辨识度，看不出这一站讲什么故事。
+ */
+async function resolveUnitName() {
+  if (route.query.unitName || !themeId.value) return
+  try {
+    const unitList = await getUnitsByTheme(themeId.value)
+    const matched = unitList.find(unit => String(unit.id) === String(route.params.unitId))
+    if (matched) resolvedUnitName.value = matched.name
+  } catch (error) {
+    // 反查失败不阻塞页面，标题回退到编号即可
+    console.warn('反查单元名失败:', error)
+  }
+}
+
 function openLesson(lesson) {
-  const query = { unitId: String(route.params.unitId) }
+  const query = {
+    unitId: String(route.params.unitId),
+    // 透传单元名，课时页返回单元时标题保持真实名称
+    unitName: unitDisplayName.value
+  }
   if (themeId.value) query.themeId = String(themeId.value)
   if (themeName.value) query.themeName = themeName.value
   if (subjectId.value) query.subjectId = String(subjectId.value)
@@ -125,8 +150,8 @@ function goBack() {
       </div>
 
       <div class="modern-brand-sticker" aria-hidden="true">
-        <span>1st</span>
-        <strong>先学推荐课</strong>
+        <span>⭐</span>
+        <strong>先学这课</strong>
       </div>
     </section>
 
@@ -146,7 +171,7 @@ function goBack() {
       <section v-if="mainLesson" class="modern-brand-card modern-brand-panel main-lesson">
         <div class="main-lesson-top">
           <div class="main-lesson-copy">
-            <span class="modern-brand-chip">建议先学</span>
+            <span class="modern-brand-chip">从这里开始</span>
             <h2>{{ mainLesson.name }}</h2>
             <p class="modern-brand-note">
               {{ getLessonTypeText(mainLesson.type) }} · {{ getLessonStatusCopy(mainLesson.progress).label }}
@@ -175,10 +200,9 @@ function goBack() {
       <section class="task-list-section" aria-labelledby="task-list-title">
         <div class="modern-brand-section-head">
           <div>
-            <p class="modern-brand-kicker">课时列表</p>
-            <h2 id="task-list-title" class="modern-brand-section-title">其余任务</h2>
+            <p class="modern-brand-kicker">全部课程</p>
+            <h2 id="task-list-title" class="modern-brand-section-title">点一节课，马上开始</h2>
           </div>
-          <p class="modern-brand-section-note">已完成、进行中、未开始都保持统一且清晰的状态表达。</p>
         </div>
 
         <div class="task-list">
@@ -312,7 +336,7 @@ function goBack() {
 
 .status-chip--in_progress {
   color: var(--color-primary);
-  background: rgba(107, 124, 255, 0.12);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--bg-card));
 }
 
 .status-chip--not_started {

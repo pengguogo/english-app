@@ -23,13 +23,12 @@ function openRoute(route) {
     <section class="modern-brand-card modern-brand-hero modern-brand-hero--split home-hero">
       <div class="modern-brand-hero-copy">
         <p class="modern-brand-kicker">今天先做什么</p>
-        <h1 class="modern-brand-title">先去英语学科乐园，完成今天的第一张小车票</h1>
+        <h1 class="modern-brand-title">今天学点什么？</h1>
         <p class="modern-brand-desc">
-          先学一点，再去绘本、游戏和交通工具馆继续探索。今天的路线已经帮你排好了。
+          先学一会儿英语，再去读绘本、玩游戏、看小火车。
         </p>
         <div class="modern-brand-actions">
-          <AppButton size="lg" @click="openRoute('/subject/1')">进入学科乐园</AppButton>
-          <button type="button" class="modern-brand-ghost-button" @click="openRoute('/learned')">查看学习记录</button>
+          <AppButton size="lg" @click="openRoute('/subject/1')">开始学英语</AppButton>
         </div>
       </div>
 
@@ -38,7 +37,7 @@ function openRoute(route) {
           <span>🎫</span>
           <strong>出发喽</strong>
         </div>
-        <p class="modern-brand-caption">跟着路线走，不怕迷路。</p>
+        <p class="modern-brand-caption">学得越多，星星越多！</p>
       </div>
     </section>
 
@@ -46,8 +45,8 @@ function openRoute(route) {
     <section class="home-section" aria-labelledby="home-featured-title">
       <div class="modern-brand-section-head">
         <div>
-          <p class="modern-brand-kicker">主入口</p>
-          <h2 id="home-featured-title" class="modern-brand-section-title">今天的四个主要入口</h2>
+          <p class="modern-brand-kicker">去哪儿</p>
+          <h2 id="home-featured-title" class="modern-brand-section-title">四个好地方</h2>
         </div>
         <p class="modern-brand-section-note">学一点、读一点、玩一点、看一点，刚刚好。</p>
       </div>
@@ -65,7 +64,6 @@ function openRoute(route) {
           <p class="modern-brand-kicker">{{ entry.kicker }}</p>
           <h3>{{ entry.title }}</h3>
           <p class="modern-brand-note">{{ entry.description }}</p>
-          <strong class="modern-brand-tile-cta">现在出发</strong>
         </button>
       </div>
     </section>
@@ -74,8 +72,8 @@ function openRoute(route) {
     <section class="home-section" aria-labelledby="home-support-title">
       <div class="modern-brand-section-head">
         <div>
-          <p class="modern-brand-kicker">学习补给站</p>
-          <h2 id="home-support-title" class="modern-brand-section-title">两张随手可用的小卡片</h2>
+          <p class="modern-brand-kicker">小帮手</p>
+          <h2 id="home-support-title" class="modern-brand-section-title">复习和记录</h2>
         </div>
       </div>
 
