@@ -1,0 +1,66 @@
+# 云端诊断与恢复工作流(手动触发)
+# 用途:当阿里云上的 mimi 服务异常时,通过 GitHub Actions 携带的 SSH 凭据
+#       登录云主机采集诊断信息,并尝试恢复服务。不影响正常部署流程。
+# 触发:仅手动触发(workflow_dispatch),不会随 push 自动运行
+name: Diagnose Cloud
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 登录云主机诊断并尝试恢复
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USER }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+          port: 22
+          command_timeout: 15m
+          script: |
+            echo '=== [1/8] 系统资源 ==='
+            free -m
+            df -h
+            uptime
+            echo '=== [2/8] mimi 服务状态 ==='
+            systemctl status mimi --no-pager -l || true
+            echo '=== [3/8] 8080 端口监听 ==='
+            ss -tlnp | grep -E ':8080' || echo '无进程监听 8080'
+            echo '=== [4/8] JAR 文件检查 ==='
+            ls -la /opt/english-app/backend/target/*.jar 2>/dev/null || echo 'JAR 文件不存在!'
+            echo '=== [5/8] .env 配置检查 ==='
+            if [ -f /opt/english-app/.env ]; then
+              echo '.env 存在,包含密钥行数:'
+              grep -cE 'BAIDU' /opt/english-app/.env || true
+            else
+              echo '.env 缺失(语音功能将降级,不影响启动)'
+            fi
+            echo '=== [6/8] systemd 日志(最近 120 行) ==='
+            journalctl -u mimi -n 120 --no-pager || true
+            echo '=== [7/8] 应用日志尾部(最近 150 行) ==='
+            tail -n 150 /var/log/mimi/app.log 2>/dev/null || echo 'app.log 不存在'
+            echo '=== [8/8] 尝试恢复服务 ==='
+            # reset-failed 清除 systemd 启动次数限制,否则反复崩溃后不会再自动拉起
+            systemctl reset-failed mimi || true
+            systemctl restart mimi || true
+            sleep 25
+            if systemctl is-active --quiet mimi; then
+              echo '[恢复] 服务状态:active'
+            else
+              echo '[恢复] 服务状态:未激活'
+            fi
+            ss -tlnp | grep -E ':8080' || echo '[恢复] 仍无监听'
+            for attempt in $(seq 1 15); do
+              if curl --fail --silent http://127.0.0.1:8080/api/v1/subjects >/dev/null; then
+                echo "[恢复] 第 ${attempt} 次探测:API 健康"
+                break
+              fi
+              if [ "$attempt" -eq 15 ]; then
+                echo '[恢复] API 仍不可达'
+              fi
+              sleep 4
+            done
+            echo '=== 恢复后服务日志(最近 40 行) ==='
+            journalctl -u mimi -n 40 --no-pager || true
