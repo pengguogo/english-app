@@ -25,6 +25,8 @@ const routes = [
   { path: '/picturebooks/:unitId', name: 'picturebook', component: () => import('../views/PicturebookView.vue') },
   { path: '/', name: 'home', component: () => import('../views/HomeView.vue') },
   { path: '/child-profile', name: 'child-profile', component: () => import('../views/ChildProfileView.vue') },
+  // 成长相册:独立照片墙页面,月份分组+多选下载+分类筛选+批量上传
+  { path: '/child-photos', name: 'child-photos', component: () => import('../views/ChildPhotosView.vue') },
   { path: '/subject/:subjectId', name: 'subject', component: () => import('../views/SubjectView.vue') },
   { path: '/theme/:themeId', name: 'theme', component: () => import('../views/ThemeView.vue') },
   { path: '/unit/:unitId', name: 'unit', component: () => import('../views/UnitView.vue') },

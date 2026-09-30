@@ -12,6 +12,7 @@ public class ChildPhoto {
     private Integer userId;
     private LocalDate takenAt;
     private String caption;
+    private String category;
     private String fileName;
     private String contentType;
     private LocalDateTime createdAt;
@@ -24,6 +25,8 @@ public class ChildPhoto {
     public void setTakenAt(LocalDate takenAt) { this.takenAt = takenAt; }
     public String getCaption() { return caption; }
     public void setCaption(String caption) { this.caption = caption; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
     public String getFileName() { return fileName; }
     public void setFileName(String fileName) { this.fileName = fileName; }
     public String getContentType() { return contentType; }

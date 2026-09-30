@@ -1,6 +1,6 @@
 <!--
   PhotoEditModal.vue - 成长照片编辑弹窗
-  用途: 新增照片(选文件+日期+说明)或修改已有照片的日期与说明(后端不支持换图);
+  用途: 新增照片(选文件+日期+说明+分类)或修改已有照片的日期/说明/分类(后端不支持换图);
         保存动作交给父组件完成。文件校验(JPG/PNG、≤8MB)在弹窗内前置完成。
   作者: english-app
   创建日期: 2026-09-30
@@ -21,25 +21,27 @@ const MAX_PHOTO_SIZE = 8 * 1024 * 1024
  * @param {Boolean} saving - 父组件是否正在提交(用于禁用按钮)
  * @param {String} error - 父组件接口返回的错误信息
  * @param {Object} photo - 待修改的照片记录;null 表示新增模式
+ * @param {Array} categories - 已有分类列表,用于输入建议
  */
 const props = defineProps({
   open: { type: Boolean, default: false },
   saving: { type: Boolean, default: false },
   error: { type: String, default: '' },
-  photo: { type: Object, default: null }
+  photo: { type: Object, default: null },
+  categories: { type: Array, default: () => [] }
 })
 
 /**
  * 组件事件:
  * @event close - 关闭弹窗
- * @event save - 提交表单,payload 为 { takenAt, caption, image }
+ * @event save - 提交表单,payload 为 { takenAt, caption, category, image }
  */
 const emit = defineEmits(['close', 'save'])
 
 // 修改模式只能调整日期和说明,标题与提示文案随模式切换
 const title = computed(() => (props.photo ? '修改照片信息' : '添加成长照片'))
 
-const form = reactive({ takenAt: today(), caption: '', image: null })
+const form = reactive({ takenAt: today(), caption: '', category: '', image: null })
 const localError = ref('')
 const fileInput = ref(null)
 
@@ -48,9 +50,14 @@ watch(() => props.open, (isOpen) => {
   if (!isOpen) return
   localError.value = ''
   if (props.photo) {
-    Object.assign(form, { takenAt: props.photo.takenAt, caption: props.photo.caption || '', image: null })
+    Object.assign(form, {
+      takenAt: props.photo.takenAt,
+      caption: props.photo.caption || '',
+      category: props.photo.category || '',
+      image: null
+    })
   } else {
-    Object.assign(form, { takenAt: today(), caption: '', image: null })
+    Object.assign(form, { takenAt: today(), caption: '', category: '', image: null })
   }
   if (fileInput.value) fileInput.value.value = ''
 })
@@ -76,7 +83,7 @@ function submit() {
     localError.value = '照片不能超过 8 MB'
     return
   }
-  emit('save', { takenAt: form.takenAt, caption: form.caption, image: form.image })
+  emit('save', { takenAt: form.takenAt, caption: form.caption, category: form.category, image: form.image })
 }
 </script>
 
@@ -86,6 +93,13 @@ function submit() {
       <p v-if="localError || error" role="alert" class="cg-error">{{ localError || error }}</p>
       <label class="cg-field">拍摄日期
         <input v-model="form.takenAt" class="cg-input" type="date" :max="today()" required />
+      </label>
+      <label class="cg-field">分类（可选）
+        <input v-model.trim="form.category" class="cg-input" maxlength="50" list="pe-category-options"
+          placeholder="例如：亲子活动" />
+        <datalist id="pe-category-options">
+          <option v-for="item in categories" :key="item" :value="item" />
+        </datalist>
       </label>
       <label v-if="!photo" class="cg-field cg-wide">照片（JPG/PNG，最多 8 MB）
         <input ref="fileInput" class="cg-file" type="file" accept="image/jpeg,image/png" @change="selectImage" />

@@ -1,8 +1,9 @@
 <!--
   ChildProfileView.vue - 孩子成长档案页
-  用途: 家长查看孩子资料摘要、身高体重轨迹、测量记录与成长照片;
-        页面只做展示,所有编辑动作(资料/记录/照片)均通过弹窗完成,
-        数据与接口调用统一托管在 useChildGrowth 组合式函数中。
+  用途: 家长查看孩子资料摘要、身高体重轨迹与测量记录;
+        页面只做展示,编辑动作(资料/记录)通过弹窗完成,数据与接口调用
+        统一托管在 useChildGrowth 组合式函数中;成长照片已独立为相册页
+        (/child-photos),此处仅保留入口卡展示照片数量。
   作者: english-app
   创建日期: 2026-07-20 (2026-09-30 重构为摘要+弹窗布局)
 -->
@@ -14,7 +15,6 @@ import AppButton from '../components/AppButton.vue'
 import GrowthChart from '../components/GrowthChart.vue'
 import ProfileEditModal from '../components/childgrowth/ProfileEditModal.vue'
 import MeasurementEditModal from '../components/childgrowth/MeasurementEditModal.vue'
-import PhotoEditModal from '../components/childgrowth/PhotoEditModal.vue'
 import { useChildGrowth } from '../composables/useChildGrowth'
 import { formatAge } from '../utils/date'
 
@@ -24,11 +24,10 @@ const accessKey = ref('')
 // 解构组合式函数: 顶层 ref 在模板中自动解包
 const {
   profile, records, photos, unlocked, loading, saving, pageError, notice,
-  profileOpen, measurementOpen, photoOpen, editingRecord, editingPhoto, modalError,
+  profileOpen, measurementOpen, editingRecord, modalError,
   load, unlock,
   openProfile, closeProfile, saveProfile,
-  openMeasurement, closeMeasurement, saveMeasurement, removeMeasurement,
-  openPhoto, closePhoto, savePhoto, removePhoto
+  openMeasurement, closeMeasurement, saveMeasurement, removeMeasurement
 } = useChildGrowth()
 
 // 摘要卡上的只读文案
@@ -109,30 +108,21 @@ onMounted(() => {
         </ul>
       </section>
 
-      <!-- 成长照片 -->
-      <section class="panel">
-        <div class="panel-head">
-          <h2>成长照片</h2>
-          <AppButton @click="openPhoto()">添加照片</AppButton>
+      <!-- 成长相册入口: 照片墙已独立成页,支持月份分组/分类/批量上传与打包下载 -->
+      <section class="panel photo-entry" aria-label="成长相册入口">
+        <div class="entry-main">
+          <h2>成长相册</h2>
+          <p class="muted">
+            {{ photos.length ? `共 ${photos.length} 张照片，按月份整理` : '还没有照片，去留下第一张' }}
+          </p>
         </div>
-        <p v-if="!photos.length" class="muted">还没有成长照片，点击「添加照片」留下第一张。</p>
-        <ul v-else class="photo-grid">
-          <li v-for="item in photos" :key="item.id">
-            <img :src="item.src" :alt="item.caption || `${item.takenAt} 的成长照片`" loading="lazy" />
-            <div class="photo-info">
-              <strong>{{ item.takenAt }}</strong>
-              <span>{{ item.caption }}</span>
-            </div>
-            <div class="row-actions photo-actions">
-              <button type="button" @click="openPhoto(item)">修改</button>
-              <button type="button" class="danger" @click="removePhoto(item)">删除</button>
-            </div>
-          </li>
-        </ul>
+        <AppButton @click="router.push('/child-photos')">
+          {{ photos.length ? '查看相册' : '去添加照片' }}
+        </AppButton>
       </section>
     </template>
 
-    <!-- 三个编辑弹窗: 状态与接口调用在 useChildGrowth 中 -->
+    <!-- 两个编辑弹窗: 状态与接口调用在 useChildGrowth 中 -->
     <ProfileEditModal
       :open="profileOpen" :saving="saving" :error="modalError" :profile="profile"
       @close="closeProfile" @save="saveProfile"
@@ -140,10 +130,6 @@ onMounted(() => {
     <MeasurementEditModal
       :open="measurementOpen" :saving="saving" :error="modalError" :record="editingRecord"
       @close="closeMeasurement" @save="saveMeasurement"
-    />
-    <PhotoEditModal
-      :open="photoOpen" :saving="saving" :error="modalError" :photo="editingPhoto"
-      @close="closePhoto" @save="savePhoto"
     />
   </main>
 </template>
@@ -184,13 +170,9 @@ h2 { margin: 0; font-size: var(--text-base); }
 .row-actions button { border: 0; background: transparent; color: var(--color-primary); cursor: pointer; font: inherit; min-height: var(--touch-target); }
 .row-actions button.danger { color: var(--color-warning); }
 
-/* 照片网格 */
-.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-4); padding: 0; list-style: none; }
-.photo-grid li { display: flex; flex-direction: column; border: 1px solid var(--border-light); border-radius: var(--radius-sm); overflow: hidden; }
-.photo-grid img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
-.photo-info { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-2) var(--space-3) 0; }
-.photo-info span { color: var(--text-secondary); font-size: var(--text-sm); }
-.photo-actions { padding: 0 var(--space-2) var(--space-2); }
+/* 成长相册入口卡: 说明文案与跳转按钮左右布局,窄屏自动换行 */
+.photo-entry { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+.photo-entry .entry-main { display: flex; flex-direction: column; gap: var(--space-1); }
 
 /* 手机端: 摘要与轨迹图退化为单列 */
 @media (max-width: 640px) {

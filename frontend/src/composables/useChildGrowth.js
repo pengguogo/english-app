@@ -1,15 +1,16 @@
 /**
  * useChildGrowth.js - 孩子成长档案数据与弹窗流程管理
- * 用途: 集中管理成长档案的资料/测量记录/照片的加载、增删改与三个编辑弹窗的
- *       开关状态,让 ChildProfileView 只负责展示,符合单一职责。
+ * 用途: 集中管理成长档案的资料/测量记录的加载、增删改与编辑弹窗的开关状态,
+ *       让 ChildProfileView 只负责展示;照片的完整管理已迁移至 useChildPhotos
+ *       (独立相册页 /child-photos),此处仅保留照片元数据供入口卡展示数量。
  * 作者: english-app
  * 创建日期: 2026-09-30
  */
-import { onUnmounted, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import {
   getChildProfile, updateChildProfile, getGrowthMeasurements,
   createGrowthMeasurement, updateGrowthMeasurement, deleteGrowthMeasurement,
-  getChildPhotos, addChildPhoto, deleteChildPhoto, updateChildPhoto, getChildPhotoImage
+  getChildPhotos
 } from '../api/childGrowth'
 
 /**
@@ -30,32 +31,12 @@ export function useChildGrowth() {
   const notice = ref('')
 
   // ===== 弹窗状态 =====
-  // 三个弹窗互斥打开;editingXxx 为 null 表示"新增"模式,非 null 表示"修改"模式
+  // 两个弹窗互斥打开;editingRecord 为 null 表示"新增"模式,非 null 表示"修改"模式
   const profileOpen = ref(false)
   const measurementOpen = ref(false)
-  const photoOpen = ref(false)
   const editingRecord = ref(null)
-  const editingPhoto = ref(null)
   // 弹窗内展示的接口错误(保存失败时弹窗保持打开)
   const modalError = ref('')
-
-  // 照片 blob URL 登记: 便于整体回收,防止内存泄漏
-  const photoUrls = new Map()
-
-  /**
-   * 将照片列表转为带本地预览地址的对象数组。
-   * @param {Array} items 接口返回的照片元数据列表
-   */
-  async function setPhotos(items) {
-    for (const url of photoUrls.values()) URL.revokeObjectURL(url)
-    photoUrls.clear()
-    photos.value = await Promise.all(items.map(async item => {
-      const blob = await getChildPhotoImage(item.id)
-      const src = URL.createObjectURL(blob)
-      photoUrls.set(item.id, src)
-      return { ...item, src }
-    }))
-  }
 
   /**
    * 加载全部档案数据;口令错误(401)时回到解锁界面。
@@ -73,7 +54,7 @@ export function useChildGrowth() {
         sex: child.sex || ''
       })
       records.value = measurements
-      await setPhotos(savedPhotos)
+      photos.value = savedPhotos
       unlocked.value = true
     } catch (e) {
       if (e.response?.status === 401) unlocked.value = false
@@ -110,17 +91,6 @@ export function useChildGrowth() {
     measurementOpen.value = true
   }
   function closeMeasurement() { measurementOpen.value = false }
-
-  /**
-   * 打开照片弹窗。
-   * @param {Object|null} photo 待修改的照片,null 表示新增
-   */
-  function openPhoto(photo = null) {
-    modalError.value = ''
-    editingPhoto.value = photo
-    photoOpen.value = true
-  }
-  function closePhoto() { photoOpen.value = false }
 
   // ===== 保存动作: 成功关弹窗,失败留在弹窗内提示 =====
 
@@ -170,33 +140,6 @@ export function useChildGrowth() {
     }
   }
 
-  /**
-   * 保存照片: 修改模式仅更新日期与说明;新增模式以 FormData 上传图片。
-   * @param {Object} data 弹窗提交的 { takenAt, caption, image }
-   */
-  async function savePhoto(data) {
-    modalError.value = ''
-    saving.value = true
-    try {
-      if (editingPhoto.value) {
-        await updateChildPhoto(editingPhoto.value.id, { takenAt: data.takenAt, caption: data.caption })
-      } else {
-        const form = new FormData()
-        form.append('takenAt', data.takenAt)
-        form.append('caption', data.caption)
-        form.append('image', data.image)
-        await addChildPhoto(form)
-      }
-      await setPhotos(await getChildPhotos())
-      photoOpen.value = false
-      notice.value = '照片已保存'
-    } catch (e) {
-      modalError.value = e.response?.data?.message || '照片保存失败，请使用 JPG 或 PNG 文件'
-    } finally {
-      saving.value = false
-    }
-  }
-
   // ===== 删除动作: 结果反映在页面级横幅 =====
 
   /**
@@ -216,34 +159,11 @@ export function useChildGrowth() {
     }
   }
 
-  /**
-   * 删除一张成长照片(带确认)。
-   * @param {Object} item 待删除的照片
-   */
-  async function removePhoto(item) {
-    if (!window.confirm(`删除 ${item.takenAt} 的照片？`)) return
-    pageError.value = ''
-    notice.value = ''
-    try {
-      await deleteChildPhoto(item.id)
-      await setPhotos(await getChildPhotos())
-      notice.value = '照片已删除'
-    } catch (e) {
-      pageError.value = e.response?.data?.message || '照片删除失败'
-    }
-  }
-
-  // 组件卸载时释放全部照片 blob URL
-  onUnmounted(() => {
-    for (const url of photoUrls.values()) URL.revokeObjectURL(url)
-  })
-
   return {
     profile, records, photos, unlocked, loading, saving, pageError, notice,
-    profileOpen, measurementOpen, photoOpen, editingRecord, editingPhoto, modalError,
+    profileOpen, measurementOpen, editingRecord, modalError,
     load, unlock,
     openProfile, closeProfile, saveProfile,
-    openMeasurement, closeMeasurement, saveMeasurement, removeMeasurement,
-    openPhoto, closePhoto, savePhoto, removePhoto
+    openMeasurement, closeMeasurement, saveMeasurement, removeMeasurement
   }
 }

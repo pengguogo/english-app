@@ -141,6 +141,10 @@
   --gradient-fruit-quest: linear-gradient(145deg, #FFFDF2 0%, #FFF4DC 100%);
   --fruit-border: rgba(255, 152, 0, 0.35);
   --overlay-dark: rgba(50, 50, 50, 0.72);
+  /* ===== 成长照片灯箱 ===== */
+  /* 灯箱遮罩(比通用弹罩更深,突出照片)与悬浮按钮半透明白底 */
+  --lb-veil: rgba(20, 20, 20, 0.92);
+  --lb-btn-bg: rgba(255, 255, 255, 0.22);
   --shadow-fruit-pulse: 0 8px 24px rgba(255, 152, 0, 0.28);
 
   /* ===== 汪汪队主题视觉 ===== */
