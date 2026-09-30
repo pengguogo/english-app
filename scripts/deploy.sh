@@ -12,13 +12,9 @@ echo "[deploy] 工作目录: $(pwd)"
 # ---------- 1. 前端构建 ----------
 echo "[deploy] 1/3 前端构建"
 cd frontend
-# 安装依赖(有 lock 文件用 ci,更快更稳定)
-if [ -d node_modules ] && [ package-lock.json -nt node_modules/.package-lock.json ] 2>/dev/null; then
-  echo "[deploy] node_modules 较新,跳过安装"
-else
-  echo "[deploy] 安装依赖 (npm ci)"
-  npm ci
-fi
+# 每次按锁文件安装，避免旧 node_modules 缺少新增依赖
+echo "[deploy] 安装依赖 (npm ci)"
+npm ci
 # 构建产物直接输出到 backend/src/main/resources/static/app
 npm run build
 cd "$ROOT_DIR"
