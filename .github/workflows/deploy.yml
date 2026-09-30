@@ -1,6 +1,6 @@
 # 自动部署到阿里云主机
 # 触发:push 到 main 分支,或手动(workflow_dispatch)
-# 方式:GitHub Runner 完成测试与打包,上传 JAR 后重启 systemd 服务
+# 方式:GitHub Runner 完成测试与打包,云主机拉取代码构建后重启 systemd 服务
 name: Deploy to Aliyun
 
 on:
@@ -47,18 +47,7 @@ jobs:
         working-directory: backend
         run: mvn clean package
 
-      - name: 上传应用 JAR
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.ALIYUN_HOST }}
-          username: ${{ secrets.ALIYUN_USER }}
-          password: ${{ secrets.ALIYUN_PASSWORD }}
-          port: 22
-          source: backend/target/english-app-backend-1.0.0.jar
-          target: /opt/english-app
-          overwrite: true
-
-      - name: 重启并检查云端服务
+      - name: 云端构建并检查服务
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.ALIYUN_HOST }}        # 公网 IP,如 39.96.59.120
@@ -70,6 +59,11 @@ jobs:
           script: |
             set -Eeuo pipefail
             trap 'echo "[deploy] 部署失败，输出服务日志"; journalctl -u mimi -n 100 --no-pager || true' ERR
+            cd /opt/english-app
+            git fetch origin main
+            git checkout main
+            git pull --ff-only origin main
+            ./scripts/deploy.sh
             growth_key='${{ secrets.CHILD_GROWTH_ACCESS_KEY }}'
             if [ -n "$growth_key" ]; then
               sed -i '/^CHILD_GROWTH_ACCESS_KEY=/d' /opt/english-app/.env
