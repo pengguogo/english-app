@@ -3,6 +3,7 @@ backend/target/
 backend/*.db
 backend/english.db
 backend/.tts-cache/
+backend/child-photos/
 .tts-cache/
 *.class
 *.jar

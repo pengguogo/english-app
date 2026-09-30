@@ -38,6 +38,12 @@ export const featuredRoutes = [
 
 export const supportRoutes = [
   {
+    title: '成长档案',
+    description: '记录身高体重，看看成长轨迹。',
+    route: '/child-profile',
+    accent: 'var(--color-success)'
+  },
+  {
     title: '错题本',
     description: '再练一遍还没记住的题。',
     route: '/wrong-answers',

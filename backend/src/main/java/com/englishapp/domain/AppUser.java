@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "app_user")
@@ -17,6 +18,8 @@ public class AppUser {
 
     private String nickname;
     private String avatarUrl;
+    private LocalDate birthDate;
+    private String sex;
     private LocalDateTime createdAt;
 
     public Integer getId() {
@@ -46,6 +49,11 @@ public class AppUser {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
+    public LocalDate getBirthDate() { return birthDate; }
+    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
+    public String getSex() { return sex; }
+    public void setSex(String sex) { this.sex = sex; }
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;

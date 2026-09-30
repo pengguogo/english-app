@@ -24,6 +24,7 @@ const routes = [
   { path: '/picturebooks', name: 'picturebooks', component: () => import('../views/PicturebooksView.vue') },
   { path: '/picturebooks/:unitId', name: 'picturebook', component: () => import('../views/PicturebookView.vue') },
   { path: '/', name: 'home', component: () => import('../views/HomeView.vue') },
+  { path: '/child-profile', name: 'child-profile', component: () => import('../views/ChildProfileView.vue') },
   { path: '/subject/:subjectId', name: 'subject', component: () => import('../views/SubjectView.vue') },
   { path: '/theme/:themeId', name: 'theme', component: () => import('../views/ThemeView.vue') },
   { path: '/unit/:unitId', name: 'unit', component: () => import('../views/UnitView.vue') },

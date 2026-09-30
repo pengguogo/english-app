@@ -104,6 +104,21 @@ function startFruitAdventure() {
         <button
           type="button"
           class="quick-card"
+          :style="{ '--card-accent': 'var(--color-success)' }"
+          @click="router.push('/child-profile')"
+        >
+          <div class="quick-left" :style="{ background: 'var(--color-success)' }"></div>
+          <div class="quick-body">
+            <span class="quick-icon">📏</span>
+            <div class="quick-text">
+              <h3 class="quick-title">成长档案</h3>
+              <p class="quick-sub">身高体重轨迹</p>
+            </div>
+          </div>
+        </button>
+        <button
+          type="button"
+          class="quick-card"
           :style="{ '--card-accent': 'var(--color-warning)' }"
           @click="router.push('/wrong-answers')"
         >
