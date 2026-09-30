@@ -29,6 +29,7 @@ function openRoute(route) {
         </p>
         <div class="modern-brand-actions">
           <AppButton size="lg" @click="openRoute('/subject/1')">开始学英语</AppButton>
+          <AppButton variant="ghost" @click="openRoute('/child-profile')">记录身高体重</AppButton>
         </div>
       </div>
 

@@ -77,6 +77,7 @@ function startFruitAdventure() {
         <div class="greeting">
           <h1>Mimi 启蒙乐园</h1>
           <p>每天 15 分钟，陪孩子快乐成长 🎈</p>
+          <AppButton variant="ghost" @click="router.push('/child-profile')">记录身高体重</AppButton>
         </div>
         <MimiMascot variant="welcome" size="lg" />
       </div>
@@ -233,6 +234,11 @@ function startFruitAdventure() {
 .greeting p {
   color: rgba(255, 255, 255, 0.9);
   font-size: var(--text-base);
+}
+
+.greeting :deep(.app-btn.variant-ghost) {
+  color: var(--text-on-primary);
+  border: 1px solid var(--text-on-primary-muted);
 }
 
 .decor {
