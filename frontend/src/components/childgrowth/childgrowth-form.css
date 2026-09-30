@@ -1,0 +1,99 @@
+/*
+  childgrowth-form.css - 成长档案弹窗共享表单样式
+  用途: 为资料/测量/照片三个编辑弹窗提供统一的字段布局与控件外观,
+        类名统一 cg- 前缀,避免全局样式冲突;色值全部引用 tokens.css 设计令牌。
+  作者: english-app
+  创建日期: 2026-09-30
+*/
+
+/* 表单网格: 双列布局,窄屏自动退化为单列 */
+.cg-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+/* 字段标签: 上文字下控件,触控目标不小于 44px */
+.cg-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
+/* 输入框/下拉框统一外观 */
+.cg-input,
+.cg-select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+/* 只读展示位(如年龄): 灰底区别于可输入项 */
+.cg-static {
+  background: var(--bg-muted);
+}
+
+/* 文件选择: 与其他控件同高,显示文件名 */
+.cg-file {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--border-light);
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+/* 焦点可见性: 键盘导航时高亮 */
+.cg-input:focus,
+.cg-select:focus,
+.cg-file:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* 跨双列的字段(备注、说明等) */
+.cg-wide {
+  grid-column: 1 / -1;
+}
+
+/* 弹窗底部操作按钮行 */
+.cg-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* 表单校验/接口错误提示 */
+.cg-error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--color-warning);
+  font-size: var(--text-sm);
+}
+
+/* 辅助说明文字 */
+.cg-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* 手机端: 表单退化为单列 */
+@media (max-width: 480px) {
+  .cg-form {
+    grid-template-columns: 1fr;
+  }
+}

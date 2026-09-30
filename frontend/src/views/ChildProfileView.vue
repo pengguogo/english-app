@@ -1,290 +1,203 @@
+<!--
+  ChildProfileView.vue - 孩子成长档案页
+  用途: 家长查看孩子资料摘要、身高体重轨迹、测量记录与成长照片;
+        页面只做展示,所有编辑动作(资料/记录/照片)均通过弹窗完成,
+        数据与接口调用统一托管在 useChildGrowth 组合式函数中。
+  作者: english-app
+  创建日期: 2026-07-20 (2026-09-30 重构为摘要+弹窗布局)
+-->
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BackBar from '../components/BackBar.vue'
 import AppButton from '../components/AppButton.vue'
 import GrowthChart from '../components/GrowthChart.vue'
-import {
-  getChildProfile, updateChildProfile, getGrowthMeasurements,
-  createGrowthMeasurement, updateGrowthMeasurement, deleteGrowthMeasurement,
-  getChildPhotos, addChildPhoto, deleteChildPhoto, getChildPhotoImage, updateChildPhoto
-} from '../api/childGrowth'
+import ProfileEditModal from '../components/childgrowth/ProfileEditModal.vue'
+import MeasurementEditModal from '../components/childgrowth/MeasurementEditModal.vue'
+import PhotoEditModal from '../components/childgrowth/PhotoEditModal.vue'
+import { useChildGrowth } from '../composables/useChildGrowth'
+import { formatAge } from '../utils/date'
 
-const today = () => {
-  const date = new Date()
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
-const profile = reactive({ nickname: '', birthDate: '', sex: '' })
 const router = useRouter()
-const form = reactive({ measuredAt: today(), heightCm: '', weightKg: '', note: '' })
-const records = ref([])
-const photos = ref([])
-const accessKey = ref(sessionStorage.getItem('childGrowthKey') || '')
-const unlocked = ref(false)
-const photoUrls = new Map()
-const photoDate = ref(today())
-const photoCaption = ref('')
-const photoFile = ref(null)
-const photoEditingId = ref(null)
-const photoInput = ref(null)
-const editingId = ref(null)
-const loading = ref(true)
-const saving = ref(false)
-const error = ref('')
-const notice = ref('')
+const accessKey = ref('')
 
-const age = computed(() => {
-  if (!profile.birthDate) return '填写生日后自动计算'
-  const [year, month, day] = profile.birthDate.split('-').map(Number)
-  const now = new Date()
-  let years = now.getFullYear() - year
-  let months = now.getMonth() + 1 - month
-  if (now.getDate() < day) months--
-  if (months < 0) { years--; months += 12 }
-  if (years < 0) return '生日不能晚于今天'
-  return `${years} 岁 ${months} 个月`
+// 解构组合式函数: 顶层 ref 在模板中自动解包
+const {
+  profile, records, photos, unlocked, loading, saving, pageError, notice,
+  profileOpen, measurementOpen, photoOpen, editingRecord, editingPhoto, modalError,
+  load, unlock,
+  openProfile, closeProfile, saveProfile,
+  openMeasurement, closeMeasurement, saveMeasurement, removeMeasurement,
+  openPhoto, closePhoto, savePhoto, removePhoto
+} = useChildGrowth()
+
+// 摘要卡上的只读文案
+const age = computed(() => (profile.birthDate ? formatAge(profile.birthDate) : '未填写生日'))
+const sexText = computed(() => (profile.sex === 'MALE' ? '男' : profile.sex === 'FEMALE' ? '女' : '未填写'))
+
+// 历史记录倒序展示(最新在前),与既有行为保持一致
+const latestRecords = computed(() => [...records.value].reverse())
+
+// 会话内已有口令时自动加载,否则停留在解锁界面
+onMounted(() => {
+  if (sessionStorage.getItem('childGrowthKey')) load()
 })
-
-async function load() {
-  loading.value = true
-  error.value = ''
-  try {
-    const [child, measurements, savedPhotos] = await Promise.all([getChildProfile(), getGrowthMeasurements(), getChildPhotos()])
-    Object.assign(profile, { nickname: child.nickname || '', birthDate: child.birthDate || '', sex: child.sex || '' })
-    records.value = measurements
-    await setPhotos(savedPhotos)
-    unlocked.value = true
-  } catch (e) {
-    if (e.response?.status === 401) unlocked.value = false
-    error.value = e.response?.data?.message || '加载失败，请重试'
-  }
-  finally { loading.value = false }
-}
-
-async function unlock() {
-  sessionStorage.setItem('childGrowthKey', accessKey.value)
-  await load()
-}
-
-async function setPhotos(items) {
-  for (const url of photoUrls.values()) URL.revokeObjectURL(url)
-  photoUrls.clear()
-  photos.value = await Promise.all(items.map(async item => {
-    const blob = await getChildPhotoImage(item.id)
-    const src = URL.createObjectURL(blob)
-    photoUrls.set(item.id, src)
-    return { ...item, src }
-  }))
-}
-
-async function saveProfile() {
-  error.value = ''; notice.value = ''; saving.value = true
-  try {
-    await updateChildProfile({ ...profile, birthDate: profile.birthDate || null, sex: profile.sex || null })
-    notice.value = '孩子资料已保存'
-  } catch (e) { error.value = e.response?.data?.message || '资料保存失败' }
-  finally { saving.value = false }
-}
-
-async function saveMeasurement() {
-  error.value = ''; notice.value = ''
-  if (!form.heightCm && !form.weightKg) { error.value = '身高和体重至少填写一项'; return }
-  saving.value = true
-  const data = { measuredAt: form.measuredAt, heightCm: form.heightCm || null,
-    weightKg: form.weightKg || null, note: form.note || null }
-  try {
-    if (editingId.value) await updateGrowthMeasurement(editingId.value, data)
-    else await createGrowthMeasurement(data)
-    records.value = await getGrowthMeasurements()
-    resetForm()
-    notice.value = '测量记录已保存'
-  } catch (e) { error.value = e.response?.data?.message || '记录保存失败，请检查输入' }
-  finally { saving.value = false }
-}
-
-function edit(item) {
-  editingId.value = item.id
-  Object.assign(form, { measuredAt: item.measuredAt, heightCm: item.heightCm ?? '',
-    weightKg: item.weightKg ?? '', note: item.note ?? '' })
-  notice.value = '正在修改所选记录'
-}
-
-function resetForm() {
-  editingId.value = null
-  Object.assign(form, { measuredAt: today(), heightCm: '', weightKg: '', note: '' })
-}
-
-async function remove(item) {
-  if (!window.confirm(`删除 ${item.measuredAt} 的测量记录？`)) return
-  error.value = ''; notice.value = ''
-  try {
-    await deleteGrowthMeasurement(item.id)
-    records.value = await getGrowthMeasurements()
-    if (editingId.value === item.id) resetForm()
-    notice.value = '记录已删除'
-  } catch (e) { error.value = e.response?.data?.message || '删除失败' }
-}
-
-function selectPhoto(event) {
-  photoFile.value = event.target.files?.[0] || null
-}
-
-async function savePhoto() {
-  error.value = ''; notice.value = ''
-  if (!photoEditingId.value && !photoFile.value) { error.value = '请先选择照片'; return }
-  if (photoFile.value && photoFile.value.size > 8 * 1024 * 1024) { error.value = '照片不能超过 8 MB'; return }
-  saving.value = true
-  try {
-    if (photoEditingId.value) {
-      await updateChildPhoto(photoEditingId.value, { takenAt: photoDate.value, caption: photoCaption.value })
-    } else {
-      const data = new FormData()
-      data.append('takenAt', photoDate.value)
-      data.append('caption', photoCaption.value)
-      data.append('image', photoFile.value)
-      await addChildPhoto(data)
-    }
-    await setPhotos(await getChildPhotos())
-    resetPhotoForm()
-    notice.value = '照片已保存'
-  } catch (e) { error.value = e.response?.data?.message || '照片保存失败，请使用 JPG 或 PNG 文件' }
-  finally { saving.value = false }
-}
-
-function editPhoto(item) {
-  photoEditingId.value = item.id
-  photoDate.value = item.takenAt
-  photoCaption.value = item.caption || ''
-  photoFile.value = null
-  if (photoInput.value) photoInput.value.value = ''
-  notice.value = '正在修改照片日期和说明'
-}
-
-function resetPhotoForm() {
-  photoEditingId.value = null
-  photoDate.value = today(); photoCaption.value = ''; photoFile.value = null
-  if (photoInput.value) photoInput.value.value = ''
-}
-
-async function removePhoto(item) {
-  if (!window.confirm(`删除 ${item.takenAt} 的照片？`)) return
-  error.value = ''; notice.value = ''
-  try {
-    await deleteChildPhoto(item.id)
-    await setPhotos(await getChildPhotos())
-    notice.value = '照片已删除'
-  } catch (e) { error.value = e.response?.data?.message || '照片删除失败' }
-}
-
-onMounted(() => { if (accessKey.value) load(); else loading.value = false })
-onUnmounted(() => { for (const url of photoUrls.values()) URL.revokeObjectURL(url) })
 </script>
 
 <template>
   <main class="profile-page">
     <BackBar title="孩子成长档案" @back="router.push('/')" />
-    <h1>孩子成长档案</h1>
-    <p class="intro">为家长记录身体变化。年龄按生日计算，测量日期默认今天，都可以修改。</p>
-    <p v-if="error" role="alert" class="error">{{ error }}</p>
+
+    <p class="intro">记录孩子的身体成长。点击「修改」或「添加」会弹出编辑窗口，不会打断浏览。</p>
+
+    <p v-if="pageError" role="alert" class="error">{{ pageError }}</p>
     <p v-if="notice" role="status" class="notice">{{ notice }}</p>
     <p v-if="loading" role="status">正在加载...</p>
+
+    <!-- 家长访问解锁 -->
     <section v-if="!unlocked && !loading" class="panel">
       <h2>家长访问</h2>
       <p class="muted">请输入成长档案访问口令。本次浏览会话中会记住它。</p>
-      <form @submit.prevent="unlock" class="access-form">
-        <label>访问口令<input v-model="accessKey" type="password" autocomplete="off" required /></label>
-        <AppButton @click="unlock">进入档案</AppButton>
+      <form class="access-form" @submit.prevent="unlock(accessKey)">
+        <label>访问口令
+          <input v-model="accessKey" type="password" autocomplete="off" required />
+        </label>
+        <AppButton :disabled="loading" @click="unlock(accessKey)">进入档案</AppButton>
       </form>
     </section>
+
     <template v-if="unlocked && !loading">
+      <!-- 孩子资料摘要: 只读展示,编辑走弹窗 -->
       <section class="panel">
-        <h2>孩子资料</h2>
-        <form @submit.prevent="saveProfile" class="fields">
-          <label>昵称<input v-model.trim="profile.nickname" required maxlength="50" autocomplete="off" /></label>
-          <label>生日<input v-model="profile.birthDate" type="date" :max="today()" /></label>
-          <label>年龄<output class="age">{{ age }}</output></label>
-          <label>性别（可选）<select v-model="profile.sex"><option value="">暂不填写</option><option value="MALE">男</option><option value="FEMALE">女</option></select></label>
-          <div class="actions"><AppButton :disabled="saving" @click="saveProfile">保存资料</AppButton></div>
-        </form>
+        <div class="panel-head">
+          <h2>孩子资料</h2>
+          <AppButton @click="openProfile">修改</AppButton>
+        </div>
+        <dl class="summary">
+          <div class="summary-item"><dt>昵称</dt><dd>{{ profile.nickname || '未填写' }}</dd></div>
+          <div class="summary-item"><dt>年龄</dt><dd>{{ age }}</dd></div>
+          <div class="summary-item"><dt>生日</dt><dd>{{ profile.birthDate || '未填写' }}</dd></div>
+          <div class="summary-item"><dt>性别</dt><dd>{{ sexText }}</dd></div>
+        </dl>
       </section>
 
-      <section class="panel">
-        <h2>{{ editingId ? '修改测量记录' : '添加测量记录' }}</h2>
-        <form @submit.prevent="saveMeasurement" class="fields">
-          <label>测量日期<input v-model="form.measuredAt" type="date" :max="today()" required /></label>
-          <label>身高（cm）<input v-model="form.heightCm" type="number" min="20" max="250" step="0.1" inputmode="decimal" /></label>
-          <label>体重（kg）<input v-model="form.weightKg" type="number" min="0.5" max="300" step="0.01" inputmode="decimal" /></label>
-          <label class="wide">备注（可选）<input v-model.trim="form.note" maxlength="200" placeholder="例如：学校体检" /></label>
-          <div class="actions"><AppButton :disabled="saving" @click="saveMeasurement">{{ editingId ? '保存修改' : '保存记录' }}</AppButton><AppButton v-if="editingId" variant="ghost" @click="resetForm">取消修改</AppButton></div>
-        </form>
-      </section>
-
+      <!-- 生长轨迹 -->
       <section class="charts" aria-label="生长轨迹">
         <GrowthChart title="身高轨迹" unit="cm" field="heightCm" :records="records" />
         <GrowthChart title="体重轨迹" unit="kg" field="weightKg" :records="records" />
       </section>
 
+      <!-- 测量记录 -->
       <section class="panel">
-        <h2>历史记录</h2>
-        <p v-if="!records.length" class="muted">还没有测量记录。</p>
+        <div class="panel-head">
+          <h2>测量记录</h2>
+          <AppButton @click="openMeasurement()">添加记录</AppButton>
+        </div>
+        <p v-if="!records.length" class="muted">还没有测量记录，点击「添加记录」开始记录。</p>
         <ul v-else class="records">
-          <li v-for="item in [...records].reverse()" :key="item.id">
-            <div><strong>{{ item.measuredAt }}</strong><span>{{ item.heightCm == null ? '—' : `${item.heightCm} cm` }} · {{ item.weightKg == null ? '—' : `${item.weightKg} kg` }}</span><small v-if="item.note">{{ item.note }}</small></div>
-            <div class="record-actions"><button type="button" @click="edit(item)">修改</button><button type="button" @click="remove(item)">删除</button></div>
+          <li v-for="item in latestRecords" :key="item.id">
+            <div class="record-main">
+              <strong>{{ item.measuredAt }}</strong>
+              <span>{{ item.heightCm == null ? '—' : `${item.heightCm} cm` }} · {{ item.weightKg == null ? '—' : `${item.weightKg} kg` }}</span>
+              <small v-if="item.note">{{ item.note }}</small>
+            </div>
+            <div class="row-actions">
+              <button type="button" @click="openMeasurement(item)">修改</button>
+              <button type="button" class="danger" @click="removeMeasurement(item)">删除</button>
+            </div>
           </li>
         </ul>
       </section>
 
+      <!-- 成长照片 -->
       <section class="panel">
-        <h2>成长照片</h2>
-        <form class="fields" @submit.prevent="savePhoto">
-          <label>拍摄日期<input v-model="photoDate" type="date" :max="today()" required /></label>
-          <label v-if="!photoEditingId">照片（JPG/PNG，最多 8 MB）<input ref="photoInput" type="file" accept="image/jpeg,image/png" @change="selectPhoto" /></label>
-          <label class="wide">一句话记录<input v-model.trim="photoCaption" maxlength="200" placeholder="例如：第一次骑上自行车" /></label>
-          <div class="actions"><AppButton :disabled="saving" @click="savePhoto">{{ photoEditingId ? '保存修改' : '保存照片' }}</AppButton><AppButton v-if="photoEditingId" variant="ghost" @click="resetPhotoForm">取消修改</AppButton></div>
-        </form>
-        <p v-if="!photos.length" class="muted">还没有成长照片。</p>
+        <div class="panel-head">
+          <h2>成长照片</h2>
+          <AppButton @click="openPhoto()">添加照片</AppButton>
+        </div>
+        <p v-if="!photos.length" class="muted">还没有成长照片，点击「添加照片」留下第一张。</p>
         <ul v-else class="photo-grid">
           <li v-for="item in photos" :key="item.id">
             <img :src="item.src" :alt="item.caption || `${item.takenAt} 的成长照片`" loading="lazy" />
-            <div><strong>{{ item.takenAt }}</strong><span>{{ item.caption }}</span></div>
-            <button type="button" @click="editPhoto(item)">修改记录</button>
-            <button type="button" @click="removePhoto(item)">删除照片</button>
+            <div class="photo-info">
+              <strong>{{ item.takenAt }}</strong>
+              <span>{{ item.caption }}</span>
+            </div>
+            <div class="row-actions photo-actions">
+              <button type="button" @click="openPhoto(item)">修改</button>
+              <button type="button" class="danger" @click="removePhoto(item)">删除</button>
+            </div>
           </li>
         </ul>
       </section>
     </template>
+
+    <!-- 三个编辑弹窗: 状态与接口调用在 useChildGrowth 中 -->
+    <ProfileEditModal
+      :open="profileOpen" :saving="saving" :error="modalError" :profile="profile"
+      @close="closeProfile" @save="saveProfile"
+    />
+    <MeasurementEditModal
+      :open="measurementOpen" :saving="saving" :error="modalError" :record="editingRecord"
+      @close="closeMeasurement" @save="saveMeasurement"
+    />
+    <PhotoEditModal
+      :open="photoOpen" :saving="saving" :error="modalError" :photo="editingPhoto"
+      @close="closePhoto" @save="savePhoto"
+    />
   </main>
 </template>
 
 <style scoped>
 .profile-page { max-width: 960px; margin: 0 auto; padding: var(--space-4); color: var(--text-primary); }
-h1 { margin: var(--space-4) 0 var(--space-2); font-size: var(--text-lg); }
-h2 { margin: 0 0 var(--space-4); font-size: var(--text-base); }
-.intro, .muted { color: var(--text-secondary); }
+h2 { margin: 0; font-size: var(--text-base); }
+.intro, .muted, .notice { color: var(--text-secondary); }
+.error { color: var(--color-warning); }
+
+/* 卡片与卡片头部: 标题与主操作按钮同行,右对齐 */
 .panel { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: var(--space-5); margin: var(--space-5) 0; }
-.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
-label { display: flex; flex-direction: column; gap: var(--space-2); font-weight: var(--font-medium); }
-input, select, .age { box-sizing: border-box; width: 100%; min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--border-light); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-primary); font: inherit; }
-.age { background: var(--bg-muted); }
-input:focus, select:focus, button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-.wide, .actions { grid-column: 1 / -1; }
-.actions { display: flex; gap: var(--space-2); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+
+/* 资料摘要: 四格只读信息 */
+.summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); margin: 0; }
+.summary-item { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3); background: var(--bg-muted); border-radius: var(--radius-sm); }
+.summary-item dt { color: var(--text-secondary); font-size: var(--text-sm); }
+.summary-item dd { margin: 0; font-weight: var(--font-bold); }
+
+/* 解锁表单 */
+.access-form { display: flex; align-items: end; gap: var(--space-3); flex-wrap: wrap; }
+.access-form label { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; min-width: 200px; font-weight: var(--font-medium); }
+.access-form input { box-sizing: border-box; min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--border-light); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-primary); font: inherit; }
+.access-form input:focus { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+/* 轨迹图双列 */
 .charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+
+/* 测量记录列表 */
 .records { padding: 0; margin: 0; list-style: none; }
 .records li { display: flex; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border-top: 1px solid var(--border-light); }
-.records li div:first-child { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-.records small { width: 100%; color: var(--text-secondary); }
-.record-actions { display: flex; gap: var(--space-2); }
-.record-actions button { border: 0; background: transparent; color: var(--color-primary); cursor: pointer; font: inherit; }
-.error { color: var(--color-warning); }
-.notice { color: var(--text-secondary); }
-.access-form { display: flex; align-items: end; gap: var(--space-3); flex-wrap: wrap; }
-.access-form label { flex: 1; min-width: 200px; }
+.record-main { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: baseline; }
+.record-main small { width: 100%; color: var(--text-secondary); }
+
+/* 行内轻量操作按钮(修改/删除) */
+.row-actions { display: flex; gap: var(--space-2); }
+.row-actions button { border: 0; background: transparent; color: var(--color-primary); cursor: pointer; font: inherit; min-height: var(--touch-target); }
+.row-actions button.danger { color: var(--color-warning); }
+
+/* 照片网格 */
 .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-4); padding: 0; list-style: none; }
-.photo-grid li { border: 1px solid var(--border-light); border-radius: var(--radius-sm); overflow: hidden; }
+.photo-grid li { display: flex; flex-direction: column; border: 1px solid var(--border-light); border-radius: var(--radius-sm); overflow: hidden; }
 .photo-grid img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
-.photo-grid li div { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-2); }
-.photo-grid li button { margin: var(--space-2); border: 0; background: transparent; color: var(--color-primary); cursor: pointer; }
-@media (max-width: 640px) { .fields, .charts { grid-template-columns: 1fr; } .records li { flex-direction: column; } }
+.photo-info { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-2) var(--space-3) 0; }
+.photo-info span { color: var(--text-secondary); font-size: var(--text-sm); }
+.photo-actions { padding: 0 var(--space-2) var(--space-2); }
+
+/* 手机端: 摘要与轨迹图退化为单列 */
+@media (max-width: 640px) {
+  .summary, .charts { grid-template-columns: 1fr 1fr; }
+  .records li { flex-direction: column; }
+}
+@media (max-width: 480px) {
+  .summary { grid-template-columns: 1fr; }
+}
 </style>
