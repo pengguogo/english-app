@@ -1,9 +1,12 @@
 package com.englishapp.service;
 
 import com.englishapp.domain.DailyStudyTime;
+import com.englishapp.domain.LessonStudySession;
 import com.englishapp.dto.GameAccessDto;
 import com.englishapp.dto.GameUnlockDto;
 import com.englishapp.repository.DailyStudyTimeRepository;
+import com.englishapp.repository.LessonRepository;
+import com.englishapp.repository.LessonStudySessionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
@@ -15,9 +18,35 @@ public class GameAccessServiceImpl implements GameAccessService {
     private static final int DEFAULT_USER_ID = 1;
     private static final String PARENT_PASSWORD = "000000";
     private final DailyStudyTimeRepository repository;
+    private final LessonStudySessionRepository sessions;
+    private final LessonRepository lessons;
 
-    public GameAccessServiceImpl(DailyStudyTimeRepository repository) {
+    public GameAccessServiceImpl(DailyStudyTimeRepository repository,
+                                 LessonStudySessionRepository sessions, LessonRepository lessons) {
         this.repository = repository;
+        this.sessions = sessions;
+        this.lessons = lessons;
+    }
+
+    @Override
+    @Transactional
+    public GameAccessDto recordPendingStudyTime(Integer userId, Integer lessonId, int seconds) {
+        if (lessonId == null || !lessons.existsById(lessonId)) throw new IllegalArgumentException("课时不存在");
+        Integer uid = resolveUser(userId);
+        LocalDate today = LocalDate.now();
+        LessonStudySession session = sessions.findByUserIdAndLessonIdAndStudyDate(uid, lessonId, today)
+                .orElseGet(() -> {
+                    LessonStudySession created = new LessonStudySession();
+                    created.setUserId(uid);
+                    created.setLessonId(lessonId);
+                    created.setStudyDate(today);
+                    created.setPendingSeconds(0);
+                    created.setPassed(false);
+                    return created;
+                });
+        session.setPendingSeconds(Math.min(REQUIRED_SECONDS, session.getPendingSeconds() + seconds));
+        sessions.save(session);
+        return getTodayAccess(uid);
     }
 
     @Override

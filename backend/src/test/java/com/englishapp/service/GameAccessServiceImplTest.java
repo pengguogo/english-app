@@ -4,6 +4,8 @@ import com.englishapp.domain.DailyStudyTime;
 import com.englishapp.dto.GameAccessDto;
 import com.englishapp.dto.GameUnlockDto;
 import com.englishapp.repository.DailyStudyTimeRepository;
+import com.englishapp.repository.LessonRepository;
+import com.englishapp.repository.LessonStudySessionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -16,12 +18,16 @@ import static org.mockito.Mockito.*;
 class GameAccessServiceImplTest {
     @Mock
     private DailyStudyTimeRepository repository;
+    @Mock
+    private LessonStudySessionRepository sessions;
+    @Mock
+    private LessonRepository lessons;
     private GameAccessServiceImpl service;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        service = new GameAccessServiceImpl(repository);
+        service = new GameAccessServiceImpl(repository, sessions, lessons);
     }
 
     @Test
@@ -58,6 +64,20 @@ class GameAccessServiceImplTest {
 
         assertEquals(15, access.studiedSeconds());
         verify(repository).save(any(DailyStudyTime.class));
+    }
+
+    @Test
+    void should_暂存时长且不解锁游戏_当_复习尚未通过() {
+        when(lessons.existsById(7)).thenReturn(true);
+        when(sessions.findByUserIdAndLessonIdAndStudyDate(1, 7, LocalDate.now())).thenReturn(Optional.empty());
+        when(repository.findByUserIdAndStudyDate(1, LocalDate.now())).thenReturn(Optional.empty());
+
+        GameAccessDto access = service.recordPendingStudyTime(1, 7, 15);
+
+        assertFalse(access.unlocked());
+        assertEquals(0, access.studiedSeconds());
+        verify(sessions).save(argThat(session -> session.getPendingSeconds() == 15));
+        verify(repository, never()).save(any());
     }
 
     @Test

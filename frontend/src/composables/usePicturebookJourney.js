@@ -14,6 +14,7 @@ export function usePicturebookJourney(route) {
   const saving = ref(false)
   const saveError = ref('')
   const arrival = ref(false)
+  const reviewing = ref(false)
   const scores = ref([])
   const bookmarkError = ref('')
   let loadVersion = 0
@@ -36,6 +37,7 @@ export function usePicturebookJourney(route) {
     error.value = ''
     active.value = -1
     arrival.value = false
+    reviewing.value = false
     try {
       const [list, progress] = await Promise.all([getLessonsByUnit(route.params.unitId), getUnitProgress(route.params.unitId)])
       const details = await Promise.all(list.map((entry) => getLessonById(entry.id)))
@@ -59,6 +61,7 @@ export function usePicturebookJourney(route) {
     index.value = saved?.lessonId === lesson.value.id ? saved.index : 0
     scores.value = saved?.lessonId === lesson.value.id ? saved.scores : []
     arrival.value = false
+    reviewing.value = false
     saveError.value = ''
     bookmark()
   }
@@ -84,8 +87,12 @@ export function usePicturebookJourney(route) {
     bookmark()
   }
 
-  async function finish() {
+  async function finish(reviewPassed = false) {
     if (saving.value) return
+    if (!reviewPassed) {
+      reviewing.value = true
+      return
+    }
     stopActiveTts()
     saving.value = true
     saveError.value = ''
@@ -102,13 +109,14 @@ export function usePicturebookJourney(route) {
       scores.value = []
       bookmark()
       arrival.value = true
+      reviewing.value = false
     } catch { if (version === loadVersion) saveError.value = '车票还没保存成功，请点“重试保存”。' }
     finally { saving.value = false }
   }
 
-  function timetable() { activityVersion++; stopActiveTts(); active.value = -1; arrival.value = false }
+  function timetable() { activityVersion++; stopActiveTts(); active.value = -1; arrival.value = false; reviewing.value = false }
   watch(() => route.params.unitId, load, { immediate: true })
   onBeforeUnmount(() => { loadVersion++; stopActiveTts() })
   return { lessons, completedIds, active, index, lesson, item, loading, error, saving, saveError, bookmarkError,
-    arrival, allComplete, load, start, resume, move, answer, finish, timetable }
+    arrival, reviewing, allComplete, load, start, resume, move, answer, finish, timetable }
 }

@@ -38,6 +38,8 @@ class ProgressServiceImplTest {
     private UserProgressRepository userProgressRepository;
     @Mock
     private LessonRepository lessonRepository;
+    @Mock
+    private LessonReviewService lessonReviewService;
 
     @InjectMocks
     private ProgressServiceImpl progressService;
@@ -45,6 +47,18 @@ class ProgressServiceImplTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        when(lessonReviewService.hasPassed(any(), any())).thenReturn(true);
+    }
+
+    @Test
+    void should_拒绝完成课时_当_复习未全对() {
+        when(lessonReviewService.hasPassed(1, 2)).thenReturn(false);
+        CompleteRequest request = new CompleteRequest();
+        request.setStars(3);
+        request.setScore(100);
+
+        assertThrows(IllegalArgumentException.class, () -> progressService.completeLesson(2, request, 1));
+        verify(userProgressRepository, never()).save(any());
     }
 
     /**

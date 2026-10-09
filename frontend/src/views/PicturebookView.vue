@@ -5,6 +5,8 @@ import BackBar from '../components/BackBar.vue'
 import AppButton from '../components/AppButton.vue'
 import MimiMascot from '../components/MimiMascot.vue'
 import PicturebookActivity from '../components/picturebooks/PicturebookActivity.vue'
+import LessonReview from '../components/lesson-templates/LessonReview.vue'
+import { useStudyTimer } from '../composables/useStudyTimer'
 import TrainTrack from '../components/picturebooks/TrainTrack.vue'
 import { usePicturebookJourney } from '../composables/usePicturebookJourney'
 const route = useRoute()
@@ -13,7 +15,9 @@ const interactive = ref(true)
 const calm = ref(false)
 const autoRead = ref(false)
 const { lessons, completedIds, active, index, lesson, item, loading, error, saving, saveError, bookmarkError,
-  arrival, allComplete, load, start, resume, move, answer, finish, timetable } = usePicturebookJourney(route)
+  arrival, reviewing, allComplete, load, start, resume, move, answer, finish, timetable } = usePicturebookJourney(route)
+useStudyTimer(computed(() => !!lesson.value && !loading.value && !reviewing.value && !arrival.value),
+  computed(() => lesson.value?.id))
 function next() { index.value < lesson.value.content.items.length - 1 ? move(1) : finish() }
 const bookTitle = computed(() => lessons.value[0]?.content.bookTitle || '绘本小火车')
 const bookCover = computed(() => lessons.value[0]?.content.items.find((entry) => !entry.image?.includes('train-station'))?.image || '/images/picturebooks/train-station.jpg')
@@ -47,11 +51,12 @@ function begin(position = null) {
         <p>会听、会观察，还愿意开口。谢谢小司机的努力！</p>
         <div class="arrival-actions"><AppButton v-if="active + 1 < lessons.length" variant="success" @click="start(active + 1)">下一大站 →</AppButton><AppButton variant="ghost" @click="timetable">返回路线 / 再开一趟</AppButton></div>
       </section>
+      <LessonReview v-else-if="reviewing && lesson" :lesson-id="lesson.id" :save-error="saveError" @passed="finish(true)" />
       <template v-else-if="lesson && item">
         <div class="journey-toolbar"><strong>{{ lesson.name }}</strong><details><summary>家长设置</summary><div><label><input v-model="autoRead" type="checkbox" /> 翻页自动带读</label><label><input v-model="interactive" type="checkbox" /> 故事途中提问</label><label><input v-model="calm" type="checkbox" /> 关闭火车动效</label></div></details></div>
         <TrainTrack :step="index" :total="lesson.content.items.length" :calm="calm" />
         <PicturebookActivity :key="`${lesson.id}:${index}`" :item="item" :quiz="lesson.type === 'QUIZ'" :interactive="interactive" :auto-read="autoRead" :first="index === 0" :last="index === lesson.content.items.length - 1" :saving="saving" @next="next" @prev="move(-1)" @answer="answer" />
-        <div v-if="saveError" class="save-error" role="alert"><p>{{ saveError }}</p><AppButton :disabled="saving" @click="finish">重试保存</AppButton></div>
+        <div v-if="saveError" class="save-error" role="alert"><p>{{ saveError }}</p><AppButton :disabled="saving" @click="finish(true)">重试保存</AppButton></div>
       </template>
       <p v-if="bookmarkError" role="status">{{ bookmarkError }}</p>
     </template>

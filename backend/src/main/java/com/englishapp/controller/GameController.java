@@ -28,7 +28,7 @@ public class GameController {
     public Result<GameAccessDto> recordStudyTime(
             @Valid @RequestBody StudyTimeRequest request,
             @RequestParam(defaultValue = "1") Integer userId) {
-        return Result.success(gameAccessService.recordStudyTime(userId, request.getSeconds()));
+        return Result.success(gameAccessService.recordPendingStudyTime(userId, request.getLessonId(), request.getSeconds()));
     }
 
     @PostMapping("/unlock")

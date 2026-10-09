@@ -46,6 +46,7 @@ public class ProgressServiceImpl implements ProgressService {
 
     private final UserProgressRepository userProgressRepository;
     private final LessonRepository lessonRepository;
+    private final LessonReviewService lessonReviewService;
 
     /**
      * 构造进度业务实现
@@ -54,9 +55,10 @@ public class ProgressServiceImpl implements ProgressService {
      * @param lessonRepository       课程仓库
      */
     public ProgressServiceImpl(UserProgressRepository userProgressRepository,
-                               LessonRepository lessonRepository) {
+                               LessonRepository lessonRepository, LessonReviewService lessonReviewService) {
         this.userProgressRepository = userProgressRepository;
         this.lessonRepository = lessonRepository;
+        this.lessonReviewService = lessonReviewService;
     }
 
     /**
@@ -91,6 +93,9 @@ public class ProgressServiceImpl implements ProgressService {
     @Override
     @Transactional
     public CompleteResponse completeLesson(Integer lessonId, CompleteRequest request, Integer userId) {
+        if (!lessonReviewService.hasPassed(userId, lessonId)) {
+            throw new IllegalArgumentException("请先完成本课全部复习题");
+        }
         // 未指定用户时使用默认用户,便于匿名/调试场景
         Integer uid = userId != null ? userId : DEFAULT_USER_ID;
         UserProgress progress = userProgressRepository

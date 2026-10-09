@@ -6,10 +6,14 @@ import jakarta.validation.constraints.NotNull;
 
 public class StudyTimeRequest {
     @NotNull
+    private Integer lessonId;
+    @NotNull
     @Min(1)
     @Max(30)
     private Integer seconds;
 
     public Integer getSeconds() { return seconds; }
     public void setSeconds(Integer seconds) { this.seconds = seconds; }
+    public Integer getLessonId() { return lessonId; }
+    public void setLessonId(Integer lessonId) { this.lessonId = lessonId; }
 }

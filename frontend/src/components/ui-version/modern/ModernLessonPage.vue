@@ -23,6 +23,7 @@ import MascotFeedback from '../../MascotFeedback.vue'
 import WordLesson from '../../lesson-templates/WordLesson.vue'
 import SentenceLesson from '../../lesson-templates/SentenceLesson.vue'
 import LessonComplete from '../../lesson-templates/LessonComplete.vue'
+import LessonReview from '../../lesson-templates/LessonReview.vue'
 import ReadingLesson from '../../lesson-templates/ReadingLesson.vue'
 import QuizLesson from '../../lesson-templates/QuizLesson.vue'
 import CalculateLesson from '../../lesson-templates/CalculateLesson.vue'
@@ -44,6 +45,7 @@ const currentStars = ref(0)
 const scoreMessage = ref('')
 const isScoring = ref(false)
 const isComplete = ref(false)
+const showReview = ref(false)
 const isSubmitting = ref(false)
 const isProgressSaved = ref(false)
 const saveError = ref('')
@@ -75,8 +77,8 @@ const totalItems = computed(() => {
 const isLastItem = computed(() => currentIndex.value >= totalItems.value - 1)
 const currentItemEngaged = computed(() => engagedItems.value[currentIndex.value] === true)
 const isFruitPilot = computed(() => Number(route.query.themeId) === 1)
-const isActivelyStudying = computed(() => !isLoading.value && !!lesson.value && !isComplete.value)
-useStudyTimer(isActivelyStudying)
+const isActivelyStudying = computed(() => !isLoading.value && !!lesson.value && !isComplete.value && !showReview.value)
+useStudyTimer(isActivelyStudying, computed(() => lesson.value?.id))
 
 const totalBestScore = computed(() => {
   const validScores = bestScores.value.filter(score => typeof score === 'number')
@@ -232,6 +234,7 @@ async function loadLesson() {
   errorMsg.value = ''
   currentIndex.value = 0
   isComplete.value = false
+  showReview.value = false
   isProgressSaved.value = false
   saveError.value = ''
   resetCurrentScoreState()
@@ -378,8 +381,7 @@ function nextItem() {
     currentIndex.value++
     resetCurrentScoreState()
   } else {
-    isComplete.value = true
-    showMascotFeedback('celebrate', '关卡完成，水果贴纸收集成功！')
+    showReview.value = true
   }
 }
 
@@ -392,7 +394,11 @@ function prevItem() {
   }
 }
 
-async function advanceContinuousPlayback() {
+async function advanceContinuousPlayback(reviewPassed = false) {
+  if (!reviewPassed) {
+    showReview.value = true
+    return
+  }
   if (isSubmitting.value || !lesson.value) return
   const sourceLessonId = Number(lesson.value.id)
   const sourceUnitId = Number(lesson.value.unitId)
@@ -432,6 +438,26 @@ async function advanceContinuousPlayback() {
   } catch (error) {
     console.error('自动进入下一节阅读课失败:', error)
     alert('自动播放下一课失败,请重试')
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+async function handleReviewPassed() {
+  if (route.query.continuous === '1') {
+    await advanceContinuousPlayback(true)
+    return
+  }
+  isSubmitting.value = true
+  saveError.value = ''
+  try {
+    await completeLesson(lesson.value.id, totalStars.value, totalBestScore.value)
+    isProgressSaved.value = true
+    showReview.value = false
+    isComplete.value = true
+    showMascotFeedback('celebrate', '复习全对，本课完成！')
+  } catch (error) {
+    saveError.value = '保存失败，请重新提交复习'
   } finally {
     isSubmitting.value = false
   }
@@ -547,6 +573,7 @@ async function finishLesson() {
         />
       </section>
 
+      <LessonReview v-else-if="showReview" :lesson-id="lesson.id" :save-error="saveError" @passed="handleReviewPassed" />
       <section v-else-if="lessonTemplate && currentItem" class="modern-brand-card modern-brand-panel lesson-stage-shell">
         <div class="modern-brand-surface stage-summary">
           <div>

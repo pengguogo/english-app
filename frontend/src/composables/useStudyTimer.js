@@ -4,13 +4,13 @@ import { recordStudyTime } from '../api/games'
 const HEARTBEAT_SECONDS = 15
 
 /** 仅在学习页可见且课时加载成功时累计有效学习时长。 */
-export function useStudyTimer(enabled) {
+export function useStudyTimer(enabled, lessonId) {
   let timer = null
 
   async function sendHeartbeat() {
-    if (!enabled.value || document.visibilityState !== 'visible') return
+    if (!enabled.value || !lessonId.value || document.visibilityState !== 'visible') return
     try {
-      await recordStudyTime(HEARTBEAT_SECONDS)
+      await recordStudyTime(lessonId.value, HEARTBEAT_SECONDS)
     } catch (error) {
       console.error('记录学习时长失败:', error)
     }
