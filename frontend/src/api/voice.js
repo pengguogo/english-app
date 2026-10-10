@@ -27,13 +27,13 @@ export const textToSpeech = (text, lan = 'en', options = {}) =>
   }, { responseType: 'blob' })
 
 /**
- * 发音评测。
+ * 发音评测；score 为 null 时表示失败，不计成绩。
  * 通过 FormData 以 multipart/form-data 上传录音文件与对照文本,
  * 后端返回 { code, message, data: { score, feedback } },拦截器剥离后返回 data。
  *
  * @param {Blob} audioBlob 录音二进制数据
  * @param {string} text 对照文本
- * @return {Promise<{score: number, feedback: string}>} 评测结果
+ * @return {Promise<{score: number|null, feedback: string}>} 评测结果
  */
 export const scorePronunciation = (audioBlob, text) => {
   const formData = new FormData()

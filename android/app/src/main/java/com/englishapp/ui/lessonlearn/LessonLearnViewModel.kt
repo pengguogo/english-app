@@ -217,15 +217,25 @@ class LessonLearnViewModel @Inject constructor(
             try {
                 val wavData = withContext(Dispatchers.IO) { wavRecorder.stop() }
                 val result = voiceRepository.scorePronunciation(wavData, text)
+                val score = result.score
+                if (score == null) {
+                    _uiState.value = _uiState.value.copy(
+                        isScoring = false,
+                        currentScore = null,
+                        currentStars = 0,
+                        scoreFeedback = result.feedback
+                    )
+                    return@launch
+                }
                 val index = _uiState.value.currentIndex
                 // 更新历史最佳分
                 if (index < bestScores.size) {
-                    bestScores[index] = maxOf(bestScores[index], result.score)
+                    bestScores[index] = maxOf(bestScores[index], score)
                 }
                 _uiState.value = _uiState.value.copy(
                     isScoring = false,
-                    currentScore = result.score,
-                    currentStars = scoreToStars(result.score),
+                    currentScore = score,
+                    currentStars = scoreToStars(score),
                     scoreFeedback = result.feedback
                 )
             } catch (e: Exception) {

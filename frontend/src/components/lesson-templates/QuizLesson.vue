@@ -31,7 +31,9 @@ const props = defineProps({
   /** 总题数 */
   totalItems: { type: Number, default: 0 },
   /** 是否最后一题 */
-  isLastItem: { type: Boolean, default: false }
+  isLastItem: { type: Boolean, default: false },
+  /** 单题重练可使用独立的末题动作文案。 */
+  lastActionLabel: { type: String, default: '完成答题' }
 })
 
 /**
@@ -257,7 +259,7 @@ function getOptionClass(index) {
         class="action-next"
         @click="emit('next')"
       >
-        {{ isLastItem ? '完成答题' : '下一题 →' }}
+        {{ isLastItem ? lastActionLabel : '下一题 →' }}
       </AppButton>
     </div>
   </div>

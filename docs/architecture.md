@@ -224,7 +224,7 @@ Service 抛出业务异常，`GlobalExceptionHandler` 统一捕获并返回
 采用适配器模式，`VoiceService` 接口定义 `textToSpeech` 与 `scorePronunciation`
 两个方法。`BaiduVoiceService` 通过 `@ConditionalOnProperty` 条件装配，
 后续可平滑切换至阿里云、腾讯云等其他供应商。发音评测采用百度 ASR 识别 +
-文本相似度评分。AI 功能放 `service/ai/`，必须设超时 + 降级 + 结果校验。
+文本相似度评分。评测响应 `data.score` 为 `0–100` 时是有效成绩，为 `null` 时表示服务失败或未识别到语音；前端显示反馈并允许重试，不计入学习成绩。AI 功能放 `service/ai/`，必须设超时 + 降级 + 结果校验。
 
 ### 课时模板路由
 

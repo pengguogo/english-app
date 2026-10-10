@@ -5,6 +5,7 @@
   创建日期: 2026-09-29
 -->
 <script setup>
+import ContinueLesson from '../../ContinueLesson.vue'
 import CharacterEntry from '../../CharacterEntry.vue'
 import { useRouter } from 'vue-router'
 import AppButton from '../../AppButton.vue'
@@ -43,6 +44,7 @@ function openRoute(route) {
       </div>
     </section>
 
+    <ContinueLesson />
     <CharacterEntry />
 
     <!-- 主入口：四个磁贴，各自注入入口强调色 -->

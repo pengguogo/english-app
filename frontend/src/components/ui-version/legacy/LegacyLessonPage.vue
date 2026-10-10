@@ -38,6 +38,7 @@ import CalculateLesson from '../../lesson-templates/CalculateLesson.vue'
 import PhonicsLesson from '../../lesson-templates/PhonicsLesson.vue'
 import DialogueLesson from '../../lesson-templates/DialogueLesson.vue'
 import { findNextReadingLesson } from '../../../utils/continuousPlayback'
+import { useLessonBookmark } from '../../../composables/useLessonBookmark'
 import { useStudyTimer } from '../../../composables/useStudyTimer'
 
 const route = useRoute()
@@ -76,6 +77,9 @@ const engagedItems = ref([])
 /**
  * 当前学习项。
  */
+const restoreBookmark = useLessonBookmark(lesson, isLoading, currentIndex, bestScores,
+  engagedItems, isProgressSaved, route)
+
 const currentItem = computed(() => {
   if (!lesson.value || !lesson.value.content) return null
   const items = lesson.value.content.items
@@ -249,6 +253,7 @@ async function loadLesson() {
   const version = ++lessonLoadVersion
   isLoading.value = true
   errorMsg.value = ''
+  isScoring.value = false
   currentIndex.value = 0
   isComplete.value = false
   showReview.value = false
@@ -269,8 +274,11 @@ async function loadLesson() {
       data.content = normalizeContent(data.content)
     }
     lesson.value = data
-    bestScores.value = new Array(totalItems.value).fill(0)
+    bestScores.value = new Array(totalItems.value).fill(
+      ['WORD', 'SENTENCE', 'PHONICS', 'DIALOGUE'].includes(data.type) ? null : 0
+    )
     engagedItems.value = new Array(totalItems.value).fill(false)
+    restoreBookmark()
   } catch (e) {
     if (version !== lessonLoadVersion) return
     errorMsg.value = '加载课时失败,请返回重试'
@@ -288,12 +296,21 @@ async function loadLesson() {
  */
 async function handleRecorded(wavBlob) {
   if (!currentItem.value || !currentText.value) return
+  const sourceLesson = lesson.value
+  const sourceIndex = currentIndex.value
+  const sourceVersion = lessonLoadVersion
   markCurrentItemEngaged()
   isScoring.value = true
   scoreMessage.value = '评分中...'
   currentScore.value = null
   try {
     const result = await scorePronunciation(wavBlob, currentText.value)
+    if (lesson.value !== sourceLesson || lessonLoadVersion !== sourceVersion || currentIndex.value !== sourceIndex) return
+    if (!Number.isFinite(result.score)) {
+      currentStars.value = 0
+      scoreMessage.value = result.feedback || '评测未完成，请重试，不计成绩'
+      return
+    }
     currentScore.value = result.score
     currentStars.value = scoreToStars(result.score)
     scoreMessage.value = result.feedback || ''
@@ -303,10 +320,12 @@ async function handleRecorded(wavBlob) {
       result.score >= 80 ? '发音真清楚，收下一颗星星！' : '已经开口啦，慢慢说会更棒。'
     )
   } catch (e) {
-    scoreMessage.value = '评分失败,请重试'
+    if (lesson.value !== sourceLesson || lessonLoadVersion !== sourceVersion || currentIndex.value !== sourceIndex) return
+    currentStars.value = 0
+    scoreMessage.value = '评分失败，请重试，本次不计成绩'
     console.error('发音评测失败:', e)
   } finally {
-    isScoring.value = false
+    if (lesson.value === sourceLesson && lessonLoadVersion === sourceVersion) isScoring.value = false
   }
 }
 

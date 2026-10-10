@@ -94,8 +94,11 @@ async function handleResolve(item) {
   actionError.value = ''
   try {
     await resolveWrongAnswer(item.id)
-    // 从列表中移除
-    wrongAnswers.value = wrongAnswers.value.filter((w) => w.id !== item.id)
+    if (filter.value === 'unresolved') {
+      wrongAnswers.value = wrongAnswers.value.filter((w) => w.id !== item.id)
+    } else {
+      item.isResolved = true
+    }
     // 刷新统计
     await loadStats()
   } catch (e) {
@@ -109,7 +112,9 @@ async function handleResolve(item) {
  * @param {Object} item 错题对象
  */
 function redoLesson(item) {
-  router.push(`/lesson/${item.lessonId}`)
+  router.push(['QUIZ', 'CALCULATE'].includes(item.questionType)
+    ? `/wrong-answers/${item.id}/practice`
+    : `/lesson/${item.lessonId}`)
 }
 
 /**

@@ -41,6 +41,7 @@ jobs:
         working-directory: frontend
         run: |
           npm ci
+          npm test
           npm run build
 
       - name: Maven 完整打包

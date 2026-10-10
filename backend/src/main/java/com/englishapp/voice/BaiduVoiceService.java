@@ -201,7 +201,7 @@ public class BaiduVoiceService {
             if (errNo != 0) {
                 String errMsg = node.has("err_msg") ? node.get("err_msg").asText() : "unknown";
                 log.warn("ASR 识别失败: err_no={}, err_msg={}", errNo, errMsg);
-                return new ScoreResponse(0, "没有听清楚,请再试一次");
+                return new ScoreResponse(null, "没有听清楚，请再试一次，本次不计成绩");
             }
 
             // 提取识别结果(result 是字符串数组)
@@ -211,13 +211,15 @@ public class BaiduVoiceService {
             }
             log.info("ASR 识别结果: recognized={}, target={}", recognized, text);
 
+            if (recognized.isBlank()) return new ScoreResponse(null, "没有听清楚，请再试一次，本次不计成绩");
+
             // 计算相似度并映射为分数
             int score = calculateScore(text, recognized);
             String feedback = buildFeedback(score);
             return new ScoreResponse(score, feedback);
         } catch (Exception e) {
             log.error("发音评测调用失败: text={}", text, e);
-            return new ScoreResponse(0, "评分服务暂时不可用,请重试");
+            return new ScoreResponse(null, "评分服务暂时不可用，请重试，本次不计成绩");
         }
     }
 

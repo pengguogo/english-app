@@ -10,6 +10,7 @@ import { normalizeRouterBase } from '../utils/routerBase'
 
 // 路由表：home / subject / theme / unit / lesson 五级学习流 + 错题集/我学过的快捷入口
 const routes = [
+  { path: '/wrong-answers/:id/practice', name: 'wrong-answer-practice', component: () => import('../views/WrongAnswerPracticeView.vue') },
   { path: '/character-review', name: 'character-review', component: () => import('../views/CharacterReviewView.vue') },
   { path: '/games/picture-puzzle', name: 'picture-puzzle', component: () => import('../views/PicturePuzzleView.vue') },
   { path: '/games/shape-puzzle', name: 'shape-puzzle', component: () => import('../views/ShapePuzzleView.vue') },

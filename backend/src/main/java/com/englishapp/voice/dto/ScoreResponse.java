@@ -10,7 +10,7 @@ package com.englishapp.voice.dto;
  * @since 1.0.0
  */
 public class ScoreResponse {
-    /** 评测分数,范围 0-100 */
+    /** 评测分数,范围 0-100；null 表示未获得有效评测，不计成绩 */
     private Integer score;
     /** 反馈文案,根据分数分级生成鼓励语 */
     private String feedback;
