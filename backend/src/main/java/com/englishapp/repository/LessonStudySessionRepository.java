@@ -6,5 +6,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public interface LessonStudySessionRepository extends JpaRepository<LessonStudySession, Integer> {
+    java.util.List<LessonStudySession> findByUserIdAndStudyDateBetween(Integer userId, LocalDate start, LocalDate end);
     Optional<LessonStudySession> findByUserIdAndLessonIdAndStudyDate(Integer userId, Integer lessonId, LocalDate studyDate);
 }

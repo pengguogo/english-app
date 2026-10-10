@@ -5,7 +5,7 @@
   创建日期: 2026-09-29
 -->
 <script setup>
-import ContinueLesson from '../../ContinueLesson.vue'
+import TodayTask from '../../TodayTask.vue'
 import CharacterEntry from '../../CharacterEntry.vue'
 import { useRouter } from 'vue-router'
 import AppButton from '../../AppButton.vue'
@@ -21,10 +21,10 @@ function openRoute(route) {
 <template>
   <!-- 首页为应用根路由，没有返回目标：仅用顶部留白为右上角 UI 切换开关让位 -->
   <main class="modern-home modern-page-shell modern-page-shell--top-spaced">
-    <!-- 今日主任务卡：一步主动作指向英语学科乐园 -->
+    <!-- 介绍卡；具体任务由 TodayTask 根据学习记录生成。 -->
     <section class="modern-brand-card modern-brand-hero modern-brand-hero--split home-hero">
       <div class="modern-brand-hero-copy">
-        <p class="modern-brand-kicker">今天先做什么</p>
+        <p class="modern-brand-kicker">欢迎回来</p>
         <h1 class="modern-brand-title">今天学点什么？</h1>
         <p class="modern-brand-desc">
           先学一会儿英语，再去读绘本、玩游戏、看小火车。
@@ -44,7 +44,7 @@ function openRoute(route) {
       </div>
     </section>
 
-    <ContinueLesson />
+    <TodayTask />
     <CharacterEntry />
 
     <!-- 主入口：四个磁贴，各自注入入口强调色 -->

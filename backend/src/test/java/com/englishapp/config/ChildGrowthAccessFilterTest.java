@@ -8,6 +8,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ChildGrowthAccessFilterTest {
     @Test
+    void should_保护密码设置和周报_当_没有家长口令() throws Exception {
+        for (String path : new String[]{"/api/v1/parent-settings/password", "/api/v1/parent-settings/week"}) {
+            var response = new MockHttpServletResponse();
+            new ChildGrowthAccessFilter("secret").doFilter(new MockHttpServletRequest("PUT", path), response, new MockFilterChain());
+            assertEquals(401, response.getStatus());
+        }
+    }
+
+    @Test
     void should_拒绝错误口令_当_读取成长档案() throws Exception {
         var filter = new ChildGrowthAccessFilter("secret");
         var request = new MockHttpServletRequest("GET", "/api/v1/child-growth/profile");

@@ -1,4 +1,5 @@
 <script setup>
+import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import AppButton from '../AppButton.vue'
 import { unlockGames } from '../../api/games'
@@ -9,6 +10,7 @@ defineProps({
   errorMsg: { type: String, default: '' },
   progressPercent: { type: Number, default: 0 }
 })
+const router = useRouter()
 const emit = defineEmits(['retry', 'learn'])
 const showPassword = ref(false)
 const password = ref('')
@@ -50,7 +52,7 @@ async function submitPassword() {
       <span :style="{ width: `${progressPercent}%` }"></span>
     </div>
     <AppButton size="lg" @click="$emit('learn')">去学习</AppButton>
-    <button v-if="!showPassword" type="button" class="parent-link" @click="showPassword = true">家长密码解锁</button>
+    <AppButton v-if="!showPassword" variant="ghost" @click="showPassword = true">家长密码解锁</AppButton>
     <form v-else class="password-form" @submit.prevent="submitPassword">
       <label for="game-password">输入 6 位家长密码</label>
       <div class="password-row">
@@ -62,6 +64,7 @@ async function submitPassword() {
       </div>
       <p v-if="passwordError" class="password-error" role="alert">{{ passwordError }}</p>
     </form>
+    <AppButton variant="ghost" @click="router.push('/parent-center')">设置或修改游戏密码</AppButton>
   </div>
   <slot v-else />
 </template>
@@ -77,7 +80,6 @@ async function submitPassword() {
 .locked p { color: var(--text-secondary); margin-bottom: var(--space-4); }
 .progress { height: 14px; overflow: hidden; margin-bottom: var(--space-5); background: var(--bg-muted); border-radius: var(--radius-pill); }
 .progress span { display: block; height: 100%; background: var(--gradient-success); border-radius: inherit; transition: width var(--duration-normal) var(--ease-smooth); }
-.parent-link { display: block; margin: var(--space-4) auto 0; padding: var(--space-2); color: var(--color-primary); text-decoration: underline; }
 .password-form { max-width: 360px; margin: var(--space-4) auto 0; padding-top: var(--space-4); border-top: 1px solid var(--border-light); text-align: left; }
 .password-form label { display: block; margin-bottom: var(--space-2); color: var(--text-secondary); font-size: var(--text-sm); }
 .password-row { display: flex; gap: var(--space-2); }

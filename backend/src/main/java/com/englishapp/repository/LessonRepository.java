@@ -19,6 +19,16 @@ import java.util.List;
  */
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, Integer> {
+    @Query("SELECT l FROM Lesson l, Unit u, Theme t, Subject s WHERE l.unitId = u.id AND u.themeId = t.id "
+            + "AND t.subjectId = s.id AND s.code = 'ENGLISH' AND l.type IN "
+            + "(com.englishapp.domain.enums.LessonType.WORD, com.englishapp.domain.enums.LessonType.SENTENCE, "
+            + "com.englishapp.domain.enums.LessonType.PHONICS, com.englishapp.domain.enums.LessonType.DIALOGUE, "
+            + "com.englishapp.domain.enums.LessonType.READING, com.englishapp.domain.enums.LessonType.QUIZ) "
+            + "AND NOT EXISTS (SELECT p.id FROM UserProgress p WHERE p.userId = :userId AND p.lessonId = l.id "
+            + "AND p.status = com.englishapp.domain.enums.ProgressStatus.COMPLETED) "
+            + "ORDER BY t.sortOrder, u.sortOrder, l.sortOrder, l.id")
+    List<Lesson> findNextUnfinishedEnglishLesson(@Param("userId") Integer userId, org.springframework.data.domain.Pageable pageable);
+
 
     /**
      * 按单元 ID 查询课程列表(按排序序号升序)

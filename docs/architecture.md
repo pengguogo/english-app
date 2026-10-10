@@ -345,3 +345,24 @@ mvn test
 - [ ] 成就系统与勋章
 - [ ] 家长端数据看板
 - [ ] 内容难度自适应
+
+
+### 家长中心与学习统计
+
+- `/app/parent-center` 使用与成长档案相同的访问口令（`CHILD_GROWTH_ACCESS_KEY`）。
+  `X-Child-Growth-Key` 同时保护 `/api/v1/parent-settings/password` 和
+  `/api/v1/parent-settings/week`。游戏密码支持设置、修改与重置；不再提供固定默认密码。
+- 游戏密码为6位数字，数据库仅保存带随机盐的 PBKDF2 摘要。连续5次错误后暂停验证5分钟。
+  正确密码仅设置当日游戏解锁标记，不增加学习时长。
+- `POST /api/v1/games/study-time` 接收 `lessonId`、`seconds`（1–30）与 `eventId`。
+  前端按15秒发送，隐藏、切课和离页结算尾段；页面不可见或60秒无操作时暂停。
+  同一事件重试不会重复计时；断网期间先保留在当前页面队列，页面关闭后不保证补传。
+- 实际时长来自 `study_time_event`，不受游戏解锁的300秒上限影响。
+  游戏解锁仍要求课后复习通过；通过后才计入解锁时长，复习通过后到达的尾段也可结算。
+- `GET /api/v1/parent-settings/week` 返回最近七天每日时长、复习通过课次、选择题/计算题样本，
+  首次答对和辅助答对使用同一练习事件记录，重试不会覆盖首次结果。
+  实际时长和答题率从 V84 上线后开始采集；历史解锁时间与历史最高分不转换成这些数据。
+- `GET /api/v1/learning/today` 推荐最近未掌握错题，或按课程顺序选择未完成英语课；
+  首页先检查本机续学草稿，有草稿时优先继续学习。
+- 新旧课时页共用 `useLessonLearning`、`useLessonScoring` 和 `useLessonCompletion`，
+  页面仅保留展示和视觉摘要；历史课程格式由 `lessonContent` 统一转换。

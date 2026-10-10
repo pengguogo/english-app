@@ -18,6 +18,7 @@ import java.util.Optional;
  */
 @Repository
 public interface WrongAnswerRepository extends JpaRepository<WrongAnswer, Integer> {
+    Optional<WrongAnswer> findFirstByUserIdAndIsResolvedFalseAndQuestionTypeInOrderByLastWrongAtDesc(Integer userId, List<String> types);
 
     /**
      * 查询某用户的全部错题,按最近答错时间降序排列(最新答错的排在最前)

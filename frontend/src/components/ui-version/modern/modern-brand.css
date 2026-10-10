@@ -18,10 +18,10 @@
   position: relative;
   overflow: hidden;
   padding: var(--space-6);
-  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 18%, white);
+  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 18%, var(--bg-card));
   background:
-    radial-gradient(circle at right top, color-mix(in srgb, var(--brand-accent, var(--color-primary)) 18%, white) 0, transparent 36%),
-    linear-gradient(135deg, color-mix(in srgb, var(--brand-accent, var(--color-primary)) 12%, white), rgba(255, 255, 255, 0.96));
+    radial-gradient(circle at right top, color-mix(in srgb, var(--brand-accent, var(--color-primary)) 18%, var(--bg-card)) 0, var(--color-transparent) 36%),
+    linear-gradient(135deg, color-mix(in srgb, var(--brand-accent, var(--color-primary)) 12%, var(--bg-card)), var(--brand-surface-strong));
 }
 
 .modern-brand-hero::after {
@@ -32,7 +32,7 @@
   width: 150px;
   height: 150px;
   border-radius: 44px;
-  background: color-mix(in srgb, var(--brand-accent, var(--color-primary)) 12%, white);
+  background: color-mix(in srgb, var(--brand-accent, var(--color-primary)) 12%, var(--bg-card));
   transform: rotate(12deg);
 }
 
@@ -104,14 +104,14 @@
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 12%, white);
+  background: var(--brand-surface-badge);
+  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 12%, var(--bg-card));
 }
 
 .modern-brand-badge--solid {
   color: var(--text-on-primary);
   background: var(--brand-accent, var(--color-primary));
-  border-color: transparent;
+  border-color: var(--color-transparent);
 }
 
 .modern-brand-progress {
@@ -119,7 +119,7 @@
   margin-top: var(--space-3);
   overflow: hidden;
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--brand-accent, var(--color-primary)) 10%, white);
+  background: color-mix(in srgb, var(--brand-accent, var(--color-primary)) 10%, var(--bg-card));
 }
 
 .modern-brand-progress-fill {
@@ -142,7 +142,7 @@
   position: relative;
   overflow: hidden;
   padding: var(--space-5);
-  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 14%, white);
+  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 14%, var(--bg-card));
 }
 
 .modern-brand-panel::before {
@@ -196,7 +196,7 @@
   color: var(--brand-accent, var(--color-primary));
   font-weight: var(--font-medium);
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--brand-surface-button);
 }
 
 .modern-brand-state {
@@ -243,9 +243,9 @@
 }
 
 .modern-brand-surface {
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--brand-surface-soft);
   border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--brand-surface-soft);
 }
 
 @media (max-width: 720px) {
@@ -301,7 +301,7 @@
   justify-items: start;
   padding: var(--space-5);
   text-align: left;
-  border: 2px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 18%, white);
+  border: 2px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 18%, var(--bg-card));
   transition:
     transform var(--duration-fast) var(--ease-bounce),
     box-shadow var(--duration-fast) var(--ease-smooth),
@@ -335,7 +335,7 @@
   font-size: var(--text-base);
   font-weight: var(--font-bold);
   border-radius: 18px;
-  background: color-mix(in srgb, var(--brand-accent, var(--color-primary)) 22%, white);
+  background: color-mix(in srgb, var(--brand-accent, var(--color-primary)) 22%, var(--bg-card));
 }
 
 .modern-brand-tile-cta {
@@ -354,7 +354,7 @@
   gap: var(--space-3);
   padding: var(--space-4);
   text-align: left;
-  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 14%, white);
+  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 14%, var(--bg-card));
   transition:
     transform var(--duration-fast) var(--ease-bounce),
     box-shadow var(--duration-fast) var(--ease-smooth);
@@ -386,7 +386,7 @@
   gap: var(--space-2);
   padding: var(--space-5);
   text-align: left;
-  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 16%, white);
+  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 16%, var(--bg-card));
   transition:
     transform var(--duration-fast) var(--ease-bounce),
     box-shadow var(--duration-fast) var(--ease-smooth);
@@ -421,7 +421,7 @@
   height: 72px;
   font-size: 40px;
   border-radius: 24px;
-  background: color-mix(in srgb, var(--brand-accent, var(--color-primary)) 16%, white);
+  background: color-mix(in srgb, var(--brand-accent, var(--color-primary)) 16%, var(--bg-card));
 }
 
 /* ---------- 图文分栏大卡：左侧封面 + 右侧文案（主行动卡） ---------- */
@@ -441,7 +441,7 @@
   align-items: center;
   padding: var(--space-3);
   text-align: left;
-  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 14%, white);
+  border: 1px solid color-mix(in srgb, var(--brand-accent, var(--color-primary)) 14%, var(--bg-card));
   transition:
     transform var(--duration-fast) var(--ease-bounce),
     box-shadow var(--duration-fast) var(--ease-smooth);

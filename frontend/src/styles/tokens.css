@@ -16,6 +16,14 @@
   --model-glass: #a6dce4;
   --model-wood: #85725e;
   --model-ground: #d5e2df;
+  /* 品牌半透明表面 */
+  --brand-surface-strong: rgba(255, 255, 255, 0.96);
+  --brand-surface-card: rgba(255, 255, 255, 0.86);
+  --brand-surface-badge: rgba(255, 255, 255, 0.82);
+  --brand-surface-button: rgba(255, 255, 255, 0.78);
+  --brand-surface-soft: rgba(255, 255, 255, 0.7);
+  --color-primary-bg: rgba(107, 124, 255, 0.1);
+  --color-transparent: transparent;
   /* ===== 配色令牌 ===== */
   /* 主色: 蓝紫色,用于主按钮、导航、链接 */
   --color-primary: #6B7CFF;

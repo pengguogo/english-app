@@ -21,7 +21,8 @@ public class ChildGrowthAccessFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/v1/child-growth/");
+        String path = request.getRequestURI();
+        return !path.startsWith("/api/v1/child-growth/") && !path.startsWith("/api/v1/parent-settings/");
     }
 
     @Override

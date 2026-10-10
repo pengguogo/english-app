@@ -14,8 +14,11 @@ public class DailyStudyTime {
     private Integer userId;
     private LocalDate studyDate;
     private Integer seconds;
+    private Boolean parentUnlocked = false;
     private LocalDateTime updatedAt;
 
+    public Boolean getParentUnlocked() { return parentUnlocked; }
+    public void setParentUnlocked(Boolean value) { parentUnlocked = value; }
     public Integer getId() { return id; }
     public Integer getUserId() { return userId; }
     public void setUserId(Integer userId) { this.userId = userId; }

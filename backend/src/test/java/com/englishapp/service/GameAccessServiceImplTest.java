@@ -22,12 +22,14 @@ class GameAccessServiceImplTest {
     private LessonStudySessionRepository sessions;
     @Mock
     private LessonRepository lessons;
+    @Mock private ParentPasswordService passwords;
+    @Mock private com.englishapp.repository.StudyTimeEventRepository events;
     private GameAccessServiceImpl service;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        service = new GameAccessServiceImpl(repository, sessions, lessons);
+        service = new GameAccessServiceImpl(repository, sessions, lessons, passwords, events);
     }
 
     @Test
@@ -86,11 +88,14 @@ class GameAccessServiceImplTest {
         when(repository.findByUserIdAndStudyDate(1, LocalDate.now()))
                 .thenReturn(Optional.of(record));
 
-        GameUnlockDto result = service.unlockWithPassword(1, "000000");
+        when(passwords.verify("246810")).thenReturn(true);
+        GameUnlockDto result = service.unlockWithPassword(1, "246810");
 
         assertTrue(result.success());
         assertTrue(result.access().unlocked());
-        assertEquals(300, record.getSeconds());
+        assertEquals(30, record.getSeconds());
+        assertTrue(record.getParentUnlocked());
+        verifyNoInteractions(events);
         verify(repository).save(record);
     }
 
@@ -104,6 +109,42 @@ class GameAccessServiceImplTest {
         assertFalse(result.success());
         assertFalse(result.access().unlocked());
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void should_不重复累加_当_计时事件重试() {
+        var event = new com.englishapp.domain.StudyTimeEvent();
+        event.setUserId(1); event.setLessonId(7); event.setSeconds(8);
+        when(lessons.existsById(7)).thenReturn(true);
+        when(events.findById("same-event")).thenReturn(Optional.of(event));
+        when(repository.findByUserIdAndStudyDate(1, LocalDate.now())).thenReturn(Optional.empty());
+        service.recordPendingStudyTime(1, 7, 8, "same-event");
+        verify(events, never()).save(any());
+        verifyNoInteractions(sessions);
+    }
+
+    @Test
+    void should_保留实际时长且结算尾段_当_复习已通过() {
+        var session = new com.englishapp.domain.LessonStudySession();
+        session.setPassed(true); session.setPendingSeconds(0);
+        when(lessons.existsById(7)).thenReturn(true);
+        when(sessions.findByUserIdAndLessonIdAndStudyDate(1, 7, LocalDate.now())).thenReturn(Optional.of(session));
+        when(repository.findByUserIdAndStudyDate(1, LocalDate.now())).thenReturn(Optional.of(studyTime(300)));
+        var access = service.recordPendingStudyTime(1, 7, 8, "tail-event");
+        assertTrue(access.unlocked());
+        verify(events).save(argThat(e -> e.getSeconds() == 8));
+        verify(repository).save(any());
+    }
+
+    @Test
+    void should_拒绝计时_当_秒数无效或事件被改写() {
+        assertThrows(IllegalArgumentException.class, () -> service.recordPendingStudyTime(1, 7, 0));
+        when(lessons.existsById(7)).thenReturn(true);
+        var event = new com.englishapp.domain.StudyTimeEvent();
+        event.setUserId(1); event.setLessonId(7); event.setSeconds(8);
+        when(events.findById("same-event")).thenReturn(Optional.of(event));
+        assertThrows(IllegalArgumentException.class, () -> service.recordPendingStudyTime(1, 7, 9, "same-event"));
+        verify(events, never()).save(any());
     }
 
     private DailyStudyTime studyTime(int seconds) {

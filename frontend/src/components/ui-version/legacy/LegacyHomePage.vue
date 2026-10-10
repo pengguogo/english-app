@@ -5,7 +5,7 @@
   创建日期: 2026-09-29
 -->
 <script setup>
-import ContinueLesson from '../../ContinueLesson.vue'
+import TodayTask from '../../TodayTask.vue'
 import CharacterEntry from '../../CharacterEntry.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -85,7 +85,7 @@ function startFruitAdventure() {
       </div>
     </header>
 
-    <ContinueLesson />
+    <TodayTask />
     <CharacterEntry />
     <PicturebookEntry />
     <ModelEntry />

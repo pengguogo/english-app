@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getWrongAnswers } from '../api/wrongAnswer'
+import { useLearningAttempts } from '../composables/useLearningAttempts'
 import { useWrongAnswerPractice } from '../composables/useWrongAnswerPractice'
 import { getLessonById } from '../api/lesson'
 import BackBar from '../components/BackBar.vue'
@@ -16,6 +17,10 @@ const item = ref(null)
 const loading = ref(true)
 const attempt = ref(0)
 const { error, saving, mastered, canSave, answered, save } = useWrongAnswerPractice(entry, item)
+const { recordAttempt, resetAttempts } = useLearningAttempts(
+  computed(() => entry.value && ({ id: entry.value.lessonId, type: entry.value.questionType })),
+  computed(() => entry.value?.questionIndex))
+function handleAnswered(result) { recordAttempt(result); return answered(result) }
 const template = computed(() => entry.value?.questionType === 'QUIZ' ? QuizLesson : CalculateLesson)
 
 onMounted(async () => {
@@ -35,6 +40,7 @@ onMounted(async () => {
 
 function retry() {
   if (saving.value || canSave.value) return
+  resetAttempts()
   attempt.value++
   error.value = ''
 }
@@ -51,7 +57,7 @@ function retry() {
     </section>
     <template v-else-if="item">
       <component :is="template" :key="attempt" :current-item="item" :current-index="0"
-        :total-items="1" :is-last-item="true" last-action-label="再练一次" @answered="answered" @next="retry" />
+        :total-items="1" :is-last-item="true" last-action-label="再练一次" @answered="handleAnswered" @next="retry" />
       <p v-if="saving" role="status">正在保存掌握状态...</p>
       <AppButton v-if="error && canSave" :disabled="saving" @click="save">重试保存</AppButton>
     </template>

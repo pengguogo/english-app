@@ -4,14 +4,15 @@ import { readFileSync } from 'node:fs'
 import { runInNewContext } from 'node:vm'
 import { ref } from 'vue'
 
-for (const page of ['legacy/LegacyLessonPage', 'modern/ModernLessonPage']) {
-  const source = readFileSync(new URL(`../src/components/ui-version/${page}.vue`, import.meta.url), 'utf8')
+{
+  const page = '新旧界面共享评分'
+  const source = readFileSync(new URL('../src/composables/useLessonScoring.js', import.meta.url), 'utf8')
   const handler = source.slice(source.indexOf('async function handleRecorded('), source.indexOf('function updateBestScore('))
   function setup(scorePronunciation) {
     const state = { lesson: ref({ id: 1 }), currentItem: ref({ word: 'apple' }), currentText: ref('apple'),
       currentIndex: ref(0), currentScore: ref(90), currentStars: ref(3), scoreMessage: ref(''), isScoring: ref(false) }
     const scores = [90, 0]
-    const callback = runInNewContext(`${handler}\nhandleRecorded`, { ...state, lessonLoadVersion: 1,
+    const callback = runInNewContext(`${handler}\nhandleRecorded`, { ...state, getVersion: () => 1, requestVersion: 0,
       scorePronunciation, markCurrentItemEngaged() {}, showMascotFeedback() {},
       scoreToStars: score => score >= 80 ? 3 : 0,
       updateBestScore: (index, score) => { scores[index] = Math.max(scores[index], score) }, console: { error() {} } })

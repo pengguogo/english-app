@@ -1,36 +1,45 @@
 import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { recordStudyTime } from '../api/games'
+import { createStudyClock, createStudyQueue } from '../utils/studyClock'
 
-const HEARTBEAT_SECONDS = 15
-
-/** 仅在学习页可见且课时加载成功时累计有效学习时长。 */
+/** 页面可见且60秒内有操作时计时；隐藏、切课和卸载结算尾段。 */
 export function useStudyTimer(enabled, lessonId) {
-  let timer = null
+  const now = () => performance.now()
+  let clock = createStudyClock(now())
+  let currentLesson = null
+  let timer
+  const queue = createStudyQueue(({ lessonId, seconds, eventId }) =>
+    recordStudyTime(lessonId, seconds, eventId), () => crypto.randomUUID())
 
-  async function sendHeartbeat() {
-    if (!enabled.value || !lessonId.value || document.visibilityState !== 'visible') return
-    try {
-      await recordStudyTime(lessonId.value, HEARTBEAT_SECONDS)
-    } catch (error) {
-      console.error('记录学习时长失败:', error)
-    }
+  function flush() {
+    const seconds = clock.take(now())
+    return currentLesson ? queue.add(currentLesson, seconds) : queue.drain()
   }
-
-  function syncTimer() {
-    clearInterval(timer)
-    timer = null
-    if (enabled.value && document.visibilityState === 'visible') {
-      timer = setInterval(sendHeartbeat, HEARTBEAT_SECONDS * 1000)
+  function sync() {
+    flush()
+    if (currentLesson !== lessonId.value) {
+      clock = createStudyClock(now())
+      currentLesson = lessonId.value
     }
+    clock.setActive(enabled.value && !!currentLesson && document.visibilityState === 'visible', now())
   }
+  function interact() { clock.interact(now()) }
+  function hide() { flush(); clock.setActive(false, now()) }
 
   onMounted(() => {
-    document.addEventListener('visibilitychange', syncTimer)
-    syncTimer()
+    sync()
+    timer = setInterval(flush, 15000)
+    document.addEventListener('visibilitychange', sync)
+    for (const event of ['pointerdown', 'keydown', 'scroll']) document.addEventListener(event, interact, { passive: true })
+    window.addEventListener('pagehide', hide)
   })
-  watch(enabled, syncTimer)
+  watch([enabled, lessonId], sync, { flush: 'sync' })
   onBeforeUnmount(() => {
+    hide()
     clearInterval(timer)
-    document.removeEventListener('visibilitychange', syncTimer)
+    document.removeEventListener('visibilitychange', sync)
+    for (const event of ['pointerdown', 'keydown', 'scroll']) document.removeEventListener(event, interact)
+    window.removeEventListener('pagehide', hide)
   })
+  return { flush }
 }
