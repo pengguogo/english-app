@@ -28,6 +28,7 @@ const { phase, choices, hint, answered, heard, saved, saving, error, feedback, s
       <AppButton variant="ghost" @click="showPinyin = !showPinyin">{{ showPinyin ? '收起拼音' : '看看拼音' }}</AppButton>
       <p v-if="showPinyin">{{ currentItem.phonetic }}</p>
       <p>{{ currentItem.exampleWord }} · {{ currentItem.exampleSentence }}</p>
+      <p v-if="currentItem.readingNote">{{ currentItem.readingNote }}</p>
       <AudioButton :text="currentItem.exampleSentence" lan="zh" />
       <RecordButton @recorded="blob => emit('recorded', blob)" />
       <p>跟读可以练发音；下面的找字练习才会记录认字结果。</p>

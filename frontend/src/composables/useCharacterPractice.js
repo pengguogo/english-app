@@ -28,20 +28,30 @@ export function useCharacterPractice(props, emit) {
     }, 900)
   }
   const labels = ['看图认识', '听音选字', '看字选图', '收起提示再认字', '在词句中找字']
-  const title = computed(() => labels[phase.value])
+  const title = computed(() => phase.value === 2 && !isImage.value ? '听词找字' : labels[phase.value])
   const isLearn = computed(() => phase.value === 0)
-  const isImage = computed(() => phase.value === 2)
+  const isImage = computed(() => phase.value === 2 && props.currentItem.imageChoice !== false
+    && props.items.some(item => item.word !== props.currentItem.word && item.imageChoice !== false
+      && item.image !== props.currentItem.image))
   const isContext = computed(() => phase.value === 4)
-  const needsAudio = computed(() => phase.value === 1 || phase.value === 3)
-  const audioText = computed(() => isLearn.value ? props.currentItem.word
-    : isContext.value ? `请在句子中找到${props.currentItem.word}` : `请找出${props.currentItem.word}`)
+  const needsAudio = computed(() => phase.value === 1 || phase.value === 3 || (phase.value === 2 && !isImage.value))
+  const audioText = computed(() => {
+    const item = props.currentItem
+    if (isLearn.value) return item.exampleWord || item.word
+    if (item.imageChoice === false || item.readingNote) {
+      const position = [...item.exampleWord].indexOf(item.word) + 1
+      return isContext.value ? `请在句子中找到“${item.exampleWord}”里的第${position}个字。`
+        : `请听词语“${item.exampleWord}”，找出第${position}个字。`
+    }
+    return isContext.value ? `请在句子中找到${item.word}` : `请找出${item.word}`
+  })
 
   function reset() {
     revision++
     clearTimeout(advanceTimer)
     stopActiveTts()
     phase.value = props.reviewOnly ? 3 : 0
-    choices.value = characterChoices(props.currentItem, props.items)
+    choices.value = characterChoices(props.currentItem, props.items, Math.random, isImage.value)
     wrong.value = assisted.value = hint.value = answered.value = heard.value = saved.value = saving.value = false
     showPinyin.value = false
     error.value = feedback.value = ''
@@ -75,7 +85,7 @@ export function useCharacterPractice(props, emit) {
     if (saved.value) { emit('next'); return }
     if (props.reviewOnly || phase.value === 4) { save(); return }
     phase.value++
-    choices.value = characterChoices(props.currentItem, props.items)
+    choices.value = characterChoices(props.currentItem, props.items, Math.random, isImage.value)
     answered.value = heard.value = hint.value = false
     showPinyin.value = false
     feedback.value = ''

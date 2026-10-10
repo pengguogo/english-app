@@ -28,6 +28,12 @@ public interface LessonRepository extends JpaRepository<Lesson, Integer> {
      */
     List<Lesson> findByUnitIdOrderBySortOrderAsc(Integer unitId);
 
+    /** 按教材单元顺序读取指定主题的词语课。 */
+    @Query("SELECT l FROM Lesson l, Unit u WHERE l.unitId = u.id AND u.themeId = :themeId "
+            + "AND l.type = :type ORDER BY u.sortOrder, l.sortOrder, l.id")
+    List<Lesson> findByThemeAndType(@Param("themeId") Integer themeId,
+            @Param("type") com.englishapp.domain.enums.LessonType type);
+
     /**
      * 统计某单元下的课程总数
      * <p>

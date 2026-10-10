@@ -1,6 +1,7 @@
-# 汉字认读试点
+# 汉字认读
 
-覆盖原汉字识读 lesson 68–73，6 课、24 字，旧课时进度不迁移到认字状态。
+V82 覆盖原汉字识读 lesson 68–73；V83 按 2024 修订版人教统编一年级上册识字表补齐为 73 课、280 字。旧课时进度不迁移到认字状态。
+选字范围与大班使用方式见 `docs/curriculum/hanzi-grade1-2024.md`。
 首页“认字与每日复习”进入 `/app/character-review`，新版和旧版课时页均支持。
 
 ## 学习与复习
@@ -23,7 +24,7 @@
 
 统一 `{code,message,data}`，固定 `user_id=1`。
 
-- `GET /api/v1/characters/progress`：24 项；每项包含 `item`、`status`、`independentDays`、`wrongCount`、`assistedCount`、`lastOutcome`、`dueDate`。
+- `GET /api/v1/characters/progress`：280 项；每项包含 `item`、`status`、`independentDays`、`wrongCount`、`assistedCount`、`lastOutcome`、`dueDate`。
 - `GET /api/v1/characters/review`：最多 8 个到期学习项。
 - `POST /api/v1/characters/attempts`：记录一轮单字辨认结果。
 
@@ -31,8 +32,9 @@
 {"eventId":"unique-attempt-id","lessonId":68,"itemIndex":0,"outcome":"INDEPENDENT"}
 ```
 
-`item` 字段：`lessonId`、`itemIndex`（从 0 开始）、`word`、`phonetic`、`image`（解析后的 URL）、`exampleWord`、`exampleSentence`。
-课程内容仍为 WORD，在 items 中新增 `recognition:true`、`exampleWord`、`exampleSentence`，后端目录仅接受试点课程标记项，拒绝其他课程和越界索引。
+`item` 字段：`lessonId`、`itemIndex`（从 0 开始）、`word`、`phonetic`、`image`（解析后的 URL）、`exampleWord`、`exampleSentence`、`imageChoice`、`readingNote`。
+`imageChoice` 缺省为 true；虚词与抽象字为 false，图片用于理解语境，第三步改为听词找字；多音字通过组词定位目标读音。
+课程内容仍为 WORD，在 items 中新增 `recognition:true`、`exampleWord`、`exampleSentence`，后端目录仅接受汉字识读主题的 WORD 课程标记项，拒绝其他课程和越界索引。
 `outcome` 只允许 INDEPENDENT / ASSISTED / WRONG，eventId 最长 80 位，只允许 ASCII 字母数字与连字符。
 服务端通过事务和唯一 eventId 去重，保存失败时前端用同一事件重试，成功后才能进入下一字。
 认读结果由前端练习汇总，上述接口不用于防作弊或考试评分。

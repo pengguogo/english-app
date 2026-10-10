@@ -8,9 +8,10 @@ export function shuffleChoices(items, random = Math.random) {
   return result
 }
 
-export function characterChoices(target, pool, random = Math.random) {
-  const others = [...new Map(pool.filter(item => item.word !== target.word)
-    .map(item => [item.word, item])).values()]
+export function characterChoices(target, pool, random = Math.random, imageOnly = false) {
+  const others = [...new Map(pool.filter(item => item.word !== target.word
+    && (!imageOnly || (item.imageChoice !== false && item.image !== target.image)))
+    .map(item => [imageOnly ? item.image : item.word, item])).values()]
   return shuffleChoices([target, ...shuffleChoices(others, random).slice(0, 2)], random)
 }
 

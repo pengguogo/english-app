@@ -59,7 +59,8 @@ onMounted(load)
       <AppButton v-if="queue.length" @click="start">开始今日复习（{{ queue.length }} 字）</AppButton>
       <p v-else>今天暂时没有到期复习，可以选择下面一课认识新字。</p>
       <AudioButton text="点开始今日复习，听声音找字。也可以点下面的课程，认识新字。" lan="zh" />
-      <h2>六课 · 24 字</h2>
+      <h2>{{ progress.filter(p => p.item.itemIndex === 0).length }} 课 · {{ progress.length }} 字</h2>
+      <p>选字依据：人教版统编语文一年级上册（2024 年修订版）识字表。按兴趣选学，不要求大班提前学完。</p>
       <div class="lessons">
         <AppButton v-for="row in progress.filter(p => p.item.itemIndex === 0)" :key="row.item.lessonId"
           variant="ghost" @click="learn(row.item)">

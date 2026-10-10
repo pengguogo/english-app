@@ -18,8 +18,8 @@ class CharacterProgressServiceImplTest {
     CharacterProgressRepository repository = mock(CharacterProgressRepository.class);
     CharacterProgressServiceImpl service = new CharacterProgressServiceImpl(catalog, repository);
     LocalDate today = LocalDate.now(ZoneId.of("Asia/Shanghai"));
-    CharacterItemResponseDTO mountain = new CharacterItemResponseDTO(68, 0, "山", "shān", "/images/hanzi-pilot/hanzi-shan.jpg", "小山", "小山很高。");
-    CharacterItemResponseDTO water = new CharacterItemResponseDTO(68, 1, "水", "shuǐ", "/images/hanzi-pilot/hanzi-shui.jpg", "河水", "河水流过小山。");
+    CharacterItemResponseDTO mountain = new CharacterItemResponseDTO(68, 0, "山", "shān", "/images/hanzi-pilot/hanzi-shan.jpg", "小山", "小山很高。", true, "");
+    CharacterItemResponseDTO water = new CharacterItemResponseDTO(68, 1, "水", "shuǐ", "/images/hanzi-pilot/hanzi-shui.jpg", "河水", "河水流过小山。", true, "");
     @BeforeEach
     void setup() {
         when(catalog.items()).thenReturn(List.of(mountain, water));

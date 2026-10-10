@@ -9,7 +9,7 @@ const router = useRouter()
     <img :src="'/images/hanzi-pilot/hanzi-shan.jpg'" alt="认字小课堂的山景配图" />
     <div>
       <h2>认字小课堂</h2>
-      <p>认识 24 个字，听一听、找一找。每天再认一遍。</p>
+      <p>按统编一年级上册选字，听一听、找一找，学过的字再复习。</p>
       <AppButton @click="router.push('/character-review')">认字与每日复习</AppButton>
     </div>
   </section>

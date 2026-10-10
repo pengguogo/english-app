@@ -116,3 +116,32 @@ test('保存过程中离开页面不会向新页面发出结果或自动跳转',
   assert.equal(flow.events.length, 0)
   assert.equal(flow.timers.size, 0)
 })
+
+test('虚词听词找字，使用词语位置提示并保留自动跳题', () => {
+  const flow = setup()
+  flow.props.currentItem = { word: '的', exampleWord: '我的', imageChoice: false }
+  flow.props.items = [{ word: '的' }, { word: '地' }, { word: '了' }]
+  flow.reset()
+  flow.state.advance()
+  assert.equal(flow.state.audioText.value, '请听词语“我的”，找出第2个字。')
+  flow.state.heard.value = true
+  flow.state.choose('的')
+  flow.tick()
+  assert.equal(flow.state.phase.value, 2)
+  assert.equal(flow.state.isImage.value, false)
+  assert.equal(flow.state.title.value, '听词找字')
+  assert.equal(flow.state.needsAudio.value, true)
+})
+
+test('没有有效图片干扰项时使用听词找字，重复图片不进入图片题', () => {
+  const flow = setup()
+  flow.props.currentItem = { word: '星', image: 'star', exampleWord: '星星' }
+  flow.props.items = [{ word: '星', image: 'star' }, { word: '闪', image: 'star' }]
+  flow.reset()
+  flow.state.phase.value = 2
+  assert.equal(flow.state.isImage.value, false)
+  const choices = characterChoices({ word: '星', image: 'star' }, [
+    { word: '闪', image: 'star' }, { word: '地', image: 'ground', imageChoice: false },
+    { word: '云', image: 'cloud' }, { word: '白', image: 'cloud' }], () => 0, true)
+  assert.deepEqual(choices.map(item => item.image).sort(), ['cloud', 'star'])
+})
