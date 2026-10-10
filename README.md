@@ -37,7 +37,7 @@ TTS 与发音评分开箱即用，游戏化课程地图让孩子主动学完一�
 
 ## 在线体验
 
-🌐 **官方 Demo**：http://39.96.59.120:8080/app/
+🌐 **官方 Demo**：http://study.penggeai.com/app/
 
 部署于阿里云(Alibaba Cloud Linux 3, 2C2G),`main` 分支推送即由
 GitHub Actions 自动构建并重启服务,详见 [部署文档](docs/deploy-aliyun.md)。

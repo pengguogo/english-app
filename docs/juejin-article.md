@@ -13,7 +13,7 @@
 
 所以我给自己的目标是：**开源、可自部署、发音评测可解释、内容可扩展、单 JAR 就能跑起来**。
 
-最终成品叫 **Mimi 启蒙乐园**，在线 Demo：http://39.96.59.120:8080/app/
+最终成品叫 **Mimi 启蒙乐园**，在线 Demo：http://study.penggeai.com/app/
 
 仓库地址：https://github.com/pengguogo/english-app
 
@@ -164,7 +164,7 @@ Service 公共方法必须有单测，类名 `XxxTest`，方法 `should_期望�
 
 ## 六、在线体验与参与贡献
 
-- **在线 Demo**：http://39.96.59.120:8080/app/
+- **在线 Demo**：http://study.penggeai.com/app/
 - **GitHub 仓库**：https://github.com/pengguogo/english-app
 - **一键启动**：`docker compose up`，然后访问 `http://localhost:8080/app/`
 

@@ -33,7 +33,7 @@ const fs = require('fs')
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 // 在线 Demo 地址，可改为本地 http://localhost:8080/app/
-const BASE = 'http://39.96.59.120:8080/app/'
+const BASE = 'http://study.penggeai.com/app/'
 
 // lesson 40「火车家族问答」5 题正确答案
 const ANSWERS = ['旅客', '速度很快', '可以睡觉的床位', '货物', '方便装卸']

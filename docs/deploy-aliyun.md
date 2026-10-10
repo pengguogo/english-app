@@ -14,7 +14,7 @@ GitHub (main push) ──> GitHub Actions ──SSH(密码)──> 云主机
                                               ├─ ./scripts/deploy.sh  (前端构建+Maven打包)
                                               └─ systemctl restart mimi
 
-公网用户 ──HTTP:8080──> 39.96.59.120:8080/app/
+公网用户 ──HTTP──> study.penggeai.com/app/
 ```
 
 - 构建在云主机本地跑(首次慢,有 Maven/npm 缓存后增量快)
@@ -119,7 +119,7 @@ tail -f /var/log/mimi/app.log
 
 ### 验证
 
-浏览器访问:`http://39.96.59.120:8080/app/`
+浏览器访问:`http://study.penggeai.com/app/`
 
 健康检查:
 ```bash
