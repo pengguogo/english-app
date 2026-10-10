@@ -18,6 +18,15 @@ export function useCharacterPractice(props, emit) {
   const showPinyin = ref(false)
   let eventId = ''
   let revision = 0
+  let advanceTimer = null
+
+  function scheduleAdvance() {
+    clearTimeout(advanceTimer)
+    const version = revision
+    advanceTimer = setTimeout(() => {
+      if (version === revision) advance()
+    }, 900)
+  }
   const labels = ['看图认识', '听音选字', '看字选图', '收起提示再认字', '在词句中找字']
   const title = computed(() => labels[phase.value])
   const isLearn = computed(() => phase.value === 0)
@@ -29,6 +38,7 @@ export function useCharacterPractice(props, emit) {
 
   function reset() {
     revision++
+    clearTimeout(advanceTimer)
     stopActiveTts()
     phase.value = props.reviewOnly ? 3 : 0
     choices.value = characterChoices(props.currentItem, props.items)
@@ -38,9 +48,10 @@ export function useCharacterPractice(props, emit) {
     eventId = crypto.randomUUID()
   }
   watch(() => [props.lessonId, props.currentIndex, props.currentItem.word], reset, { immediate: true })
-  onBeforeUnmount(() => { revision++; stopActiveTts() })
+  onBeforeUnmount(() => { revision++; clearTimeout(advanceTimer); stopActiveTts() })
 
   function revealHint() {
+    if (answered.value || saving.value) return
     assisted.value = true
     hint.value = true
     heard.value = true
@@ -54,8 +65,12 @@ export function useCharacterPractice(props, emit) {
     }
     answered.value = true
     feedback.value = '找对了！'
+    if (props.reviewOnly || phase.value === 4) save()
+    else scheduleAdvance()
   }
   function advance() {
+    if (saving.value || (!isLearn.value && !answered.value && !saved.value)) return
+    clearTimeout(advanceTimer)
     stopActiveTts()
     if (saved.value) { emit('next'); return }
     if (props.reviewOnly || phase.value === 4) { save(); return }
@@ -82,6 +97,7 @@ export function useCharacterPractice(props, emit) {
         userAnswer: outcome, correctAnswer: props.currentItem.word })
       feedback.value = outcome === 'INDEPENDENT' ? '独立认对，隔天再来认一认。' : '已经记入待巩固，明天再练。'
       if (skip) emit('next')
+      else scheduleAdvance()
     } catch (e) {
       if (version === revision) error.value = '保存失败，请重试；认读结果不会被重复计数。'
     } finally {
