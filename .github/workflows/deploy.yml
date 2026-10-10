@@ -58,11 +58,23 @@ jobs:
           debug: true
           script: |
             set -Eeuo pipefail
-            trap 'echo "[deploy] 部署失败，输出服务日志"; journalctl -u mimi -n 100 --no-pager || true' ERR
+            trap 'echo "[deploy] 部署失败，脚本行号: $LINENO"; journalctl -u mimi --since "10 minutes ago" -n 100 --no-pager || true' ERR
             cd /opt/english-app
-            git fetch origin main
+            # 云主机访问 GitHub 可能短暂断连，最多重试三次
+            for attempt in 1 2 3; do
+              if git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=60 fetch origin main; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "[deploy] GitHub 拉取连续失败，保留当前服务" >&2
+                exit 1
+              fi
+              sleep "$((attempt * 5))"
+            done
             git checkout main
-            git pull --ff-only origin main
+            # 使用已拉取的提交，不再通过 git pull 重复请求网络
+            git merge --ff-only '${{ github.sha }}'
+            test "$(git rev-parse HEAD)" = '${{ github.sha }}'
             ./scripts/deploy.sh
             growth_key='${{ secrets.CHILD_GROWTH_ACCESS_KEY }}'
             if [ -n "$growth_key" ]; then
