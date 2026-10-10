@@ -21,6 +21,7 @@ import BackBar from '../../BackBar.vue'
 import AppButton from '../../AppButton.vue'
 import MascotFeedback from '../../MascotFeedback.vue'
 import WordLesson from '../../lesson-templates/WordLesson.vue'
+import CharacterLesson from '../../lesson-templates/CharacterLesson.vue'
 import SentenceLesson from '../../lesson-templates/SentenceLesson.vue'
 import LessonComplete from '../../lesson-templates/LessonComplete.vue'
 import LessonReview from '../../lesson-templates/LessonReview.vue'
@@ -94,7 +95,7 @@ const lessonTemplate = computed(() => {
 
   switch (lesson.value.type) {
     case 'WORD':
-      return WordLesson
+      return currentItem.value?.recognition ? CharacterLesson : WordLesson
     case 'SENTENCE':
       return SentenceLesson
     case 'READING':
@@ -113,6 +114,7 @@ const lessonTemplate = computed(() => {
 })
 
 const lessonTemplateProps = computed(() => {
+  if (currentItem.value?.recognition) return { lessonId: lesson.value.id, items: lesson.value.content.items }
   if (lesson.value?.type !== 'READING') return {}
   return {
     continuousPlayback: Number(route.query.subjectId) === 4,
@@ -121,7 +123,7 @@ const lessonTemplateProps = computed(() => {
   }
 })
 
-const lessonTypeText = computed(() => getLessonTypeText(lesson.value?.type))
+const lessonTypeText = computed(() => currentItem.value?.recognition ? '汉字认读' : getLessonTypeText(lesson.value?.type))
 const displayItemIndex = computed(() => {
   if (isComplete.value) return totalItems.value || 0
   return Math.min(currentIndex.value + 1, totalItems.value || 0)
@@ -141,6 +143,7 @@ const heroHint = computed(() => {
     return `本课已完成，累计获得 ${totalStars.value} 颗星，准备返回主题继续前进。`
   }
 
+  if (currentItem.value?.recognition) return '看图认识，再收起提示找字；独立认对才会积累认字天数。'
   const currentLabel = currentText.value || '当前学习项'
   const guideMap = {
     WORD: `先听“${currentLabel}”，再跟读拿到更高分。`,
@@ -156,6 +159,7 @@ const heroHint = computed(() => {
 })
 const stageTitle = computed(() => {
   if (!currentItem.value) return '当前学习任务'
+  if (currentItem.value.recognition) return '汉字认读练习'
   return currentText.value || currentItem.value.translation || currentItem.value.question || '当前学习任务'
 })
 const stageCaption = computed(() => {
@@ -515,7 +519,7 @@ async function finishLesson() {
 
 <template>
   <main class="modern-lesson modern-page-shell modern-page-shell--top-spaced" :style="{ '--brand-accent': brandAccent }">
-    <BackBar :title="lesson?.name || '学习中'" @back="goBack">
+    <BackBar :title="currentItem?.recognition ? '认字小课堂' : (lesson?.name || '学习中')" @back="goBack">
       <template #right>
         <div class="lesson-bar-right">
           <span class="bar-chip">{{ displayItemIndex }} / {{ totalItems || 0 }}</span>
@@ -533,7 +537,7 @@ async function finishLesson() {
     </section>
 
     <template v-else>
-      <section class="modern-brand-card modern-brand-hero lesson-hero">
+      <section v-if="!currentItem?.recognition || isComplete" class="modern-brand-card modern-brand-hero lesson-hero">
         <div class="lesson-hero-copy">
           <p class="modern-brand-kicker">{{ isComplete ? '课时完成' : '当前课时' }}</p>
           <h1 class="modern-brand-title">{{ lesson.name }}</h1>
@@ -575,7 +579,7 @@ async function finishLesson() {
 
       <LessonReview v-else-if="showReview" :lesson-id="lesson.id" :save-error="saveError" @passed="handleReviewPassed" />
       <section v-else-if="lessonTemplate && currentItem" class="modern-brand-card modern-brand-panel lesson-stage-shell">
-        <div class="modern-brand-surface stage-summary">
+        <div v-if="!currentItem?.recognition" class="modern-brand-surface stage-summary">
           <div>
             <p class="modern-brand-kicker">现在做什么</p>
             <h2>{{ stageTitle }}</h2>

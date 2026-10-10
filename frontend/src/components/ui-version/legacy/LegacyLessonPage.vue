@@ -28,6 +28,7 @@ import BackBar from '../../BackBar.vue'
 import AppButton from '../../AppButton.vue'
 import MascotFeedback from '../../MascotFeedback.vue'
 import WordLesson from '../../lesson-templates/WordLesson.vue'
+import CharacterLesson from '../../lesson-templates/CharacterLesson.vue'
 import SentenceLesson from '../../lesson-templates/SentenceLesson.vue'
 import LessonComplete from '../../lesson-templates/LessonComplete.vue'
 import LessonReview from '../../lesson-templates/LessonReview.vue'
@@ -130,7 +131,7 @@ const lessonTemplate = computed(() => {
   if (!lesson.value) return null
   switch (lesson.value.type) {
     case 'WORD':
-      return WordLesson
+      return currentItem.value?.recognition ? CharacterLesson : WordLesson
     case 'SENTENCE':
       return SentenceLesson
     case 'READING':
@@ -150,6 +151,7 @@ const lessonTemplate = computed(() => {
 })
 
 const lessonTemplateProps = computed(() => {
+  if (currentItem.value?.recognition) return { lessonId: lesson.value.id, items: lesson.value.content.items }
   if (lesson.value?.type !== 'READING') return {}
   return {
     continuousPlayback: Number(route.query.subjectId) === 4,

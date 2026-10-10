@@ -5,6 +5,7 @@
   创建日期: 2026-09-29
 -->
 <script setup>
+import CharacterEntry from '../../CharacterEntry.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getSubjects } from '../../../api/subject'
@@ -83,6 +84,7 @@ function startFruitAdventure() {
       </div>
     </header>
 
+    <CharacterEntry />
     <PicturebookEntry />
     <ModelEntry />
 

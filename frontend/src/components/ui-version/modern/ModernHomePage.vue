@@ -5,6 +5,7 @@
   创建日期: 2026-09-29
 -->
 <script setup>
+import CharacterEntry from '../../CharacterEntry.vue'
 import { useRouter } from 'vue-router'
 import AppButton from '../../AppButton.vue'
 import { featuredRoutes, supportRoutes } from './modernHomeData'
@@ -41,6 +42,8 @@ function openRoute(route) {
         <p class="modern-brand-caption">学得越多，星星越多！</p>
       </div>
     </section>
+
+    <CharacterEntry />
 
     <!-- 主入口：四个磁贴，各自注入入口强调色 -->
     <section class="home-section" aria-labelledby="home-featured-title">
