@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import AppButton from '../AppButton.vue'
+import AudioButton from '../AudioButton.vue'
 import { getReviewQuestions, submitReview } from '../../api/review'
 
 const props = defineProps({
@@ -52,6 +53,10 @@ function imageUrl(image) {
   if (!image) return ''
   return image.startsWith('/images/') ? image : `/images/${image}.jpg`
 }
+
+function audioLanguage(text) {
+  return /[\u3400-\u9fff]/.test(text) ? 'zh' : 'en'
+}
 </script>
 
 <template>
@@ -64,6 +69,7 @@ function imageUrl(image) {
     <AppButton v-if="!questions.length && !loading" variant="ghost" @click="load">重新加载</AppButton>
     <div v-for="question in questions" :key="question.index" class="review-question">
       <h3>{{ question.prompt }}</h3>
+      <AudioButton v-if="question.prompt" :text="question.prompt" :lan="audioLanguage(question.prompt)" />
       <img v-if="question.image" :src="imageUrl(question.image)" alt="本题配图" />
       <div v-for="(option, index) in question.options" :key="index">
         <label>
@@ -71,6 +77,7 @@ function imageUrl(image) {
           <img v-if="option.image" :src="imageUrl(option.image)" :alt="option.text" />
           <span v-if="option.showText">{{ option.text }}</span>
         </label>
+        <AudioButton v-if="option.showText && option.text" :text="option.text" :lan="audioLanguage(option.text)" />
       </div>
       <p v-if="wrong.includes(question.index)">这题再想一想</p>
     </div>
