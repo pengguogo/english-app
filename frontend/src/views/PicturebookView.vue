@@ -51,7 +51,7 @@ function begin(position = null) {
         <p>会听、会观察，还愿意开口。谢谢小司机的努力！</p>
         <div class="arrival-actions"><AppButton v-if="active + 1 < lessons.length" variant="success" @click="start(active + 1)">下一大站 →</AppButton><AppButton variant="ghost" @click="timetable">返回路线 / 再开一趟</AppButton></div>
       </section>
-      <LessonReview v-else-if="reviewing && lesson" :lesson-id="lesson.id" :save-error="saveError" @passed="finish(true)" />
+      <LessonReview v-else-if="reviewing && lesson" :key="lesson.id" :lesson-id="lesson.id" :saving="saving" :save-error="saveError" @passed="finish(true)" />
       <template v-else-if="lesson && item">
         <div class="journey-toolbar"><strong>{{ lesson.name }}</strong><details><summary>家长设置</summary><div><label><input v-model="autoRead" type="checkbox" /> 翻页自动带读</label><label><input v-model="interactive" type="checkbox" /> 故事途中提问</label><label><input v-model="calm" type="checkbox" /> 关闭火车动效</label></div></details></div>
         <TrainTrack :step="index" :total="lesson.content.items.length" :calm="calm" />

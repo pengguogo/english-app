@@ -6,6 +6,7 @@ import { getReviewQuestions, submitReview } from '../../api/review'
 
 const props = defineProps({
   lessonId: { type: Number, required: true },
+  saving: { type: Boolean, default: false },
   saveError: { type: String, default: '' }
 })
 const emit = defineEmits(['passed'])
@@ -14,6 +15,7 @@ const answers = ref([])
 const wrong = ref([])
 const loading = ref(false)
 const error = ref('')
+const reviewPassed = ref(false)
 
 async function load() {
   loading.value = true
@@ -29,12 +31,17 @@ async function load() {
 }
 
 async function submit() {
-  if (loading.value || answers.value.some(answer => answer === null)) return
+  if (loading.value || props.saving || !questions.value.length || answers.value.some(answer => answer === null)) return
+  if (reviewPassed.value) {
+    emit('passed')
+    return
+  }
   loading.value = true
   error.value = ''
   try {
     const result = await submitReview(props.lessonId, answers.value)
     if (result.passed) {
+      reviewPassed.value = true
       emit('passed')
     } else {
       wrong.value = result.wrongIndexes
@@ -73,7 +80,7 @@ function audioLanguage(text) {
       <img v-if="question.image" :src="imageUrl(question.image)" alt="本题配图" />
       <div v-for="(option, index) in question.options" :key="index">
         <label>
-          <input v-model="answers[question.index]" type="radio" :name="`review-${question.index}`" :value="index" />
+          <input v-model="answers[question.index]" :disabled="loading || saving || reviewPassed" type="radio" :name="`review-${question.index}`" :value="index" />
           <img v-if="option.image" :src="imageUrl(option.image)" :alt="option.text" />
           <span v-if="option.showText">{{ option.text }}</span>
         </label>
@@ -81,8 +88,8 @@ function audioLanguage(text) {
       </div>
       <p v-if="wrong.includes(question.index)">这题再想一想</p>
     </div>
-    <AppButton :disabled="loading || !questions.length || answers.some(answer => answer === null)" @click="submit">
-      {{ loading ? '提交中…' : '提交复习' }}
+    <AppButton :disabled="loading || saving || !questions.length || answers.some(answer => answer === null)" @click="submit">
+      {{ saving ? '保存中…' : loading ? '提交中…' : reviewPassed ? '重试保存' : '提交复习' }}
     </AppButton>
   </section>
 </template>

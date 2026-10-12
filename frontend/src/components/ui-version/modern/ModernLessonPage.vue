@@ -128,7 +128,7 @@ const stageCaption = computed(() => {
         />
       </section>
 
-      <LessonReview v-else-if="showReview" :lesson-id="lesson.id" :save-error="saveError" @passed="handleReviewPassed" />
+      <LessonReview v-else-if="showReview" :key="lesson.id" :lesson-id="lesson.id" :saving="isSubmitting" :save-error="saveError" @passed="handleReviewPassed" />
       <section v-else-if="lessonTemplate && currentItem" class="modern-brand-card modern-brand-panel lesson-stage-shell">
         <div v-if="!currentItem?.recognition" class="modern-brand-surface stage-summary">
           <div>

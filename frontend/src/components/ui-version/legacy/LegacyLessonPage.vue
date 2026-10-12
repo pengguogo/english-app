@@ -55,7 +55,7 @@ const { lesson, isLoading, errorMsg, currentIndex, currentScore, currentStars, s
         :save-error="saveError"
         @finish="finishLesson"
       />
-      <LessonReview v-else-if="showReview" :lesson-id="lesson.id" :save-error="saveError" @passed="handleReviewPassed" />
+      <LessonReview v-else-if="showReview" :key="lesson.id" :lesson-id="lesson.id" :saving="isSubmitting" :save-error="saveError" @passed="handleReviewPassed" />
 
       <!-- 按类型分发到对应模板 -->
       <component

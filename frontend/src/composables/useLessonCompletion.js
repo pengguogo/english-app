@@ -15,6 +15,7 @@ export function useLessonCompletion(state) {
     const sourceLessonId = Number(lesson.value.id)
     const sourceUnitId = Number(lesson.value.unitId)
     isSubmitting.value = true
+    saveError.value = ''
 
     try {
       await completeLesson(sourceLessonId, totalStars.value, totalBestScore.value)
@@ -49,13 +50,14 @@ export function useLessonCompletion(state) {
       })
     } catch (error) {
       console.error('自动进入下一节阅读课失败:', error)
-      alert('自动播放下一课失败,请重试')
+      saveError.value = '保存或进入下一课失败，请点“重试保存”'
     } finally {
       isSubmitting.value = false
     }
   }
 
   async function handleReviewPassed() {
+    if (isSubmitting.value || !lesson.value) return
     if (route.query.continuous === '1') {
       await advanceContinuousPlayback(true)
       return
