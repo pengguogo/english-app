@@ -16,7 +16,7 @@ const calm = ref(false)
 const autoRead = ref(false)
 const { lessons, completedIds, active, index, lesson, item, loading, error, saving, saveError, bookmarkError,
   arrival, reviewing, allComplete, load, start, resume, move, answer, finish, timetable } = usePicturebookJourney(route)
-useStudyTimer(computed(() => !!lesson.value && !loading.value && !reviewing.value && !arrival.value),
+useStudyTimer(computed(() => active.value >= 0 && !!lesson.value && !loading.value && !arrival.value),
   computed(() => lesson.value?.id))
 function next() { index.value < lesson.value.content.items.length - 1 ? move(1) : finish() }
 const bookTitle = computed(() => lessons.value[0]?.content.bookTitle || '绘本小火车')

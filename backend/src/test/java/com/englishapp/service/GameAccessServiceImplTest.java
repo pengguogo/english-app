@@ -29,7 +29,7 @@ class GameAccessServiceImplTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        service = new GameAccessServiceImpl(repository, sessions, lessons, passwords, events);
+        service = new GameAccessServiceImpl(repository, lessons, passwords, events);
     }
 
     @Test
@@ -69,7 +69,7 @@ class GameAccessServiceImplTest {
     }
 
     @Test
-    void should_暂存时长且不解锁游戏_当_复习尚未通过() {
+    void should_直接累计时长_当_复习尚未通过() {
         when(lessons.existsById(7)).thenReturn(true);
         when(sessions.findByUserIdAndLessonIdAndStudyDate(1, 7, LocalDate.now())).thenReturn(Optional.empty());
         when(repository.findByUserIdAndStudyDate(1, LocalDate.now())).thenReturn(Optional.empty());
@@ -77,9 +77,9 @@ class GameAccessServiceImplTest {
         GameAccessDto access = service.recordPendingStudyTime(1, 7, 15);
 
         assertFalse(access.unlocked());
-        assertEquals(0, access.studiedSeconds());
-        verify(sessions).save(argThat(session -> session.getPendingSeconds() == 15));
-        verify(repository, never()).save(any());
+        assertEquals(15, access.studiedSeconds());
+        verifyNoInteractions(sessions);
+        verify(repository).save(any());
     }
 
     @Test
@@ -137,8 +137,24 @@ class GameAccessServiceImplTest {
     }
 
     @Test
+    void should_直接解锁并保留完整事件时长_当_未复习且累计超过五分钟() {
+        when(lessons.existsById(7)).thenReturn(true);
+        when(repository.findByUserIdAndStudyDate(1, LocalDate.now()))
+                .thenReturn(Optional.of(studyTime(290)));
+
+        GameAccessDto access = service.recordPendingStudyTime(1, 7, 20, "learning-event");
+
+        assertTrue(access.unlocked());
+        assertEquals(300, access.studiedSeconds());
+        verify(events).save(argThat(event -> event.getSeconds() == 20));
+        verifyNoInteractions(sessions);
+    }
+
+    @Test
     void should_拒绝计时_当_秒数无效或事件被改写() {
         assertThrows(IllegalArgumentException.class, () -> service.recordPendingStudyTime(1, 7, 0));
+        assertThrows(IllegalArgumentException.class, () -> service.recordPendingStudyTime(1, 7, 31));
+        assertThrows(IllegalArgumentException.class, () -> service.recordPendingStudyTime(1, 999, 8));
         when(lessons.existsById(7)).thenReturn(true);
         var event = new com.englishapp.domain.StudyTimeEvent();
         event.setUserId(1); event.setLessonId(7); event.setSeconds(8);

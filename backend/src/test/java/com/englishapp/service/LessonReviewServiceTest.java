@@ -19,13 +19,12 @@ import static org.mockito.Mockito.*;
 class LessonReviewServiceTest {
     @Mock LessonRepository lessons;
     @Mock LessonStudySessionRepository sessions;
-    @Mock GameAccessService gameAccess;
     LessonReviewService service;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        service = new LessonReviewService(lessons, sessions, gameAccess, new ObjectMapper());
+        service = new LessonReviewService(lessons, sessions, new ObjectMapper());
         Lesson lesson = new Lesson();
         lesson.setId(7);
         lesson.setType(LessonType.QUIZ);
@@ -34,16 +33,15 @@ class LessonReviewServiceTest {
     }
 
     @Test
-    void should_保持锁定且不计时_当_复习答案错误() {
+    void should_返回错题且不改变复习状态_当_复习答案错误() {
         var result = service.submit(1, 7, List.of(0));
         assertFalse(result.passed());
         assertEquals(List.of(0), result.wrongIndexes());
-        verifyNoInteractions(gameAccess);
         verify(sessions, never()).save(any());
     }
 
     @Test
-    void should_只结算待计时长_当_全部答对() {
+    void should_只更新复习状态且不额外加时_当_全部答对() {
         LessonStudySession session = new LessonStudySession();
         session.setPendingSeconds(90);
         session.setPassed(false);
@@ -52,10 +50,11 @@ class LessonReviewServiceTest {
         var result = service.submit(1, 7, List.of(1));
 
         assertTrue(result.passed());
-        assertEquals(90, result.creditedSeconds());
+        assertEquals(0, result.creditedSeconds());
         assertEquals(0, session.getPendingSeconds());
         assertTrue(session.getPassed());
-        verify(gameAccess).recordStudyTime(1, 90);
+        verify(sessions).save(session);
+        assertEquals(0, service.submit(1, 7, List.of(1)).creditedSeconds());
     }
 
     @Test

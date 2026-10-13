@@ -47,7 +47,7 @@ async function submitPassword() {
   <div v-else-if="access && !access.unlocked" class="gate locked">
     <span class="lock-icon" aria-hidden="true">🔒</span>
     <h2>再累计 {{ Math.ceil(access.remainingSeconds / 60) }} 分钟有效学习可解锁</h2>
-    <p>每课复习全部答对后结算时长。今日已结算 {{ Math.floor(access.studiedSeconds / 60) }} 分 {{ access.studiedSeconds % 60 }} 秒</p>
+    <p>学习和复习都会累计时间。今日已累计 {{ Math.floor(access.studiedSeconds / 60) }} 分 {{ access.studiedSeconds % 60 }} 秒</p>
     <div class="progress" role="progressbar" :aria-valuenow="progressPercent" aria-valuemin="0" aria-valuemax="100">
       <span :style="{ width: `${progressPercent}%` }"></span>
     </div>

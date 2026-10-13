@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getWrongAnswers } from '../api/wrongAnswer'
+import { useStudyTimer } from '../composables/useStudyTimer'
 import { useLearningAttempts } from '../composables/useLearningAttempts'
 import { useWrongAnswerPractice } from '../composables/useWrongAnswerPractice'
 import { getLessonById } from '../api/lesson'
@@ -17,6 +18,8 @@ const item = ref(null)
 const loading = ref(true)
 const attempt = ref(0)
 const { error, saving, mastered, canSave, answered, save } = useWrongAnswerPractice(entry, item)
+useStudyTimer(computed(() => !loading.value && !!item.value && !mastered.value),
+  computed(() => entry.value?.lessonId))
 const { recordAttempt, resetAttempts } = useLearningAttempts(
   computed(() => entry.value && ({ id: entry.value.lessonId, type: entry.value.questionType })),
   computed(() => entry.value?.questionIndex))

@@ -69,7 +69,7 @@ function audioLanguage(text) {
 <template>
   <section class="review">
     <h2>课后复习</h2>
-    <p>全部答对后，本课学习时间才会计入游戏解锁进度。</p>
+    <p>学习和复习都会累计时间，累计学习5分钟即可解锁今日游戏。</p>
     <p v-if="saveError" role="alert">{{ saveError }}</p>
     <p v-if="error" role="alert">{{ error }}</p>
     <p v-if="loading && !questions.length" role="status">正在加载复习题…</p>

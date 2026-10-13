@@ -5,6 +5,7 @@ import BackBar from '../components/BackBar.vue'
 import AppButton from '../components/AppButton.vue'
 import AudioButton from '../components/AudioButton.vue'
 import CharacterLesson from '../components/lesson-templates/CharacterLesson.vue'
+import { useStudyTimer } from '../composables/useStudyTimer'
 import { getCharacterProgress, getCharacterReview } from '../api/characters'
 
 const router = useRouter()
@@ -16,6 +17,8 @@ const loading = ref(false)
 const error = ref('')
 const finished = ref(false)
 const current = computed(() => queue.value[index.value])
+useStudyTimer(computed(() => active.value && !loading.value && !!current.value && !finished.value),
+  computed(() => current.value?.lessonId))
 const counts = computed(() => ({ learned: progress.value.filter(p => p.status !== 'NEW').length,
   reviewing: progress.value.filter(p => p.status === 'REVIEWING').length,
   recognized: progress.value.filter(p => p.status === 'RECOGNIZED').length }))

@@ -69,7 +69,7 @@ export function useLessonLearning() {
   const isLastItem = computed(() => currentIndex.value >= totalItems.value - 1)
   const currentItemEngaged = computed(() => engagedItems.value[currentIndex.value] === true)
   const isFruitPilot = computed(() => Number(route.query.themeId) === 1)
-  const isActivelyStudying = computed(() => !isLoading.value && !!lesson.value && !isComplete.value && !showReview.value)
+  const isActivelyStudying = computed(() => !isLoading.value && !!lesson.value && !isComplete.value)
   useStudyTimer(isActivelyStudying, computed(() => lesson.value?.id))
 
   const totalBestScore = computed(() => {

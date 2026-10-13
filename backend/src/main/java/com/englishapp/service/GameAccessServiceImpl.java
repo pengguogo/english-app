@@ -3,12 +3,10 @@ package com.englishapp.service;
 import com.englishapp.domain.DailyStudyTime;
 import com.englishapp.domain.StudyTimeEvent;
 import com.englishapp.repository.StudyTimeEventRepository;
-import com.englishapp.domain.LessonStudySession;
 import com.englishapp.dto.GameAccessDto;
 import com.englishapp.dto.GameUnlockDto;
 import com.englishapp.repository.DailyStudyTimeRepository;
 import com.englishapp.repository.LessonRepository;
-import com.englishapp.repository.LessonStudySessionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
@@ -21,14 +19,12 @@ public class GameAccessServiceImpl implements GameAccessService {
     private final ParentPasswordService passwords;
     private final StudyTimeEventRepository events;
     private final DailyStudyTimeRepository repository;
-    private final LessonStudySessionRepository sessions;
     private final LessonRepository lessons;
 
     public GameAccessServiceImpl(DailyStudyTimeRepository repository,
-                                 LessonStudySessionRepository sessions, LessonRepository lessons,
+                                 LessonRepository lessons,
                                  ParentPasswordService passwords, StudyTimeEventRepository events) {
         this.repository = repository;
-        this.sessions = sessions;
         this.lessons = lessons;
         this.passwords = passwords;
         this.events = events;
@@ -61,20 +57,7 @@ public class GameAccessServiceImpl implements GameAccessService {
         event.setStudyDate(today);
         event.setSeconds(seconds);
         events.save(event);
-        LessonStudySession session = sessions.findByUserIdAndLessonIdAndStudyDate(uid, lessonId, today)
-                .orElseGet(() -> {
-                    LessonStudySession created = new LessonStudySession();
-                    created.setUserId(uid);
-                    created.setLessonId(lessonId);
-                    created.setStudyDate(today);
-                    created.setPendingSeconds(0);
-                    created.setPassed(false);
-                    return created;
-                });
-        if (Boolean.TRUE.equals(session.getPassed())) return recordStudyTime(uid, seconds);
-        session.setPendingSeconds(Math.min(REQUIRED_SECONDS, session.getPendingSeconds() + seconds));
-        sessions.save(session);
-        return getTodayAccess(uid);
+        return recordStudyTime(uid, seconds);
     }
 
     @Override

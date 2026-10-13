@@ -19,14 +19,12 @@ import java.util.List;
 public class LessonReviewService {
     private final LessonRepository lessons;
     private final LessonStudySessionRepository sessions;
-    private final GameAccessService gameAccess;
     private final ObjectMapper mapper;
 
     public LessonReviewService(LessonRepository lessons, LessonStudySessionRepository sessions,
-                               GameAccessService gameAccess, ObjectMapper mapper) {
+                               ObjectMapper mapper) {
         this.lessons = lessons;
         this.sessions = sessions;
-        this.gameAccess = gameAccess;
         this.mapper = mapper;
     }
 
@@ -50,12 +48,10 @@ public class LessonReviewService {
         int uid = userId == null ? 1 : userId;
         LessonStudySession session = sessions.findByUserIdAndLessonIdAndStudyDate(uid, lessonId, LocalDate.now())
                 .orElseGet(() -> newSession(uid, lessonId));
-        int credited = session.getPendingSeconds();
         session.setPendingSeconds(0);
         session.setPassed(true);
         sessions.save(session);
-        if (credited > 0) gameAccess.recordStudyTime(uid, credited);
-        return new ReviewResultDto(true, List.of(), credited);
+        return new ReviewResultDto(true, List.of(), 0);
     }
 
     public boolean hasPassed(Integer userId, Integer lessonId) {
