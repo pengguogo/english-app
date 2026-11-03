@@ -8,8 +8,10 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
+import org.springframework.http.CacheControl;
 
 import java.io.IOException;
+import java.time.Duration;
 
 /**
  * Web 配置:静态资源映射(Vue history 模式) + 开发期 CORS
@@ -60,8 +62,17 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/app/assets/**")
+                .addResourceLocations("classpath:/static/app/assets/")
+                .setCacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic().immutable())
+                .resourceChain(true);
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("classpath:/static/images/")
+                .setCacheControl(CacheControl.maxAge(Duration.ofDays(7)).cachePublic())
+                .resourceChain(true);
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/")
+                .setCacheControl(CacheControl.noCache())
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver() {
                     @Override

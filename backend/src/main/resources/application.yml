@@ -23,6 +23,10 @@ spring:
 
 server:
   port: 8080
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: application/json,text/html,text/css,text/javascript,application/javascript,image/svg+xml
 
 voice:
   tts:

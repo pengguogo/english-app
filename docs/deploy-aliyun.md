@@ -119,7 +119,7 @@ tail -f /var/log/mimi/app.log
 
 ### 验证
 
-浏览器访问:`http://study.penggeai.com/app/`
+浏览器访问:`https://study.penggeai.com/app/`
 
 健康检查:
 ```bash
@@ -204,13 +204,35 @@ ssh-copy-id -i ~/.ssh/aliyun_mimi.pub root@39.96.59.120
 
 deploy.yml 改用 `key: ${{ secrets.ALIYUN_SSH_KEY }}` 替代 `password`。
 
-### 2. HTTPS + Nginx 反向代理
+### 2. HTTPS + Nginx 反向代理（生产必需）
 
-有域名后:
-1. 装 Nginx:`dnf install -y nginx`
-2. 配置反代到 `127.0.0.1:8080`
-3. 申请 Let's Encrypt 证书:`dnf install -y certbot python3-certbot-nginx && certbot --nginx`
-4. 安全组:关 `8080` 公网,开 `80`/`443`
+跟读依赖浏览器麦克风 API，生产站必须使用 HTTPS。仓库已提供
+`deploy/nginx/study.penggeai.com.conf`，安装步骤如下：
+
+```bash
+dnf install -y nginx certbot python3-certbot-nginx
+mkdir -p /var/www/certbot
+
+# 首次签发证书时，先确保 80 端口可访问。
+certbot certonly --nginx -d study.penggeai.com
+
+cp deploy/nginx/study.penggeai.com.conf /etc/nginx/conf.d/study.penggeai.com.conf
+nginx -t
+systemctl enable --now nginx
+systemctl reload nginx
+```
+
+完成后在阿里云安全组开放 `80`、`443`，关闭 `8080` 公网入口。验证：
+
+```bash
+curl -I http://study.penggeai.com/app/
+curl -I https://study.penggeai.com/app/
+curl -I --compressed https://study.penggeai.com/app/assets/实际文件名.js
+systemctl status certbot-renew.timer
+```
+
+预期 HTTP 返回 `301`，HTTPS 返回 `200`，压缩后的 JS/CSS 返回
+`Content-Encoding: gzip`。证书续期后应由 certbot 自动 reload Nginx。
 
 ### 3. 构建压力缓解(若 2G 顶不住)
 
