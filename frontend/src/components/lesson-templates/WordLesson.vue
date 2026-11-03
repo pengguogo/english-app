@@ -13,8 +13,9 @@ import { computed } from 'vue'
 import StarBar from '../StarBar.vue'
 import AudioButton from '../AudioButton.vue'
 import RecordButton from '../RecordButton.vue'
-import AppButton from '../AppButton.vue'
 import MimiMascot from '../MimiMascot.vue'
+import LessonNextBar from './LessonNextBar.vue'
+import { useNextHint } from '../../composables/useNextHint'
 
 /**
  * 组件 Props
@@ -114,6 +115,8 @@ const progressPercent = computed(() => {
 const isPawPatrolImage = computed(() => {
   return String(props.currentItem?.image || '').includes('/paw-patrol/')
 })
+
+const { hinting, showHint } = useNextHint()
 </script>
 
 <template>
@@ -150,7 +153,7 @@ const isPawPatrolImage = computed(() => {
     </div>
 
     <!-- 操作区: 听发音 + 跟读录音 -->
-    <div class="actions">
+    <div class="actions" :class="{ 'is-hinting': hinting }">
       <AudioButton
         :text="currentText"
         :translation="currentItem.translation || ''"
@@ -177,33 +180,17 @@ const isPawPatrolImage = computed(() => {
       <p class="feedback">{{ scoreMessage }}</p>
     </div>
 
-    <!-- 上一步 / 下一步 / 完成本课 -->
-    <div class="action-row">
-      <!-- 上一步按钮:第一项不显示 -->
-      <AppButton
-        v-if="currentIndex > 0"
-        variant="ghost"
-        size="md"
-        @click="emit('prev')"
-      >← 上一项</AppButton>
-      <span v-else class="action-placeholder"></span>
-      <AppButton
-        v-if="!itemEngaged"
-        variant="ghost"
-        size="md"
-        @click="emit('skip')"
-      >稍后复习</AppButton>
-      <!-- 下一步 / 完成本课 -->
-      <AppButton
-        variant="primary"
-        size="md"
-        class="action-next"
-        :disabled="!itemEngaged"
-        @click="emit('next')"
-      >
-        {{ !itemEngaged ? '先听或跟读' : (isLastItem ? '完成本课' : '下一步 →') }}
-      </AppButton>
-    </div>
+    <LessonNextBar
+      :unlocked="itemEngaged"
+      :is-last-item="isLastItem"
+      :show-prev="currentIndex > 0"
+      prev-label="上一项"
+      :show-skip="!itemEngaged"
+      @prev="emit('prev')"
+      @skip="emit('skip')"
+      @next="emit('next')"
+      @hint="showHint"
+    />
   </div>
 </template>
 
@@ -349,24 +336,6 @@ const isPawPatrolImage = computed(() => {
   font-size: var(--text-sm);
 }
 
-/* 按钮行:左右分布,上一项 + 下一项 */
-.action-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-/* 占位符:第一项时保持下一项按钮居右 */
-.action-placeholder {
-  flex: 1;
-}
-
-/* 下一项按钮占据主要空间 */
-.action-next {
-  flex: 1;
-}
-
 .score-area.scoring {
   display: flex;
   align-items: center;
@@ -393,4 +362,11 @@ const isPawPatrolImage = computed(() => {
   .word { font-size: 2rem; }
   .emoji { font-size: 4rem; }
 }
+
+/* 未解锁时点「→」：高亮听发音按钮 */
+.actions.is-hinting :deep(.audio-btn) { box-shadow: 0 0 0 4px var(--color-accent), var(--shadow-hover); }
+@media (prefers-reduced-motion: no-preference) {
+  .actions.is-hinting :deep(.audio-btn) { animation: hint-pulse 0.5s ease-in-out 3; }
+}
+@keyframes hint-pulse { 50% { transform: scale(1.08); } }
 </style>

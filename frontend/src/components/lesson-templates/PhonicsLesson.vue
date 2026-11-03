@@ -16,6 +16,8 @@ import AppButton from '../AppButton.vue'
 import MimiMascot from '../MimiMascot.vue'
 import { evaluateAnswerAttempt } from '../../utils/answerAttempts'
 import { formatPhonetic } from '../../utils/phonetic'
+import LessonNextBar from './LessonNextBar.vue'
+import { useNextHint } from '../../composables/useNextHint'
 
 /**
  * 组件 Props
@@ -223,6 +225,8 @@ watch(() => props.currentIndex, () => {
   attemptCount.value = 0
   feedbackStatus.value = ''
 })
+
+const { hinting, showHint } = useNextHint()
 </script>
 
 <template>
@@ -296,7 +300,7 @@ watch(() => props.currentIndex, () => {
       </p>
 
       <!-- 选项列表（3 选 1，随机排序） -->
-      <div class="options">
+      <div class="options" :class="{ 'is-hinting': hinting }">
         <button
           v-for="(option, index) in practiceOptions"
           :key="index"
@@ -342,42 +346,30 @@ watch(() => props.currentIndex, () => {
       <p class="feedback">{{ scoreMessage }}</p>
     </div>
 
-    <!-- 操作按钮: 上一项 / 去练习(或返回学习) / 下一步 -->
-    <div class="action-row">
-      <!-- 上一项按钮:第一项不显示 -->
-      <AppButton
-        v-if="currentIndex > 0"
-        variant="ghost"
-        size="md"
-        @click="emit('prev')"
-      >← 上一项</AppButton>
-      <span v-else class="action-placeholder"></span>
-
-      <!-- 中间按钮:学习模式显示"去练习"，练习模式显示"返回学习" -->
+    <!-- 操作按钮: 上一项 / 去练习(或返回学习，次要) / 大号「→」 -->
+    <LessonNextBar
+      :unlocked="hasAnswered"
+      :is-last-item="isLastItem"
+      :show-prev="currentIndex > 0"
+      locked-hint="先去练习"
+      @prev="emit('prev')"
+      @next="emit('next')"
+      @hint="showHint"
+    >
       <AppButton
         v-if="mode === 'learn'"
-        variant="warning"
-        size="md"
+        variant="ghost"
+        class="practice-btn"
+        :class="{ 'is-hinting': hinting }"
         @click="enterPractice"
       >去练习</AppButton>
       <AppButton
         v-else
-        variant="warning"
-        size="md"
+        variant="ghost"
+        class="practice-btn"
         @click="backToLearn"
       >返回学习</AppButton>
-
-      <!-- 下一步/完成本课 -->
-      <AppButton
-        variant="primary"
-        size="md"
-        class="action-next"
-        :disabled="!hasAnswered"
-        @click="emit('next')"
-      >
-        {{ !hasAnswered ? '先完成练习' : (isLastItem ? '完成本课' : '下一步 →') }}
-      </AppButton>
-    </div>
+    </LessonNextBar>
   </div>
 </template>
 
@@ -647,17 +639,17 @@ watch(() => props.currentIndex, () => {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* 按钮行: 上一项 + 去练习/返回学习 + 下一步 */
-.action-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+/* 「去练习」比主按钮弱：ghost 描边 */
+.practice-btn { border: 1px solid var(--border-light); color: var(--color-orange); }
+
+/* 未解锁时点「→」：学习模式高亮「去练习」，练习模式高亮选项 */
+.practice-btn.is-hinting,
+.options.is-hinting .option { box-shadow: 0 0 0 4px var(--color-accent), var(--shadow-hover); }
+@media (prefers-reduced-motion: no-preference) {
+  .practice-btn.is-hinting,
+  .options.is-hinting .option { animation: hint-pulse 0.5s ease-in-out 3; }
 }
-/* 占位符:第一项时保持后续按钮居右 */
-.action-placeholder { flex: 1; }
-/* 下一步按钮占据主要空间 */
-.action-next { flex: 1; }
+@keyframes hint-pulse { 50% { transform: scale(1.06); } }
 
 /* 响应式: 手机 <480px 缩小字号和图片 */
 @media (max-width: 480px) {

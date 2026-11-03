@@ -30,11 +30,8 @@ const games = [
   <main class="games-page">
     <BackBar title-tag="span" title="游戏专区" @back="router.push('/')" />
     <section class="hero">
-      <span>🎮</span>
-      <div>
-        <h1>学习后的小奖励</h1>
-        <p>每天认真学习 5 分钟，即可解锁当天的全部游戏。</p>
-      </div>
+      <span aria-hidden="true">🎮</span>
+      <h1>学习后的小奖励</h1>
     </section>
 
     <GameAccessGate
@@ -76,7 +73,7 @@ const games = [
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-6);
+  padding: var(--space-4) var(--space-6);
   margin-bottom: var(--space-5);
   background: var(--gradient-primary);
   color: var(--text-on-primary);
@@ -84,16 +81,11 @@ const games = [
 }
 
 .hero > span {
-  font-size: 54px;
+  font-size: 40px;
 }
 
 .hero h1 {
-  margin-bottom: var(--space-2);
   font-size: var(--text-lg);
-}
-
-.hero p {
-  color: var(--text-on-primary-muted);
 }
 
 .success-tip {

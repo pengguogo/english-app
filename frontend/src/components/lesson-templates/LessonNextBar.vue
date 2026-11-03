@@ -38,11 +38,13 @@ const emit = defineEmits(['prev', 'skip', 'next', 'hint'])
       @click="emit('skip')"
     ><span aria-hidden="true">⏭</span></AppButton>
 
+    <!-- 模板自定义的次要按钮，如自然拼读的「去练习」 -->
+    <slot />
+
     <AppButton
       size="lg"
       class="next-btn"
       :class="{ 'is-locked': !unlocked }"
-      :aria-disabled="!unlocked"
       :aria-label="!unlocked ? lockedHint : (isLastItem ? '完成本课' : '下一步')"
       :title="!unlocked ? lockedHint : (isLastItem ? '完成本课' : '下一步')"
       @click="unlocked ? emit('next') : emit('hint')"
