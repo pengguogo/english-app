@@ -28,7 +28,7 @@ const games = [
 
 <template>
   <main class="games-page">
-    <BackBar title="游戏专区" @back="router.push('/')" />
+    <BackBar title-tag="span" title="游戏专区" @back="router.push('/')" />
     <section class="hero">
       <span>🎮</span>
       <div>

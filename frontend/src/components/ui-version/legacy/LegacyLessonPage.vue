@@ -40,7 +40,7 @@ const { lesson, isLoading, errorMsg, currentIndex, currentScore, currentStars, s
     <!-- 加载失败 -->
     <div v-else-if="errorMsg" class="state-tip error" role="alert">
       <p>{{ errorMsg }}</p>
-      <AppButton variant="ghost" @click="loadLesson">重新加载</AppButton>
+      <AppButton size="lg" @click="loadLesson">重试</AppButton>
     </div>
 
     <!-- 学习内容区 -->

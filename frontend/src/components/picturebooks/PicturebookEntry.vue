@@ -6,7 +6,7 @@ const router = useRouter()
 
 <template>
   <section class="book-entry" aria-labelledby="book-entry-title">
-    <img :src="'/images/picturebooks/train-station.jpg'" alt="溪边车站的绿色小火车" />
+    <img :src="'/images/picturebooks/train-station.jpg'" alt="溪边车站的绿色小火车" loading="lazy" decoding="async" />
     <div>
       <span class="eyebrow">看图 · 听故事 · 跟着说</span>
       <h2 id="book-entry-title">绘本小火车，准备发车！</h2>

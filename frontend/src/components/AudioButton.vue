@@ -124,6 +124,7 @@ async function handlePlay() {
   box-shadow: 0 4px 12px rgba(76, 217, 100, 0.3);
   transition: transform var(--duration-fast) var(--ease-bounce),
               filter var(--duration-fast) var(--ease-smooth);
+  min-height: var(--touch-target);
 }
 
 .audio-btn:not(:disabled):hover {

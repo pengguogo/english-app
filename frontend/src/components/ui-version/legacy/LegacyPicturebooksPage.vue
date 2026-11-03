@@ -58,7 +58,7 @@ onMounted(load)
 
 <template>
   <main class="book-library">
-    <BackBar title="绘本小火车" @back="router.push('/')" />
+    <BackBar title-tag="span" title="绘本小火车" @back="router.push('/')" />
     <header class="library-hero">
       <div>
         <p class="eyebrow">PICTUREBOOK EXPRESS</p>

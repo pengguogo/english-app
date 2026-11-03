@@ -29,6 +29,6 @@ async function submit() {
 
 <style scoped>
 .password-form { display: grid; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-lg); background: var(--bg-card); }
-.password-form input { padding: var(--space-3); border: 1px solid var(--border-light); border-radius: var(--radius-sm); color: var(--text-primary); background: var(--bg-card); }
+.password-form input { min-height: var(--touch-target); padding: var(--space-3); border: 1px solid var(--border-light); border-radius: var(--radius-sm); color: var(--text-primary); background: var(--bg-card); }
 .password-form p { color: var(--text-secondary); }
 </style>

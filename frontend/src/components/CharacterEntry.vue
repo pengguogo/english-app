@@ -6,7 +6,7 @@ const router = useRouter()
 
 <template>
   <section class="character-entry">
-    <img :src="'/images/hanzi-pilot/hanzi-shan.jpg'" alt="认字小课堂的山景配图" />
+    <img :src="'/images/hanzi-pilot/hanzi-shan.jpg'" alt="认字小课堂的山景配图" loading="lazy" decoding="async" />
     <div>
       <h2>认字小课堂</h2>
       <p>按统编一年级上册选字，听一听、找一找，学过的字再复习。</p>

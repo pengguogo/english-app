@@ -16,16 +16,20 @@ import BackBar from '../components/BackBar.vue'
 import StarBar from '../components/StarBar.vue'
 import MimiMascot from '../components/MimiMascot.vue'
 import AppButton from '../components/AppButton.vue'
+import { DEFAULT_LIST_PAGE_SIZE, getNextVisibleCount, getVisibleItems } from '../utils/listWindow'
 
 const router = useRouter()
 const { safeBack } = useSafeBack()
 
 // 已学课时列表
 const learnedLessons = ref([])
+const visibleCount = ref(DEFAULT_LIST_PAGE_SIZE)
 // 统计数据 { learnedCount, totalStars, averageScore, subjectDistribution }
 const stats = ref({ learnedCount: 0, totalStars: 0, averageScore: 0, subjectDistribution: [] })
 const isLoading = ref(true)
 const errorMsg = ref('')
+const visibleLessons = computed(() => getVisibleItems(learnedLessons.value, visibleCount.value))
+const remainingCount = computed(() => Math.max(0, learnedLessons.value.length - visibleCount.value))
 
 onMounted(loadPage)
 
@@ -58,12 +62,17 @@ async function loadLearnedLessons() {
   errorMsg.value = ''
   try {
     learnedLessons.value = await getLearnedLessons()
+    visibleCount.value = DEFAULT_LIST_PAGE_SIZE
   } catch (e) {
     errorMsg.value = '加载失败,请返回重试'
     console.error('加载已学课时失败:', e)
   } finally {
     isLoading.value = false
   }
+}
+
+function showMore() {
+  visibleCount.value = getNextVisibleCount(visibleCount.value, learnedLessons.value.length)
 }
 
 /**
@@ -194,7 +203,7 @@ const subjectDistribution = computed(() => {
       <h2 class="section-title">已学课时</h2>
       <div class="lesson-list">
         <button
-          v-for="lesson in learnedLessons"
+          v-for="lesson in visibleLessons"
           :key="lesson.lessonId"
           type="button"
           class="lesson-card"
@@ -223,6 +232,9 @@ const subjectDistribution = computed(() => {
           </div>
         </button>
       </div>
+      <AppButton v-if="remainingCount > 0" variant="ghost" class="show-more" @click="showMore">
+        再显示 {{ Math.min(DEFAULT_LIST_PAGE_SIZE, remainingCount) }} 课
+      </AppButton>
     </section>
   </div>
 </template>
@@ -351,6 +363,11 @@ const subjectDistribution = computed(() => {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.show-more {
+  display: flex;
+  margin: var(--space-4) auto 0;
 }
 
 .lesson-card {

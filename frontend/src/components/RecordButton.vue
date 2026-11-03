@@ -8,6 +8,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRecorder } from '../composables/useRecorder'
+import { getRecorderStartErrorMessage } from '../utils/recorderError'
 
 /**
  * 组件 emits:
@@ -31,8 +32,10 @@ async function handleClick() {
     try {
       await start()
     } catch (e) {
-      // 用户拒绝麦克风权限或设备不可用时,给出儿童可理解的友好提示
-      errorMessage.value = '请允许麦克风权限才能跟读'
+      errorMessage.value = getRecorderStartErrorMessage(e, {
+        secureContext: window.isSecureContext,
+        getUserMedia: Boolean(navigator.mediaDevices?.getUserMedia)
+      })
       console.error('启动录音失败:', e)
     }
   } else {
@@ -91,6 +94,7 @@ async function handleClick() {
   box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
   transition: transform var(--duration-fast) var(--ease-bounce),
               background var(--duration-fast) var(--ease-smooth);
+  min-height: var(--touch-target);
 }
 
 .record-btn:not(:disabled):hover {

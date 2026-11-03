@@ -8,7 +8,7 @@
 /**
  * @description 错题集页面:统计卡片 + 筛选标签 + 错题卡片列表 + 空状态。
  */
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   getWrongAnswers,
@@ -19,6 +19,8 @@ import { useSafeBack } from '../composables/useSafeBack'
 import BackBar from '../components/BackBar.vue'
 import AppButton from '../components/AppButton.vue'
 import MimiMascot from '../components/MimiMascot.vue'
+import { DEFAULT_LIST_PAGE_SIZE, getNextVisibleCount, getVisibleItems } from '../utils/listWindow'
+import { getQuestionTypeText } from '../utils/questionType'
 
 const router = useRouter()
 const { safeBack } = useSafeBack()
@@ -27,12 +29,17 @@ const { safeBack } = useSafeBack()
 const wrongAnswers = ref([])
 // 统计数据 { total, unresolved, resolved }
 const stats = ref({ total: 0, unresolved: 0, resolved: 0 })
+// 统计是否已成功加载；未加载完或失败时不显示 0/0/0 的假数据
+const statsLoaded = ref(false)
 // 当前筛选状态: 'all' | 'unresolved' | 'resolved'
-const filter = ref('all')
+const filter = ref('unresolved')
+const visibleCount = ref(DEFAULT_LIST_PAGE_SIZE)
 // 加载状态
 const isLoading = ref(true)
 const errorMsg = ref('')
 const actionError = ref('')
+const visibleWrongAnswers = computed(() => getVisibleItems(wrongAnswers.value, visibleCount.value))
+const remainingCount = computed(() => Math.max(0, wrongAnswers.value.length - visibleCount.value))
 
 onMounted(loadPage)
 
@@ -51,6 +58,7 @@ function goBack() {
 async function loadStats() {
   try {
     stats.value = await getWrongAnswerStats()
+    statsLoaded.value = true
   } catch (e) {
     console.error('加载错题统计失败:', e)
     stats.value = { total: 0, unresolved: 0, resolved: 0 }
@@ -64,11 +72,12 @@ async function loadWrongAnswers() {
   isLoading.value = true
   errorMsg.value = ''
   try {
+    visibleCount.value = DEFAULT_LIST_PAGE_SIZE
     // 将筛选状态转换为 resolved 参数:all=null, unresolved=false, resolved=true
     const resolvedParam = filter.value === 'all' ? null : filter.value === 'resolved'
     wrongAnswers.value = await getWrongAnswers(resolvedParam)
   } catch (e) {
-    errorMsg.value = '加载失败,请返回重试'
+    errorMsg.value = '加载失败，请返回重试'
     console.error('加载错题列表失败:', e)
   } finally {
     isLoading.value = false
@@ -83,6 +92,10 @@ async function switchFilter(status) {
   if (filter.value === status) return
   filter.value = status
   await loadWrongAnswers()
+}
+
+function showMore() {
+  visibleCount.value = getNextVisibleCount(visibleCount.value, wrongAnswers.value.length)
 }
 
 /**
@@ -144,16 +157,6 @@ function getQuestionText(item) {
   return q.question || q.sentence || q.word || q.text || '题目内容'
 }
 
-/**
- * 获取题目类型标签文本。
- * @param {string} type 题目类型
- * @return {string} 中文标签
- */
-function getTypeText(type) {
-  if (type === 'QUIZ') return '选择题'
-  if (type === 'CALCULATE') return '计算题'
-  return type || '题目'
-}
 </script>
 
 <template>
@@ -161,7 +164,7 @@ function getTypeText(type) {
     <BackBar title="错题集" @back="goBack" />
 
     <!-- 顶部统计卡片行 -->
-    <div class="stats-row">
+    <div v-if="statsLoaded" class="stats-row">
       <div class="stat-card stat-warning">
         <span class="stat-num">{{ stats.total }}</span>
         <span class="stat-label">总错题</span>
@@ -207,7 +210,7 @@ function getTypeText(type) {
     <!-- 加载失败 -->
     <div v-else-if="errorMsg" class="state-tip error" role="alert">
       <p>{{ errorMsg }}</p>
-      <AppButton variant="ghost" @click="loadPage">重新加载</AppButton>
+      <AppButton size="lg" @click="loadPage">重试</AppButton>
     </div>
 
     <!-- 空状态 -->
@@ -221,14 +224,14 @@ function getTypeText(type) {
     <div v-else class="card-list">
       <p v-if="actionError" class="action-error" role="alert">{{ actionError }}</p>
       <div
-        v-for="item in wrongAnswers"
+        v-for="item in visibleWrongAnswers"
         :key="item.id"
         class="wrong-card"
         :class="{ resolved: item.resolved }"
       >
         <!-- 顶部:类型标签 + 错误次数徽章 -->
         <div class="card-top">
-          <span class="type-tag">{{ getTypeText(item.questionType) }}</span>
+          <span class="type-tag">{{ getQuestionTypeText(item.questionType) }}</span>
           <span class="count-badge">错 {{ item.wrongCount || 1 }} 次</span>
           <span v-if="item.resolved" class="resolved-tag">已掌握</span>
         </div>
@@ -267,6 +270,9 @@ function getTypeText(type) {
           >跳转重做</AppButton>
         </div>
       </div>
+      <AppButton v-if="remainingCount > 0" variant="ghost" class="show-more" @click="showMore">
+        再显示 {{ Math.min(DEFAULT_LIST_PAGE_SIZE, remainingCount) }} 道
+      </AppButton>
     </div>
   </div>
 </template>
@@ -368,6 +374,10 @@ function getTypeText(type) {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+.show-more {
+  align-self: center;
 }
 
 .wrong-card {

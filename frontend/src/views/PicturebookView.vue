@@ -29,7 +29,7 @@ function begin(position = null) {
 
 <template>
   <main class="book-journey">
-    <BackBar :title="active < 0 ? '绘本出发站' : '绘本小火车'" @back="active < 0 ? router.push('/picturebooks') : timetable()" />
+    <BackBar title-tag="span" :title="active < 0 ? '绘本出发站' : '绘本小火车'" @back="active < 0 ? router.push('/picturebooks') : timetable()" />
     <p v-if="loading" role="status">车票准备中…</p>
     <section v-else-if="error" role="alert"><p>{{ error }}</p><AppButton @click="load">重新加载</AppButton></section>
     <template v-else>

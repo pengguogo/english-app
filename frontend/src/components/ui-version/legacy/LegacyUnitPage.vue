@@ -48,7 +48,7 @@ async function loadLessons() {
       progressMap.value = new Map(progressList.map(p => [p.lessonId, p]))
     }
   } catch (e) {
-    errorMsg.value = '加载失败,请返回重试'
+    errorMsg.value = '加载失败，请返回重试'
     console.error('加载课时失败:', e)
   } finally {
     isLoading.value = false
@@ -155,7 +155,7 @@ function openLesson(lesson) {
     <!-- 加载失败 -->
     <div v-else-if="errorMsg" class="state-tip error" role="alert">
       <p>{{ errorMsg }}</p>
-      <AppButton variant="ghost" @click="loadLessons">重新加载</AppButton>
+      <AppButton size="lg" @click="loadLessons">重试</AppButton>
     </div>
 
     <div v-else-if="lessons.length === 0" class="state-tip">

@@ -169,18 +169,20 @@ function getOptionClass(index) {
 
 <template>
   <div class="card-area">
-    <!-- 顶部进度条 -->
-    <div class="progress-section">
-      <div class="progress-info">
-        <span>第 {{ currentIndex + 1 }} / {{ totalItems }} 题</span>
+    <div class="lesson-head">
+      <!-- 顶部进度条 -->
+      <div class="progress-section">
+        <div class="progress-info">
+          <span>第 {{ currentIndex + 1 }} / {{ totalItems }} 题</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+        </div>
       </div>
-      <div class="progress-bar">
-        <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
-      </div>
-    </div>
 
-    <!-- 小老鼠陪伴插画 -->
-    <MimiMascot variant="companion" size="md" class="mascot-companion" />
+      <!-- 小老鼠陪伴插画 -->
+      <MimiMascot variant="companion" size="md" class="mascot-companion" />
+    </div>
 
     <!-- 题目卡片 -->
     <div class="quiz-card">
@@ -273,7 +275,9 @@ function getOptionClass(index) {
 .progress-bar { height: 8px; background: var(--bg-card); border-radius: var(--radius-pill); overflow: hidden; box-shadow: var(--shadow-soft); }
 .progress-fill { height: 100%; background: var(--gradient-primary); border-radius: var(--radius-pill); transition: width var(--duration-slow) var(--ease-smooth); }
 
-.mascot-companion { position: absolute; top: 0; right: 0; z-index: 1; opacity: 0.9; }
+.lesson-head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
+.lesson-head .progress-section { flex: 1; min-width: 0; margin-bottom: 0; }
+.mascot-companion { flex-shrink: 0; opacity: 0.9; }
 
 .quiz-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: var(--space-6); margin-bottom: var(--space-6); box-shadow: var(--shadow-card); }
 
@@ -292,8 +296,8 @@ function getOptionClass(index) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: var(--touch-target);
+  height: var(--touch-target);
   border-radius: var(--radius-pill);
   border: none;
   background: var(--color-success);

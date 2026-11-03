@@ -1,15 +1,13 @@
 <!--
-  HomeView.vue - 首页版本包装页
-  用途: 根据全局 UI 版本状态切换老版首页和新版首页。
+  HomeView.vue - 首页路由视图
+  用途: 直接渲染 LegacyHomePage（新版 UI 与版本切换已移除）。
   作者: TRAE Agent
   创建日期: 2026-09-29
 -->
 <script setup>
-import UiVersionPageShell from '../components/ui-version/UiVersionPageShell.vue'
 import LegacyHomePage from '../components/ui-version/legacy/LegacyHomePage.vue'
-import ModernHomePage from '../components/ui-version/modern/ModernHomePage.vue'
 </script>
 
 <template>
-  <UiVersionPageShell :legacy-page="LegacyHomePage" :modern-page="ModernHomePage" />
+  <LegacyHomePage />
 </template>

@@ -23,20 +23,33 @@ onMounted(load)
 
 <template>
   <section class="today-task" aria-label="今日学习任务">
-    <p class="task-label">今天先做什么</p>
-    <template v-if="task">
-      <h2>{{ task.title }}</h2>
-      <p>{{ task.reason }}</p>
-      <AppButton @click="router.push({ path: task.path, query: task.query })">开始今日任务</AppButton>
-    </template>
+    <AppButton
+      v-if="task"
+      size="lg"
+      block
+      class="today-btn"
+      @click="router.push({ path: task.path, query: task.query })"
+    >
+      <span class="today-icon" aria-hidden="true">▶</span>
+      <span class="today-text">
+        <span class="today-label">开始今日任务</span>
+        <span class="today-title">{{ task.title }}</span>
+      </span>
+    </AppButton>
     <p v-else-if="!error" role="status">正在准备今日任务...</p>
-    <template v-if="error"><p role="alert">{{ error }}</p><AppButton variant="ghost" @click="load">重试</AppButton></template>
-    <AppButton variant="ghost" @click="router.push('/parent-center')">家长中心 · 学习周报与游戏密码</AppButton>
+    <template v-if="error && !task">
+      <p role="alert">{{ error }}</p>
+      <AppButton size="lg" @click="load">重试</AppButton>
+    </template>
   </section>
 </template>
 
 <style scoped>
-.today-task { display: grid; gap: var(--space-3); padding: var(--space-5); margin-bottom: var(--space-4); border-radius: var(--radius-lg); background: var(--bg-card); box-shadow: var(--shadow-card); }
-.task-label { color: var(--color-primary); font-weight: var(--font-bold); }
-.today-task p { color: var(--text-secondary); }
+.today-task { display: grid; gap: var(--space-3); margin-bottom: var(--space-5); }
+.today-task p { color: var(--text-secondary); text-align: center; }
+.today-btn { min-height: 96px; justify-content: flex-start; gap: var(--space-4); padding: var(--space-4) var(--space-6); white-space: normal; text-align: left; }
+.today-icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 56px; height: 56px; border-radius: var(--radius-pill); background: var(--brand-surface-soft); color: var(--color-primary); font-size: var(--text-lg); }
+.today-text { display: grid; gap: var(--space-1); min-width: 0; }
+.today-label { font-size: var(--text-xl); font-weight: var(--font-bold); }
+.today-title { font-size: var(--text-sm); opacity: 0.9; overflow-wrap: anywhere; }
 </style>

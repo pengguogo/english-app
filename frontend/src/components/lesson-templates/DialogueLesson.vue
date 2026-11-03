@@ -89,18 +89,20 @@ const progressPercent = computed(() => {
 
 <template>
   <div class="card-area">
-    <!-- 顶部进度条 + 数字标注 -->
-    <div class="progress-section">
-      <div class="progress-info">
-        <span>第 {{ currentIndex + 1 }} / {{ totalItems }} 句</span>
+    <div class="lesson-head">
+      <!-- 顶部进度条 + 数字标注 -->
+      <div class="progress-section">
+        <div class="progress-info">
+          <span>第 {{ currentIndex + 1 }} / {{ totalItems }} 句</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+        </div>
       </div>
-      <div class="progress-bar">
-        <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
-      </div>
-    </div>
 
-    <!-- 小老鼠陪伴插画（右上角） -->
-    <MimiMascot variant="companion" size="md" class="mascot-companion" />
+      <!-- 小老鼠陪伴插画（右上角） -->
+      <MimiMascot variant="companion" size="md" class="mascot-companion" />
+    </div>
 
     <!-- 当前对话场景图 -->
     <img
@@ -213,13 +215,9 @@ const progressPercent = computed(() => {
 }
 
 /* 小老鼠陪伴插画 */
-.mascot-companion {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 1;
-  opacity: 0.9;
-}
+.lesson-head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
+.lesson-head .progress-section { flex: 1; min-width: 0; margin-bottom: 0; }
+.mascot-companion { flex-shrink: 0; opacity: 0.9; }
 
 .scene-image {
   width: 100%;

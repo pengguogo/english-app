@@ -55,7 +55,7 @@ onMounted(load)
       :current-item="current" :current-index="current.itemIndex" :lesson-id="current.lessonId"
       :items="progress.map(p => p.item)" :is-last-item="index === queue.length - 1" review-only @next="next" />
     <section v-else-if="!loading && !error">
-      <h1>每天认一认</h1>
+      <h2>每天认一认</h2>
       <p v-if="finished" role="status">这一轮复习完成，认字记录已保存。</p>
       <p>接触 {{ counts.learned }} 字 · 待巩固 {{ counts.reviewing }} 字 · 跨天认对 {{ counts.recognized }} 字</p>
       <p>提示后答对和认错都会进入巩固；在三个不同日期独立认对，才标为跨天认对。</p>

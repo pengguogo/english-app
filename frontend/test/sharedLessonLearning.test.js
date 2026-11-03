@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import { runInNewContext } from 'node:vm'
 import { ref, computed, reactive, watch, effectScope } from 'vue'
 import { normalizeContent } from '../src/utils/lessonContent.js'
+import { buildThemeDestination } from '../src/utils/lessonNav.js'
 function source(name) {
   return readFileSync(new URL(`../src/composables/${name}.js`, import.meta.url), 'utf8')
     .replace(/^import .*\n/gm, '').replaceAll('export function', 'function')
@@ -19,7 +20,7 @@ function setup(load = async id => ({ id: Number(id), unitId: 4, type: 'WORD', na
     useLearningAttempts: () => ({ recordAttempt: data => events.push(['answer', data]) }),
     scorePronunciation: async () => ({ score: 80 }),
     completeLesson: async id => events.push(['complete', id]),
-    getLessonsByUnit: async () => [], getUnitsByTheme: async () => [], findNextReadingLesson: async () => null,
+    getLessonsByUnit: async () => [], getUnitsByTheme: async () => [], findNextReadingLesson: async () => null, buildThemeDestination,
     normalizeContent, onMounted() {}, onBeforeUnmount: fn => { unmount = fn },
     setTimeout: () => 1, clearTimeout() {}, console, alert() {} }
   for (const name of ['WordLesson', 'CharacterLesson', 'SentenceLesson', 'ReadingLesson', 'QuizLesson', 'CalculateLesson', 'PhonicsLesson', 'DialogueLesson']) context[name] = name

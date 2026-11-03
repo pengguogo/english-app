@@ -42,7 +42,7 @@ const modelInfo = {
 
 <template>
   <main class="models-page">
-    <BackBar title="3D 交通工具馆" @back="router.push('/')" />
+    <BackBar title-tag="span" title="3D 交通工具馆" @back="router.push('/')" />
     <header class="intro">
       <div class="model-tabs" aria-label="选择交通工具模型">
         <AppButton :variant="model === 'steam' ? 'primary' : 'ghost'" :aria-pressed="model === 'steam'" @click="model = 'steam'">01 蒸汽火车</AppButton>

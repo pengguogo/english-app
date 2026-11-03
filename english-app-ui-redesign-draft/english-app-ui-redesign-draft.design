@@ -138,7 +138,14 @@
       "canvasData": {
         "x": 0,
         "y": 877,
-        "group": 1
+        "group": 1,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1538,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-d333b993",
+          "measuredAt": 1790671223142
+        }
       },
       "devMetadata": {
         "htmlSrc": "pages/home-kid-simple.html",
@@ -160,7 +167,14 @@
       "canvasData": {
         "x": 309,
         "y": 877,
-        "group": 1
+        "group": 1,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 2973,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-8479329e",
+          "measuredAt": 1790671223142
+        }
       },
       "devMetadata": {
         "htmlSrc": "pages/theme-kid-simple.html",
@@ -188,7 +202,14 @@
       "canvasData": {
         "x": 618,
         "y": 877,
-        "group": 1
+        "group": 1,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1862,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-ebc52ce0",
+          "measuredAt": 1790671223142
+        }
       },
       "devMetadata": {
         "htmlSrc": "pages/unit-kid-simple.html",
@@ -216,7 +237,14 @@
       "canvasData": {
         "x": 927,
         "y": 877,
-        "group": 1
+        "group": 1,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1285,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-6214c235",
+          "measuredAt": 1790671223142
+        }
       },
       "devMetadata": {
         "htmlSrc": "pages/lesson-kid-simple.html",
@@ -365,7 +393,14 @@
       "canvasData": {
         "x": 0,
         "y": 1855,
-        "group": 2
+        "group": 2,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 2286,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-ce2ca9c7",
+          "measuredAt": 1790671223142
+        }
       },
       "devMetadata": {
         "htmlSrc": "pages/home-latest-adapted.html",
@@ -402,7 +437,14 @@
       "canvasData": {
         "x": 309,
         "y": 1855,
-        "group": 2
+        "group": 2,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1631,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-9e49963e",
+          "measuredAt": 1790671223142
+        }
       },
       "devMetadata": {
         "htmlSrc": "pages/subject-latest-adapted.html",
@@ -431,7 +473,14 @@
       "canvasData": {
         "x": 309,
         "y": 2205,
-        "group": 2
+        "group": 2,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1677,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-964ab65a",
+          "measuredAt": 1790671223142
+        }
       },
       "devMetadata": {
         "htmlSrc": "pages/games-latest-adapted.html",
@@ -460,7 +509,14 @@
       "canvasData": {
         "x": 309,
         "y": 2555,
-        "group": 2
+        "group": 2,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1691,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-e89da5b3",
+          "measuredAt": 1790671223142
+        }
       },
       "devMetadata": {
         "htmlSrc": "pages/picturebooks-latest-adapted.html",
@@ -489,7 +545,14 @@
       "canvasData": {
         "x": 309,
         "y": 2905,
-        "group": 2
+        "group": 2,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1864,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-baa6f13f",
+          "measuredAt": 1790671223142
+        }
       },
       "devMetadata": {
         "htmlSrc": "pages/models-latest-adapted.html",

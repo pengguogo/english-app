@@ -2,6 +2,7 @@ import { completeLesson } from '../api/progress'
 import { getLessonsByUnit } from '../api/lesson'
 import { getUnitsByTheme } from '../api/unit'
 import { findNextReadingLesson } from '../utils/continuousPlayback'
+import { buildThemeDestination } from '../utils/lessonNav'
 
 export function useLessonCompletion(state) {
   const { route, router, safeBack, lesson, isSubmitting, isProgressSaved, showReview,
@@ -85,16 +86,7 @@ export function useLessonCompletion(state) {
   }
 
   function goBack() {
-    safeBack(buildThemeFallback())
-  }
-
-  function buildThemeFallback() {
-    if (!route.query.themeId) return { path: '/' }
-    const query = {}
-    if (route.query.themeName) query.themeName = String(route.query.themeName)
-    if (route.query.subjectId) query.subjectId = String(route.query.subjectId)
-    if (route.query.subjectName) query.subjectName = String(route.query.subjectName)
-    return { path: `/theme/${route.query.themeId}`, query }
+    safeBack(buildThemeDestination(route.query))
   }
 
   async function finishLesson() {
@@ -109,14 +101,7 @@ export function useLessonCompletion(state) {
           totalBestScore.value
         )
       }
-      const query = {}
-      if (route.query.themeId) query.themeId = String(route.query.themeId)
-      if (route.query.themeName) query.themeName = String(route.query.themeName)
-      if (route.query.subjectId) query.subjectId = String(route.query.subjectId)
-      if (route.query.subjectName) query.subjectName = String(route.query.subjectName)
-      const destination = route.query.themeId
-        ? { path: `/theme/${route.query.themeId}`, query }
-        : { path: '/' }
+      const destination = buildThemeDestination(route.query)
       router.replace(destination)
     } catch (error) {
       console.error('保存进度失败:', error)

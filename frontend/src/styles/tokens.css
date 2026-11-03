@@ -173,7 +173,7 @@
   --subject-extracurricular: #7E57C2;
 
   /* ===== 交互尺寸 ===== */
-  --touch-target: 44px;
+  --touch-target: 48px;
   --content-max: 960px;
   --nav-height: 60px;
 }

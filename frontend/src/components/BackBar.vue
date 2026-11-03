@@ -10,7 +10,8 @@
  * @param {String} title - 可选的居中标题
  */
 defineProps({
-  title: { type: String, default: '' }
+  title: { type: String, default: '' },
+  titleTag: { type: String, default: 'h1' }
 })
 
 /**
@@ -29,7 +30,7 @@ const emit = defineEmits(['back'])
       </svg>
       <span>返回</span>
     </button>
-    <h1 v-if="title" class="bar-title">{{ title }}</h1>
+    <component :is="titleTag" v-if="title" class="bar-title">{{ title }}</component>
     <div class="bar-right">
       <slot name="right" />
     </div>

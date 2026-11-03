@@ -168,7 +168,7 @@ export function useLessonLearning() {
       restoreBookmark()
     } catch (error) {
       if (version !== lessonLoadVersion) return
-      errorMsg.value = '加载课时失败,请返回重试'
+      errorMsg.value = '加载课时失败，请返回重试'
       console.error('加载课时失败:', error)
     } finally {
       if (version === lessonLoadVersion) {

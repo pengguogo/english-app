@@ -15,6 +15,7 @@ import AudioButton from '../AudioButton.vue'
 import AppButton from '../AppButton.vue'
 import MimiMascot from '../MimiMascot.vue'
 import { evaluateAnswerAttempt } from '../../utils/answerAttempts'
+import { formatPhonetic } from '../../utils/phonetic'
 
 /**
  * 组件 Props
@@ -226,18 +227,20 @@ watch(() => props.currentIndex, () => {
 
 <template>
   <div class="card-area">
-    <!-- 顶部进度条 + 数字标注 -->
-    <div class="progress-section">
-      <div class="progress-info">
-        <span>第 {{ currentIndex + 1 }} / {{ totalItems }} 项</span>
+    <div class="lesson-head">
+      <!-- 顶部进度条 + 数字标注 -->
+      <div class="progress-section">
+        <div class="progress-info">
+          <span>第 {{ currentIndex + 1 }} / {{ totalItems }} 项</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+        </div>
       </div>
-      <div class="progress-bar">
-        <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
-      </div>
-    </div>
 
-    <!-- 小老鼠陪伴插画（右上角） -->
-    <MimiMascot variant="companion" size="md" class="mascot-companion" />
+      <!-- 小老鼠陪伴插画（右上角） -->
+      <MimiMascot variant="companion" size="md" class="mascot-companion" />
+    </div>
 
     <!-- ============ 学习模式 ============ -->
     <div v-if="currentItem && mode === 'learn'" class="learn-card">
@@ -245,11 +248,11 @@ watch(() => props.currentIndex, () => {
       <h1 class="big-letter">{{ currentLetter }}</h1>
       <!-- 字母发音（如 /ef/） -->
       <p v-if="currentItem.pronunciation" class="letter-sound">
-        /{{ currentItem.pronunciation }}/
+        {{ formatPhonetic(currentItem.pronunciation) }}
       </p>
       <!-- 音标（如 /f/） -->
       <p v-if="currentItem.sound" class="phonetic">
-        音标 /{{ currentItem.sound }}/
+        音标 {{ formatPhonetic(currentItem.sound) }}
       </p>
       <!-- 发音提示 -->
       <p v-if="currentItem.tip" class="tip">{{ currentItem.tip }}</p>
@@ -269,7 +272,7 @@ watch(() => props.currentIndex, () => {
       <div class="word-info">
         <h2 class="word">{{ currentItem.word }}</h2>
         <p v-if="currentItem.phonetic" class="word-phonetic">
-          /{{ currentItem.phonetic }}/
+          {{ formatPhonetic(currentItem.phonetic) }}
         </p>
         <p class="translation">{{ currentItem.translation }}</p>
       </div>
@@ -289,7 +292,7 @@ watch(() => props.currentIndex, () => {
     <div v-else-if="currentItem && mode === 'practice'" class="practice-card">
       <h2 class="practice-question">听一听，选出发这个音的字母</h2>
       <p v-if="currentItem.sound" class="practice-hint">
-        音标 /{{ currentItem.sound }}/
+        音标 {{ formatPhonetic(currentItem.sound) }}
       </p>
 
       <!-- 选项列表（3 选 1，随机排序） -->
@@ -408,13 +411,9 @@ watch(() => props.currentIndex, () => {
 }
 
 /* 小老鼠陪伴插画 */
-.mascot-companion {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 1;
-  opacity: 0.9;
-}
+.lesson-head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
+.lesson-head .progress-section { flex: 1; min-width: 0; margin-bottom: 0; }
+.mascot-companion { flex-shrink: 0; opacity: 0.9; }
 
 /* 学习模式卡片 */
 .learn-card {

@@ -51,7 +51,7 @@ function retry() {
 
 <template>
   <main class="practice-page">
-    <BackBar title="错题单题重练" @back="router.replace('/wrong-answers')" />
+    <BackBar title-tag="span" title="错题单题重练" @back="router.replace('/wrong-answers')" />
     <p v-if="loading" role="status">正在加载题目...</p>
     <p v-if="error" role="alert">{{ error }}</p>
     <section v-if="mastered" role="status">

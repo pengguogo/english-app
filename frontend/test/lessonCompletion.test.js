@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { runInNewContext } from 'node:vm'
 import { ref } from 'vue'
+import { buildThemeDestination } from '../src/utils/lessonNav.js'
 
 function setup(completeLesson, continuous = false) {
   const state = { route: { params: { lessonId: '7' }, query: continuous ? { continuous: '1' } : {} },
@@ -14,7 +15,7 @@ function setup(completeLesson, continuous = false) {
     .replace(/^import .*\n/gm, '').replace('export function', 'function')
   const factory = runInNewContext(`${source}\nuseLessonCompletion`, { completeLesson,
     getLessonsByUnit: async () => [], getUnitsByTheme: async () => [],
-    findNextReadingLesson: async () => null, console: { error() {} } })
+    findNextReadingLesson: async () => null, buildThemeDestination, console: { error() {} } })
   return { state, ...factory(state) }
 }
 

@@ -146,18 +146,20 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="card-area">
-    <!-- 顶部进度条 -->
-    <div class="progress-section">
-      <div class="progress-info">
-        <span>第 {{ currentIndex + 1 }} / {{ totalItems }} 页</span>
+    <div class="lesson-head">
+      <!-- 顶部进度条 -->
+      <div class="progress-section">
+        <div class="progress-info">
+          <span>第 {{ currentIndex + 1 }} / {{ totalItems }} 页</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+        </div>
       </div>
-      <div class="progress-bar">
-        <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
-      </div>
-    </div>
 
-    <!-- 小老鼠陪伴插画 -->
-    <MimiMascot variant="companion" size="md" class="mascot-companion" />
+      <!-- 小老鼠陪伴插画 -->
+      <MimiMascot variant="companion" size="md" class="mascot-companion" />
+    </div>
 
     <!-- 阅读卡片: 配图 + 标题 + 正文 -->
     <div class="reading-card">
@@ -228,7 +230,9 @@ onBeforeUnmount(() => {
 .progress-bar { height: 8px; background: var(--bg-card); border-radius: var(--radius-pill); overflow: hidden; box-shadow: var(--shadow-soft); }
 .progress-fill { height: 100%; background: var(--gradient-primary); border-radius: var(--radius-pill); transition: width var(--duration-slow) var(--ease-smooth); }
 
-.mascot-companion { position: absolute; top: 0; right: 0; z-index: 1; opacity: 0.9; }
+.lesson-head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
+.lesson-head .progress-section { flex: 1; min-width: 0; margin-bottom: 0; }
+.mascot-companion { flex-shrink: 0; opacity: 0.9; }
 
 .reading-card {
   background: var(--bg-card);

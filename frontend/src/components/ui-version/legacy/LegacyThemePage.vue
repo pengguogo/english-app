@@ -102,7 +102,7 @@ async function loadUnits() {
       }
     }))
   } catch (e) {
-    errorMsg.value = '加载失败,请返回重试'
+    errorMsg.value = '加载失败，请返回重试'
     console.error('加载单元失败:', e)
   } finally {
     isLoading.value = false
@@ -166,7 +166,7 @@ function getTypeText(type) {
 
 <template>
   <div class="theme-view">
-    <BackBar :title="themeVisual.title" @back="goBack" />
+    <BackBar title-tag="span" :title="themeVisual.title" @back="goBack" />
 
     <!-- 场景 banner -->
     <div
@@ -221,7 +221,7 @@ function getTypeText(type) {
     <!-- 加载失败 -->
     <div v-else-if="errorMsg" class="state-tip error" role="alert">
       <p>{{ errorMsg }}</p>
-      <AppButton variant="ghost" @click="loadUnits">重新加载</AppButton>
+      <AppButton size="lg" @click="loadUnits">重试</AppButton>
     </div>
 
     <div v-else-if="units.length === 0" class="state-tip">
