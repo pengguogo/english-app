@@ -171,6 +171,9 @@ const isPawPatrolImage = computed(() => {
       <div class="scoring-dot"></div>
       <p class="feedback">{{ scoreMessage }}</p>
     </div>
+    <div v-else-if="scoreMessage" class="score-area" role="status" aria-live="polite">
+      <p class="feedback">{{ scoreMessage }}</p>
+    </div>
 
     <!-- 上一步 / 下一步 / 完成本课 -->
     <div class="action-row">
