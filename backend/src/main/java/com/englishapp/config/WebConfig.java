@@ -30,6 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
                 .allowedOriginPatterns(
+                        "https://study.penggeai.com",
                         "http://localhost:*",
                         "https://localhost:*",
                         "http://127.0.0.1:*",
