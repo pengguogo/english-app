@@ -107,12 +107,12 @@ public class ExploreService {
         boolean strict = !canGenerate && isQuestion(text);
         LearningItemIndex.Hit hit = strict ? items.best(text, 1.0) : items.best(text);
         if (hit != null) {
-            AgentChatResponseDTO r = explainItem(hit.item(), text, asker, gate, canGenerate && isQuestion(text));
+            AgentChatResponseDTO r = explainItem(hit.item(), text, asker, gate, canGenerate);
             if (r != null) return r;
             return generate(text, gentle, asker, gate);
         }
-        // 4. 知识问题：允许模型的用户实时生成；否则退回课程向导
-        if (canGenerate && isQuestion(text)) return generate(text, gentle, asker, gate);
+        // 4. 允许模型的用户：没表达想学课（知识问题、闲聊、分享）都交给豆豆生成；否则退回课程向导
+        if (canGenerate) return generate(text, gentle, asker, gate);
         return fromGuide(g);
     }
 

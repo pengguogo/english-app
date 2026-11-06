@@ -36,7 +36,8 @@ class ExploreLiveTest {
     void live() {
         Assumptions.assumeTrue(llm.enabled(), "未配置 DASHSCOPE_API_KEY");
         List<String> questions = List.of("霸王龙的牙齿", "恐龙为什么不见了", "冰淇淋为什么会化", "为什么会打嗝",
-                "月亮为什么会变", "小猫为什么喜欢晒太阳", "天上为什么会有彩虹", "蚂蚁怎么认路", "我想看火车", "黑洞里面有什么");
+                "月亮为什么会变", "小猫为什么喜欢晒太阳", "天上为什么会有彩虹", "蚂蚁怎么认路", "我想看火车", "黑洞里面有什么",
+                "你好呀", "我今天去公园玩了", "给我讲个小故事", "我喜欢小猫");
         ExploreService.Asker asker = new ExploreService.Asker("child:0", true, false);
         StringBuilder report = new StringBuilder();
         for (String q : questions) {

@@ -173,6 +173,26 @@ class AgentChatTest extends IntegrationTestBase {
     }
 
     @Test
+    void should_豆豆闲聊回应且不出题_当_已同意家庭说的话课程里没有() throws Exception {
+        Actor a = consented();
+        when(llm.complete(anyString(), anyString())).thenReturn(new LlmClient.Completion(
+                "{\"title\":\"你好呀\",\"explain\":\"你好呀，小朋友！今天你想和豆豆聊聊小动物吗？\",\"unknown\":false}", 100, 30, 500));
+        mockMvc.perform(a.with(chat(Map.of("text", "你好呀"))))
+                .andExpect(jsonPath("$.data.type").value("EXPLAIN"))
+                .andExpect(jsonPath("$.data.explain.source").value("GENERATED"))
+                .andExpect(jsonPath("$.data.quiz").doesNotExist());
+        verify(llm, times(1)).complete(anyString(), anyString());
+    }
+
+    @Test
+    void should_游客闲聊只走检索不调模型_当_课程里没有() throws Exception {
+        mockMvc.perform(chat(Map.of("text", "你好呀")).with(csrf()))
+                .andExpect(jsonPath("$.data.type").value("NO_MATCH"))
+                .andExpect(jsonPath("$.data.explain").doesNotExist());
+        verifyNoInteractions(llm);
+    }
+
+    @Test
     void should_拦截且不泄露原文_当_生成内容含联系方式() throws Exception {
         Actor a = consented();
         when(llm.complete(anyString(), anyString())).thenReturn(new LlmClient.Completion(
