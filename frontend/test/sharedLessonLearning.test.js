@@ -10,13 +10,14 @@ function source(name) {
     .replace(/^import .*\n/gm, '').replaceAll('export function', 'function')
 }
 function setup(load = async id => ({ id: Number(id), unitId: 4, type: 'WORD', name: '水果', content: { words: ['apple', 'banana'] } })) {
-  const route = reactive({ params: { lessonId: '7' }, query: {} }), events = []
+  const route = reactive({ params: { lessonId: '7' }, query: {} }), events = [], ctx = []
   const router = { replace: async target => events.push(['route', target]) }
   let unmount
   const context = { ref, computed, watch, useRoute: () => route, useRouter: () => router,
     useSafeBack: () => ({ safeBack: target => events.push(['back', target]) }),
     getLessonById: load, recordWrongAnswer: async data => events.push(['wrong', data]),
-    stopActiveTts() {}, useLessonBookmark: () => () => {}, useStudyTimer() {},
+    stopActiveTts() {}, setLearningContext: (id, index) => ctx.push([id, index]), clearLearningContext: () => ctx.push(null),
+    useLessonBookmark: () => () => {}, useStudyTimer() {},
     useLearningAttempts: () => ({ recordAttempt: data => events.push(['answer', data]) }),
     scorePronunciation: async () => ({ score: 80 }),
     completeLesson: async id => events.push(['complete', id]),
@@ -26,7 +27,7 @@ function setup(load = async id => ({ id: Number(id), unitId: 4, type: 'WORD', na
   for (const name of ['WordLesson', 'CharacterLesson', 'SentenceLesson', 'ReadingLesson', 'QuizLesson', 'CalculateLesson', 'PhonicsLesson', 'DialogueLesson']) context[name] = name
   const factory = runInNewContext(`${source('useLessonScoring')}\n${source('useLessonCompletion')}\n${source('useLessonLearning')}\nuseLessonLearning`, context)
   const scope = effectScope(), state = scope.run(() => factory())
-  return { state, events, route, unmount: () => { unmount(); scope.stop() } }
+  return { state, events, ctx, route, unmount: () => { unmount(); scope.stop() } }
 }
 
 test('共享课程流程兼容旧单词格式，切题进入复习，保存成功后才庆祝完成', async () => {
@@ -57,4 +58,15 @@ test('快速切课后旧响应不覆盖当前课时，绘本仍跳转原有阅�
   assert.equal(flow.state.lesson.value, null)
   assert.equal(flow.events[0][1].path, '/picturebooks/9')
   flow.unmount()
+})
+
+test('切换学习项时写入学习伙伴上下文，离开课程页清空', async () => {
+  const flow = setup()
+  await flow.state.loadLesson()
+  await Promise.resolve()
+  flow.state.nextItem()
+  await Promise.resolve()
+  flow.unmount()
+  assert.deepEqual(flow.ctx.at(-2), [7, 1])
+  assert.equal(flow.ctx.at(-1), null)
 })

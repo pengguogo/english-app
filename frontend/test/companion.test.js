@@ -8,6 +8,7 @@ const source = readFileSync(new URL('../src/composables/useCompanion.js', import
   .replace(/^import .*\n/gm, '').replace(/^export /gm, '')
 
 const httpError = (status, code) => Object.assign(new Error('x'), { response: { status, data: { code } } })
+const plain = (v) => JSON.parse(JSON.stringify(v))
 const tick = () => new Promise((r) => setImmediate(r))
 
 /** 可控的 Promise,用来模拟“响应还没回来” */
@@ -17,12 +18,14 @@ function deferred() {
   return { promise, resolve, reject }
 }
 
-function setup({ auth = { loggedIn: true, hasChild: true, consented: true }, api = {}, recorder = {}, tts = {}, env = {} } = {}) {
+function setup({ auth = { loggedIn: true, hasChild: true, consented: true }, api = {}, recorder = {}, tts = {}, env = {}, context = null } = {}) {
   const calls = { push: [], play: [], speak: [], abort: 0, recStop: 0, stopActive: 0, ttsStop: 0 }
   const timers = []
   const sandbox = {
     ref, computed, console,
-    askGuide: api.askGuide || (async () => ({ type: 'RECOMMEND', speech: '去学水果吧', candidates: [], topics: [] })),
+    chatWithAgent: api.chatWithAgent || (async () => ({ type: 'RECOMMEND', speech: '去学水果吧', candidates: [], topics: [] })),
+    answerQuiz: api.answerQuiz || (async () => ({ correct: true, speech: '答对啦', hint: null })),
+    learningContext: ref(context),
     fetchTopics: api.fetchTopics || (async () => [{ themeId: 1, name: '水果' }]),
     recognizeSpeech: api.recognizeSpeech || (async () => ({ text: '我想学水果' })),
     useRecorder: () => ({
@@ -51,7 +54,7 @@ function setup({ auth = { loggedIn: true, hasChild: true, consented: true }, api
 
 test('打字检索：思考中 → 播报中 → 等待选择，点了「去学」才跳转', async () => {
   const pending = deferred()
-  const { c, calls } = setup({ api: { askGuide: () => pending.promise } })
+  const { c, calls } = setup({ api: { chatWithAgent: () => pending.promise } })
   const run = c.submitText('  我想学水果  ')
   assert.equal(c.phase.value, 'thinking')
   pending.resolve({ type: 'RECOMMEND', speech: '去学水果吧', candidates: [{ title: '水果', route: '/lesson/12?themeId=3' }] })
@@ -78,7 +81,7 @@ test('录音 → 识别 → 检索，15 秒自动停止', async () => {
 
 test('超过 2 秒显示思考动画并播“让我想一想”', async () => {
   const pending = deferred()
-  const { c, calls, fire } = setup({ api: { askGuide: () => pending.promise } })
+  const { c, calls, fire } = setup({ api: { chatWithAgent: () => pending.promise } })
   const run = c.submitText('恐龙')
   assert.equal(c.slow.value, false)
   fire(2000)
@@ -93,7 +96,7 @@ test('超过 2 秒显示思考动画并播“让我想一想”', async () => {
 
 test('关闭面板后丢弃过期响应，不播报、不改状态', async () => {
   const pending = deferred()
-  const { c, calls } = setup({ api: { askGuide: () => pending.promise } })
+  const { c, calls } = setup({ api: { chatWithAgent: () => pending.promise } })
   await c.openPanel()
   const run = c.submitText('水果')
   c.closePanel()
@@ -108,7 +111,7 @@ test('关闭面板后丢弃过期响应，不播报、不改状态', async () =>
 test('新一轮覆盖旧一轮：先发的慢响应被丢弃', async () => {
   const first = deferred()
   let n = 0
-  const { c, calls } = setup({ api: { askGuide: () => (++n === 1 ? first.promise : Promise.resolve({ type: 'RECOMMEND', speech: '新的', candidates: [] })) } })
+  const { c, calls } = setup({ api: { chatWithAgent: () => (++n === 1 ? first.promise : Promise.resolve({ type: 'RECOMMEND', speech: '新的', candidates: [] })) } })
   const a = c.submitText('一')
   await c.submitText('二')
   first.resolve({ type: 'RECOMMEND', speech: '旧的', candidates: [] })
@@ -207,7 +210,7 @@ test('录音中切页取消：停止录音并回到待机', async () => {
 
 test('文本超过 100 字截断，空文本不请求', async () => {
   const bodies = []
-  const { c } = setup({ api: { askGuide: async (b) => { bodies.push(b); return { type: 'NO_MATCH', speech: '', candidates: [] } } } })
+  const { c } = setup({ api: { chatWithAgent: async (b) => { bodies.push(b); return { type: 'NO_MATCH', speech: '', candidates: [] } } } })
   await c.submitText('   ')
   await c.submitText('啊'.repeat(150))
   assert.equal(bodies.length, 1)
@@ -234,7 +237,7 @@ test('播报中关闭面板：只停 companion 自己的音频，phase 回到 id
 
 test('点主题直接跳服务端给的主题页 route，不再检索', async () => {
   let asked = 0
-  const { c, calls } = setup({ api: { askGuide: async () => { asked++; return {} } } })
+  const { c, calls } = setup({ api: { chatWithAgent: async () => { asked++; return {} } } })
   await c.openPanel()
   c.go({ themeId: 3, name: '恐龙世界', route: '/theme/3?subjectId=1' })
   assert.deepEqual(calls.push, ['/theme/3?subjectId=1'])
@@ -242,4 +245,119 @@ test('点主题直接跳服务端给的主题页 route，不再检索', async ()
   assert.equal(c.open.value, false)
   c.go({ themeId: 4, name: '没有 route' })
   assert.equal(calls.push.length, 1)
+})
+
+const EXPLAIN_RES = {
+  type: 'EXPLAIN',
+  speech: '恐龙是因为小行星撞地球消失的',
+  explain: { title: '恐龙消失', text: '很久很久以前……', image: '/img/dino.png', source: 'LESSON', lessonId: 5, itemIndex: 2 },
+  quiz: { question: '恐龙是怎么消失的？', options: [{ id: 'a', text: '小行星' }, { id: 'b', text: '下大雨' }, { id: 'c', text: '睡着了' }, { id: 'd', text: '多余' }], quizToken: 'tk' },
+  candidates: [{ title: '不该显示', route: '/x' }],
+  topics: [],
+  learnMore: { title: '恐龙世界', route: '/lesson/5' }
+}
+
+test('EXPLAIN：只播 speech，讲解卡和最多 3 个选项，「去学完整课程」走服务端 route', async () => {
+  const { c, calls } = setup({ api: { chatWithAgent: async () => EXPLAIN_RES } })
+  await c.submitText('恐龙为什么会消失')
+  assert.deepEqual(calls.speak, ['恐龙是因为小行星撞地球消失的'])
+  assert.equal(c.result.value.explain.title, '恐龙消失')
+  assert.equal(c.result.value.quiz.options.length, 3)
+  assert.equal(c.result.value.candidates.length, 0)
+  assert.equal(c.mouseState.value, 'cheer')
+  c.go(c.result.value.learnMore)
+  assert.deepEqual(calls.push, ['/lesson/5'])
+})
+
+test('答错播 hint 可再选，答对切 cheer 且不能重复提交', async () => {
+  const posts = []
+  const { c, calls } = setup({ api: {
+    chatWithAgent: async () => EXPLAIN_RES,
+    answerQuiz: async (b) => { posts.push(b); return b.optionId === 'a' ? { correct: true, speech: '答对啦', hint: null } : { correct: false, speech: '不对哦', hint: '想想天上掉下来的' } }
+  } })
+  await c.submitText('恐龙')
+  await c.answer({ id: 'b' })
+  assert.deepEqual(plain(c.quiz.value.wrong), ['b'])
+  assert.equal(c.quiz.value.solved, false)
+  assert.equal(calls.speak.at(-1), '想想天上掉下来的')
+  assert.equal(c.mouseState.value, 'idle')
+  await c.answer({ id: 'b' })
+  assert.equal(posts.length, 1)
+  await c.answer({ id: 'a' })
+  assert.equal(c.quiz.value.solved, true)
+  assert.equal(c.mouseState.value, 'cheer')
+  assert.equal(calls.speak.at(-1), '答对啦')
+  await c.answer({ id: 'c' })
+  assert.equal(posts.length, 2)
+  assert.deepEqual(plain(posts[0]), { quizToken: 'tk', optionId: 'b' })
+})
+
+test('答题请求在途时不重复提交，切页后丢弃旧结果', async () => {
+  const pending = deferred()
+  let n = 0
+  const { c, calls } = setup({ api: { chatWithAgent: async () => EXPLAIN_RES, answerQuiz: () => { n++; return pending.promise } } })
+  await c.submitText('恐龙')
+  const spoken = calls.speak.length
+  const run = c.answer({ id: 'a' })
+  await c.answer({ id: 'b' })
+  assert.equal(n, 1)
+  c.cancel()
+  pending.resolve({ correct: true, speech: '答对啦' })
+  await run
+  assert.equal(c.quiz.value.solved, false)
+  assert.equal(calls.speak.length, spoken)
+})
+
+test('SAFE_REPLY：豆豆切 safety，只显示话术和主题，不显示候选和讲解', async () => {
+  const { c } = setup({ api: { chatWithAgent: async () => ({ type: 'SAFE_REPLY', speech: '这个问题问问爸爸妈妈吧', explain: EXPLAIN_RES.explain, quiz: EXPLAIN_RES.quiz, candidates: [{ title: 'x', route: '/x' }], topics: [{ name: '动物', route: '/theme/2' }] }) } })
+  await c.submitText('坏问题')
+  assert.equal(c.mouseState.value, 'safety')
+  assert.equal(c.result.value.candidates.length, 0)
+  assert.equal(c.result.value.explain, null)
+  assert.equal(c.result.value.quiz, null)
+  assert.equal(c.quiz.value, null)
+  assert.equal(c.result.value.topics[0].name, '动物')
+})
+
+test('课程页带 lessonId/itemIndex 进 context；语音路径带上 turnToken', async () => {
+  const bodies = []
+  const { c } = setup({
+    context: { lessonId: 5, itemIndex: 2 },
+    api: { recognizeSpeech: async () => ({ text: '这是什么', turnToken: 'tt' }), chatWithAgent: async (b) => { bodies.push(b); return { type: 'NO_MATCH', speech: '' } } }
+  })
+  await c.submitText('这是什么')
+  await c.startRecording()
+  await c.stopRecording()
+  assert.deepEqual(plain(bodies[0]), { text: '这是什么', context: { lessonId: 5, itemIndex: 2 } })
+  assert.deepEqual(plain(bodies[1]), { text: '这是什么', turnToken: 'tt', context: { lessonId: 5, itemIndex: 2 } })
+})
+
+test('不在课程页时不带 context；EXPLAIN 无 quiz 时不出选项', async () => {
+  const bodies = []
+  const { c } = setup({ api: { chatWithAgent: async (b) => { bodies.push(b); return { ...EXPLAIN_RES, quiz: null, learnMore: null } } } })
+  await c.submitText('恐龙')
+  assert.deepEqual(plain(bodies[0]), { text: '恐龙' })
+  assert.equal(c.result.value.quiz, null)
+  assert.equal(c.result.value.learnMore, null)
+  assert.equal(c.quiz.value, null)
+})
+
+test('答题令牌失效 400/4002：提示重新问，之后不再提交', async () => {
+  let n = 0
+  const { c } = setup({ api: { chatWithAgent: async () => EXPLAIN_RES, answerQuiz: async () => { n++; throw httpError(400, 4002) } } })
+  await c.submitText('恐龙')
+  await c.answer({ id: 'a' })
+  assert.equal(c.quiz.value.expired, true)
+  assert.equal(c.quiz.value.feedback, '这道题过期啦，再问我一次吧')
+  await c.answer({ id: 'b' })
+  assert.equal(n, 1)
+})
+
+test('后端省略 null 字段：EXPLAIN 不带 quiz/learnMore 时正常显示讲解', async () => {
+  const { c } = setup({ api: { chatWithAgent: async () => ({ type: 'EXPLAIN', speech: '讲', explain: EXPLAIN_RES.explain, candidates: [], topics: [] }) } })
+  await c.submitText('恐龙')
+  assert.equal(c.result.value.explain.title, '恐龙消失')
+  assert.equal(c.result.value.quiz, null)
+  assert.equal(c.result.value.learnMore, null)
+  assert.equal(c.phase.value, 'choosing')
 })

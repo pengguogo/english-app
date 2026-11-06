@@ -54,7 +54,8 @@ public class SecurityConfig {
                 // 游客可提交课后复习：只判分不落库（Controller 按 currentChildId 分支），CSRF 照常
                 .requestMatchers(HttpMethod.POST, "/api/v1/lessons/*/review").permitAll()
                 // 学习伙伴：检索与主题入口游客可用（CSRF 照常）；/agent/asr 需登录，走下面的 authenticated
-                .requestMatchers(HttpMethod.POST, "/api/v1/agent/guide").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/agent/guide", "/api/v1/agent/chat",
+                        "/api/v1/agent/answer").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/agent/topics").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll())

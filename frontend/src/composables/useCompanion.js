@@ -1,13 +1,16 @@
 /**
  * @file useCompanion.js - 学习伙伴面板状态机
- * @description 管理“按住说话 / 打字 / 点主题 → 识别 → 检索 → 播报 → 等孩子选”的流程。
+ * @description 管理“按住说话 / 打字 / 点主题 → 识别 → 对话(/agent/chat) → 播报 → 等孩子选 / 答题”的流程。
  *  phase: idle 待机 | recording 录音中 | recognizing 识别中 | thinking 检索中
  *         | speaking 播报中 | choosing 等待选择 | error 异常
  *  每次发起流程分配一个序号 seq;cancel() 让 seq 失效并 abort 请求,过期响应一律丢弃。
  *  只有孩子点了「去学」或主题入口才 router.push(服务端给的 route),前端不拼。
+ *  EXPLAIN 带 quiz 时,孩子点选项调 /agent/answer:答错播 hint 可再选,答对后锁定不再提交。
+ *  在课程页时把 learningContext({lessonId, itemIndex})带进 chat 的 context。
  */
 import { computed, ref } from 'vue'
-import { askGuide, fetchTopics, recognizeSpeech } from '../api/agent'
+import { answerQuiz, chatWithAgent, fetchTopics, recognizeSpeech } from '../api/agent'
+import { learningContext } from '../stores/learningContext'
 import { useRecorder } from './useRecorder'
 import { stopActiveTts, useTts } from './useTts'
 
@@ -26,7 +29,8 @@ const MSG = {
   retry: '没听清，再说一次吧',
   minute: '说得太快啦，歇一分钟再来',
   daily: '今天聊够啦，明天再来',
-  network: '网络开小差了，再试一次'
+  network: '网络开小差了，再试一次',
+  quizExpired: '这道题过期啦，再问我一次吧'
 }
 
 /**
@@ -72,6 +76,8 @@ export function useCompanion({ auth, router }) {
   // 自动播放被浏览器拦截时显示「播放」按钮,由孩子点一下补播
   const needsPlayButton = ref(false)
   const lastSpeech = ref('')
+  // 当前题的答题状态:wrong 为答错过的选项 id;solved 后不能再提交
+  const quiz = ref(null)
 
   let seq = 0
   let controller = null
@@ -94,7 +100,11 @@ export function useCompanion({ auth, router }) {
       case 'recognizing':
       case 'thinking': return slow.value ? 'thinking' : 'listening'
       case 'speaking':
-      case 'choosing': return result.value?.type === 'NO_MATCH' ? 'idle' : 'cheer'
+      case 'choosing':
+        if (result.value?.type === 'SAFE_REPLY') return 'safety'
+        if (result.value?.type === 'NO_MATCH') return 'idle'
+        if (quiz.value?.solved) return 'cheer'
+        return quiz.value?.wrong.length ? 'idle' : 'cheer'
       case 'error': return error.value?.kind === 'consent' || error.value?.kind === 'mic' ? 'safety' : 'idle'
       default: return 'idle'
     }
@@ -114,6 +124,7 @@ export function useCompanion({ auth, router }) {
     clearTimers()
     error.value = null
     needsPlayButton.value = false
+    quiz.value = null
     return ++seq
   }
 
@@ -172,6 +183,8 @@ export function useCompanion({ auth, router }) {
     phase.value = 'idle'
     error.value = null
     needsPlayButton.value = false
+    // 在途的答题请求已作废,放开选项让孩子可以重新点
+    if (quiz.value) quiz.value.pending = false
   }
 
   /** 关闭面板:不跳转、不打断课程(课程自己的音频此时并未被面板占用) */
@@ -221,15 +234,18 @@ export function useCompanion({ auth, router }) {
     if (!blob) return fail(turn, { kind: 'retry', message: MSG.retry })
     startSlowTimer(turn)
     let text = ''
+    let turnToken
     try {
       const res = await recognizeSpeech(blob, { signal: controller?.signal })
       text = (res?.text || '').trim()
+      turnToken = res?.turnToken || undefined
     } catch (e) {
       return fail(turn, companionError(e))
     }
     if (!isCurrent(turn)) return
     if (!text) return fail(turn, { kind: 'retry', message: MSG.retry })
-    await search(turn, text)
+    // asr 已扣过回合,带上 turnToken 让 chat 不再重复扣
+    await search(turn, text.slice(0, MAX_TEXT), turnToken)
   }
 
   /** 打字或点主题入口 */
@@ -242,26 +258,80 @@ export function useCompanion({ auth, router }) {
     await search(turn, text)
   }
 
-  async function search(turn, text) {
+  async function search(turn, text, turnToken) {
     phase.value = 'thinking'
     startSlowTimer(turn)
+    const body = { text }
+    if (turnToken) body.turnToken = turnToken
+    if (learningContext.value) body.context = { ...learningContext.value }
     let res
     try {
-      res = await askGuide({ text }, { signal: controller?.signal })
+      res = await chatWithAgent(body, { signal: controller?.signal })
     } catch (e) {
       return fail(turn, companionError(e))
     }
     if (!isCurrent(turn)) return
     clearTimers()
     tts.stop()
+    const type = res?.type || 'NO_MATCH'
+    const listed = type === 'RECOMMEND' || type === 'CLARIFY'
+    const explain = type === 'EXPLAIN' ? res?.explain || null : null
+    const options = res?.quiz?.options
     result.value = {
-      type: res?.type || 'NO_MATCH',
+      type,
       speech: res?.speech || '',
-      candidates: (res?.candidates || []).slice(0, 3),
+      // 安全话术只显示话术和主题入口,不显示候选卡/讲解
+      candidates: listed ? (res?.candidates || []).slice(0, 3) : [],
+      explain,
+      quiz: explain && res?.quiz?.quizToken && Array.isArray(options) && options.length >= 2
+        ? { ...res.quiz, options: options.slice(0, 3) } : null,
+      learnMore: explain && res?.learnMore?.route ? res.learnMore : null,
       topics: res?.topics?.length ? res.topics : topics.value
     }
+    quiz.value = result.value.quiz ? { wrong: [], solved: false, pending: false, expired: false, feedback: '' } : null
     phase.value = 'speaking'
     await speak(turn, result.value.speech)
+    if (isCurrent(turn)) phase.value = 'choosing'
+  }
+
+  /**
+   * 孩子点了点选题的某个选项。答错播 hint 可再选;答对锁定,豆豆切 cheer。
+   * @param {{id: string}} option 选项
+   */
+  async function answer(option) {
+    const state = quiz.value
+    const token = result.value?.quiz?.quizToken
+    if (!state || !token || !option?.id || state.solved || state.pending || state.expired) return
+    if (state.wrong.includes(option.id)) return
+    const turn = seq
+    state.pending = true
+    let res
+    try {
+      res = await answerQuiz({ quizToken: token, optionId: option.id }, { signal: controller?.signal })
+    } catch (e) {
+      if (!isCurrent(turn)) return
+      state.pending = false
+      // 400/4002 令牌过期、换了孩子或被篡改:提示重新问,选项全部禁用
+      if (e?.response?.status === 400 && e?.response?.data?.code === 4002) {
+        state.expired = true
+        state.feedback = MSG.quizExpired
+      } else {
+        state.feedback = companionError(e).message
+      }
+      return
+    }
+    if (!isCurrent(turn)) return
+    state.pending = false
+    if (res?.correct) {
+      state.solved = true
+      state.picked = option.id
+      state.feedback = res.speech || ''
+    } else {
+      state.wrong.push(option.id)
+      state.feedback = res?.hint || res?.speech || ''
+    }
+    phase.value = 'speaking'
+    await speak(turn, state.feedback)
     if (isCurrent(turn)) phase.value = 'choosing'
   }
 
@@ -279,7 +349,7 @@ export function useCompanion({ auth, router }) {
   }
 
   return {
-    open, phase, slow, result, topics, error, needsPlayButton, micMode, mouseState,
-    openPanel, closePanel, cancel, startRecording, stopRecording, submitText, go, replay
+    open, phase, slow, result, topics, error, needsPlayButton, micMode, mouseState, quiz,
+    openPanel, closePanel, cancel, startRecording, stopRecording, submitText, answer, go, replay
   }
 }

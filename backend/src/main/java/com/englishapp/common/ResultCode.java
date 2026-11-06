@@ -17,6 +17,8 @@ public enum ResultCode {
     BAD_REQUEST(400, "请求参数错误"),
     /** 语音不合格（格式错、过大、过长、非 multipart） */
     AGENT_AUDIO_INVALID(4001, "没听清，再说一次吧"),
+    /** 答题令牌无效、过期或不属于当前答题人 */
+    AGENT_QUIZ_INVALID(4002, "这道题过期啦，再问我一次吧"),
     /** 未登录 */
     UNAUTHORIZED(401, "请先登录"),
     /** 登录邮箱或密码错误 */

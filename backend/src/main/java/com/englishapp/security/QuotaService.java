@@ -16,4 +16,7 @@ public interface QuotaService {
 
     /** 未登录游客按 IP 消耗一个回合；允许时计数 +1 */
     Decision tryConsumeGuest(String clientIp);
+
+    /** 白名单家庭：不限次数，模型花费不计入全站试用预算 */
+    boolean isUnlimited(Long familyId);
 }

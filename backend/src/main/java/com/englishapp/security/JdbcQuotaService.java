@@ -71,7 +71,8 @@ public class JdbcQuotaService implements QuotaService {
     }
 
     /** 家庭任一家长邮箱在白名单内即不限次数 */
-    private boolean isUnlimited(Long familyId) {
+    @Override
+    public boolean isUnlimited(Long familyId) {
         if (unlimitedEmails.isEmpty()) return false;
         return jdbc.queryForList("SELECT email FROM guardian_credential WHERE family_id = ?", String.class, familyId)
                 .stream().anyMatch(unlimitedEmails::contains);

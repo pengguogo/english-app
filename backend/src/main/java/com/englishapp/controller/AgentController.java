@@ -2,7 +2,11 @@ package com.englishapp.controller;
 
 import com.englishapp.common.Result;
 import com.englishapp.common.ResultCode;
+import com.englishapp.dto.AgentAnswerRequestDTO;
+import com.englishapp.dto.AgentAnswerResponseDTO;
 import com.englishapp.dto.AgentAsrResponseDTO;
+import com.englishapp.dto.AgentChatRequestDTO;
+import com.englishapp.dto.AgentChatResponseDTO;
 import com.englishapp.dto.AgentGuideRequestDTO;
 import com.englishapp.dto.AgentGuideResponseDTO;
 import com.englishapp.dto.AgentTopicDTO;
@@ -14,7 +18,11 @@ import com.englishapp.service.AuthService;
 import com.englishapp.service.ai.asr.AsrException;
 import com.englishapp.service.ai.asr.AsrResult;
 import com.englishapp.service.ai.asr.SpeechRecognizer;
+import com.englishapp.service.ai.explore.AgentTokens;
+import com.englishapp.service.ai.explore.ExploreService;
+import com.englishapp.service.ai.explore.QuizService;
 import com.englishapp.service.ai.guide.GuideService;
+import java.util.Optional;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
@@ -34,7 +42,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 /**
- * 学习伙伴阶段 1：语音识别 + 课程向导。不接大模型，不保存音频和对话，日志不记音频与识别正文。
+ * 学习伙伴：语音识别、课程向导（阶段 1），探索讲解与答题（阶段 2）。
+ * 不保存音频和对话，日志不记音频、识别正文、孩子原话与模型原文。
  */
 @RestController
 @RequestMapping("/api/v1/agent")
@@ -48,14 +57,21 @@ public class AgentController {
     private final QuotaService quota;
     private final SpeechRecognizer recognizer;
     private final GuideService guide;
+    private final ExploreService explore;
+    private final QuizService quiz;
+    private final AgentTokens tokens;
 
     public AgentController(CurrentChild current, GuardianConsentRepository consents, QuotaService quota,
-                           SpeechRecognizer recognizer, GuideService guide) {
+                           SpeechRecognizer recognizer, GuideService guide, ExploreService explore,
+                           QuizService quiz, AgentTokens tokens) {
         this.current = current;
         this.consents = consents;
         this.quota = quota;
         this.recognizer = recognizer;
         this.guide = guide;
+        this.explore = explore;
+        this.quiz = quiz;
+        this.tokens = tokens;
     }
 
     /** 语音识别：需登录 + 已选孩子 + 家庭已同意；校验通过才消耗回合，额度被拒时不调 ASR */
@@ -63,7 +79,7 @@ public class AgentController {
     public Result<AgentAsrResponseDTO> asr(@RequestPart("audio") MultipartFile audio) throws IOException {
         current.requireChildId();
         Long familyId = current.requireFamilyId();
-        if (!consents.existsByFamilyIdAndConsentVersion(familyId, AuthService.CONSENT_VERSION)) {
+        if (!consented(familyId)) {
             throw new AuthException(ResultCode.AGENT_CONSENT_REQUIRED);
         }
         if (audio.isEmpty() || audio.getSize() > MAX_AUDIO_BYTES) {
@@ -73,16 +89,55 @@ public class AgentController {
         // 本地校验格式与时长，坏文件（误触、录音失败）不消耗回合
         recognizer.validate(wav);
         QuotaService.Decision decision = quota.tryConsumeFamily(familyId);
-        if (decision != QuotaService.Decision.ALLOWED) {
-            throw new AuthException(switch (decision) {
-                case MINUTE_LIMIT -> ResultCode.AGENT_MINUTE_LIMIT;
-                case DAILY_LIMIT -> ResultCode.AGENT_DAILY_LIMIT;
-                default -> ResultCode.AGENT_BUDGET_EXHAUSTED;
-            });
-        }
+        if (decision != QuotaService.Decision.ALLOWED) throw quotaRejected(decision);
         AsrResult r = recognizer.recognize(wav);
         log.info("agent asr ok: family={} provider={} latencyMs={}", familyId, r.provider(), r.latencyMs());
-        return Result.success(new AgentAsrResponseDTO(r.text(), r.provider(), r.latencyMs()));
+        return Result.success(new AgentAsrResponseDTO(r.text(), r.provider(), r.latencyMs(), tokens.turn(familyId)));
+    }
+
+    /**
+     * 探索对话：游客与未同意家庭只走检索（课程原文讲解，不调模型）；
+     * 已同意家庭可调模型，只有真的调模型的一轮才扣回合，带有效语音回合令牌时不再扣。
+     */
+    @PostMapping("/chat")
+    public Result<AgentChatResponseDTO> chat(@Valid @RequestBody AgentChatRequestDTO request) {
+        Optional<Integer> childId = current.currentChildId();
+        Long familyId = childId.isPresent() ? current.requireFamilyId() : null;
+        boolean modelAllowed = familyId != null && consented(familyId);
+        ExploreService.Asker asker = new ExploreService.Asker(subject(childId), modelAllowed,
+                modelAllowed && !quota.isUnlimited(familyId));
+        boolean[] used = {false};
+        ExploreService.TurnGate gate = () -> {
+            if (used[0]) return QuotaService.Decision.ALLOWED;
+            used[0] = true;
+            if (tokens.validTurn(request.turnToken(), familyId)) return QuotaService.Decision.ALLOWED;
+            return quota.tryConsumeFamily(familyId);
+        };
+        AgentChatRequestDTO.Context ctx = request.context();
+        return Result.success(explore.chat(request.text(), ctx == null ? null : ctx.lessonId(),
+                ctx == null ? null : ctx.itemIndex(), asker, gate));
+    }
+
+    /** 答题判分：令牌绑定答题人，换孩子或过期 → 400/4002 */
+    @PostMapping("/answer")
+    public Result<AgentAnswerResponseDTO> answer(@Valid @RequestBody AgentAnswerRequestDTO request) {
+        return Result.success(quiz.answer(request.quizToken(), request.optionId(), subject(current.currentChildId())));
+    }
+
+    private boolean consented(Long familyId) {
+        return consents.existsByFamilyIdAndConsentVersion(familyId, AuthService.CONSENT_VERSION);
+    }
+
+    private static String subject(Optional<Integer> childId) {
+        return childId.map(id -> "child:" + id).orElse("guest");
+    }
+
+    private static AuthException quotaRejected(QuotaService.Decision d) {
+        return new AuthException(switch (d) {
+            case MINUTE_LIMIT -> ResultCode.AGENT_MINUTE_LIMIT;
+            case DAILY_LIMIT -> ResultCode.AGENT_DAILY_LIMIT;
+            default -> ResultCode.AGENT_BUDGET_EXHAUSTED;
+        });
     }
 
     /** 课程向导：游客可用，不计额度 */

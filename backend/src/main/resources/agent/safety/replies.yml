@@ -1,0 +1,15 @@
+# 固定话术（设计 v0.5 第 6.1 节），每条 ≤40 字，不复述孩子说的内容。
+# flagParent：6.1 中“标记给家长”的类别为 true（阶段 2 只返回标记，不落库）。
+# 6.1 原文没有给出具体句子的类别（DANGER / PERSONAL_INFO / EMOTION）按 6.1 的处理要求撰写。
+DEATH_FAMILY:     { reply: "这个问题很重要，我们一起去问问爸爸妈妈吧", flagParent: true }
+INJURY:           { reply: "快告诉身边的大人", flagParent: false }
+DANGER:           { reply: "这样做很危险，不可以哦，快去找身边的大人", flagParent: false }
+BODY_PRIVACY:     { reply: "这个可以问爸爸妈妈", flagParent: false }
+PERSONAL_INFO:    { reply: "这是你的小秘密，不用告诉我哦，我们聊聊学习吧", flagParent: false }
+STRANGER:         { reply: "马上告诉爸爸妈妈", flagParent: true }
+VIOLENCE_PROFANITY: { reply: "我们聊聊别的吧", flagParent: false }
+EMOTION:          { reply: "抱抱你，有不开心的事要告诉爸爸妈妈哦", flagParent: true }
+POLITICS_RELIGION: { reply: "这个问题适合问爸爸妈妈", flagParent: false }
+PROMPT_INJECTION: { reply: "我们聊聊学习吧", flagParent: false }
+# 输出审核未通过时统一用这一句（模型的问题，不标记家长）
+OUTPUT_BLOCKED:   { reply: "这个我还不太会讲，我们聊聊别的吧", flagParent: false }

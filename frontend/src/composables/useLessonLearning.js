@@ -10,6 +10,7 @@ import { useLearningAttempts } from './useLearningAttempts'
 import { normalizeContent } from '../utils/lessonContent'
 import { useLessonScoring, scoreToStars } from './useLessonScoring'
 import { useLessonCompletion } from './useLessonCompletion'
+import { setLearningContext, clearLearningContext } from '../stores/learningContext'
 import WordLesson from '../components/lesson-templates/WordLesson.vue'
 import CharacterLesson from '../components/lesson-templates/CharacterLesson.vue'
 import SentenceLesson from '../components/lesson-templates/SentenceLesson.vue'
@@ -127,8 +128,11 @@ export function useLessonLearning() {
   const { recordAttempt } = useLearningAttempts(lesson, currentIndex)
   onMounted(loadLesson)
   watch(() => route.params.lessonId, loadLesson)
+  // 学习伙伴读取当前学习项(含翻页、跳过、书签恢复)
+  watch([() => lesson.value?.id, currentIndex], ([id, index]) => setLearningContext(id, index), { immediate: true })
   onBeforeUnmount(() => {
     lessonLoadVersion++
+    clearLearningContext()
     stopActiveTts()
     clearMascotFeedback()
   })

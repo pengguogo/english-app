@@ -1,7 +1,8 @@
 <!--
   CompanionPanel.vue - 全站常驻学习伙伴(右下角小老鼠入口)
   默认安静:不自动弹出、不自动出声;点小老鼠展开面板。
-  面板:按住说话(登录+同意才可用) / 打字 → 候选卡 → 点「去学」才跳转;点主题直接跳主题页。
+  面板:按住说话(登录+同意才可用) / 打字 → 候选卡 / 讲解卡 + 点选题 → 点「去学」才跳转;点主题直接跳主题页。
+  SAFE_REPLY 只显示话术和主题入口。
   切页、关闭、卸载时停录音和播报并丢弃过期响应(useCompanion.cancel)。
 -->
 <script setup>
@@ -10,13 +11,14 @@ import { useRoute, useRouter } from 'vue-router'
 import AppButton from '../AppButton.vue'
 import CompanionMouse from './CompanionMouse.vue'
 import CompanionCandidateCard from './CompanionCandidateCard.vue'
+import CompanionExplainCard from './CompanionExplainCard.vue'
 import { useAuthStore } from '../../stores/auth'
 import { useCompanion, MAX_TEXT } from '../../composables/useCompanion'
 
 const auth = useAuthStore()
 const route = useRoute()
 const c = useCompanion({ auth, router: useRouter() })
-const { open, phase, result, topics, error, needsPlayButton, micMode, mouseState } = c
+const { open, phase, result, topics, error, needsPlayButton, micMode, mouseState, quiz } = c
 const draft = ref('')
 
 const STATUS = { recording: '我在听…', recognizing: '听到啦…', thinking: '我找找…', speaking: '', choosing: '' }
@@ -61,7 +63,10 @@ onBeforeUnmount(() => c.cancel())
           :candidate="cand" @go="c.go" />
       </div>
 
-      <div v-if="!result?.candidates?.length || result?.type === 'NO_MATCH'" class="topics">
+      <CompanionExplainCard v-if="result?.explain" :explain="result.explain" :quiz="result.quiz"
+        :state="quiz" :learn-more="result.learnMore" @answer="c.answer" @go="c.go" />
+
+      <div v-if="!result?.explain && (!result?.candidates?.length || result?.type === 'NO_MATCH')" class="topics">
         <button v-for="t in (result?.topics?.length ? result.topics : topics)" :key="t.themeId ?? t.name"
           type="button" class="topic" :disabled="phase === 'recording'" @click="c.go(t)">
           <img v-if="t.image" :src="t.image" alt="" loading="lazy" />

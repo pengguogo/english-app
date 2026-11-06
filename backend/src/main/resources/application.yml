@@ -56,6 +56,19 @@ app:
   agent:
     # 不限 Agent 次数的白名单家庭（家长邮箱，逗号分隔）；改动后重启生效
     unlimited-family-emails: ${AGENT_UNLIMITED_FAMILY_EMAILS:}
+    # 答题 / 语音回合令牌签名密钥；未配置时启动随机生成（重启后旧令牌失效）
+    quiz-secret: ${AGENT_QUIZ_SECRET:}
+    llm:
+      # 百炼 OpenAI 兼容模式（北京）；未配置 Key 时生成关闭，只走课程检索
+      api-key: ${DASHSCOPE_API_KEY:}
+      endpoint: ${AGENT_LLM_ENDPOINT:https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions}
+      model: ${AGENT_LLM_MODEL:qwen-flash}
+      timeout-ms: 5000
+      max-tokens: 400
+      temperature: 0.3
+      # 单价（分 / 千 token），用于全站试用预算记账；以百炼控制台实际价格为准
+      input-cents-per-k-token: ${AGENT_LLM_INPUT_CENTS:0.015}
+      output-cents-per-k-token: ${AGENT_LLM_OUTPUT_CENTS:0.15}
     asr:
       # 中文短语音识别供应商：baidu | dashscope（百度密钥沿用 voice.baidu.*）
       provider: ${AGENT_ASR_PROVIDER:baidu}

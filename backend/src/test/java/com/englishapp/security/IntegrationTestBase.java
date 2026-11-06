@@ -117,7 +117,7 @@ public abstract class IntegrationTestBase {
     }
 
     protected JsonNode data(MvcResult r) throws Exception {
-        return objectMapper.readTree(r.getResponse().getContentAsString()).path("data");
+        return objectMapper.readTree(r.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8)).path("data");
     }
 
     protected String json(Object o) throws Exception {
