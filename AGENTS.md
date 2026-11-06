@@ -66,7 +66,7 @@ Co-Authored-By: TRAE Agent <noreply@trae.ai>
 - 动效只用 CSS `transition`/`keyframes`，不引入动画库；装饰动画包裹 `@media (prefers-reduced-motion: no-preference)`
 - 路由路径小写连字符（`/user-progress`），name 小写，视图 `XxxView.vue`
 - 构建产物嵌入 Spring Boot 静态资源，单 JAR 部署
-- 吉祥物: 灰老鼠 Mimi + 黄围巾，仅出现在 welcome/companion/celebrate 三个场景，资产在 `frontend/src/assets/mascot/`
+- 吉祥物: 灰老鼠 Mimi + 黄围巾，仅出现在 welcome/companion/celebrate 三个场景，资产在 `frontend/src/assets/mascot/`；学习伙伴用原创小老鼠「豆豆」，常驻右下角入口，组件 `components/companion/CompanionMouse.vue`，资产在 `frontend/src/assets/companion/`
 
 ## 测试
 - Service 公共方法须有单测；类名 `XxxTest`，方法 `should_期望行为_当_条件`

@@ -74,8 +74,9 @@ public class BaiduVoiceService {
      *
      * @return 有效的 access_token
      * @throws RuntimeException 当获取 token 失败时抛出
+     * <p>public 供 service/ai/asr/BaiduRecognizer 复用同一份 token 缓存。</p>
      */
-    private String getToken() {
+    public String getToken() {
         // 命中缓存则直接返回
         if (cachedToken != null && System.currentTimeMillis() < tokenExpireAt) {
             return cachedToken;

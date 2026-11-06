@@ -6,6 +6,7 @@
 -->
 <script setup>
 import ParentVerifyModal from './components/ParentVerifyModal.vue'
+import CompanionPanel from './components/companion/CompanionPanel.vue'
 </script>
 
 <template>
@@ -13,6 +14,8 @@ import ParentVerifyModal from './components/ParentVerifyModal.vue'
     <router-view />
     <!-- 家长二次验证弹窗,由 http 拦截器触发 -->
     <ParentVerifyModal />
+    <!-- 学习伙伴入口,默认收起、不出声 -->
+    <CompanionPanel />
   </div>
 </template>
 

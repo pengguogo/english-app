@@ -25,7 +25,7 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 /**
  * 鉴权配置：服务端 Session + Cookie CSRF（XSRF-TOKEN / X-XSRF-TOKEN）。
- * 公开：静态资源、图片、/api/v1/auth/**、课程浏览 GET、TTS；其余 /api/v1/** 需登录。
+ * 公开：静态资源、图片、/api/v1/auth/**、课程浏览 GET、TTS、agent 检索与主题；其余 /api/v1/** 需登录。
  */
 @Configuration
 public class SecurityConfig {
@@ -53,6 +53,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/voice/tts").permitAll()
                 // 游客可提交课后复习：只判分不落库（Controller 按 currentChildId 分支），CSRF 照常
                 .requestMatchers(HttpMethod.POST, "/api/v1/lessons/*/review").permitAll()
+                // 学习伙伴：检索与主题入口游客可用（CSRF 照常）；/agent/asr 需登录，走下面的 authenticated
+                .requestMatchers(HttpMethod.POST, "/api/v1/agent/guide").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/agent/topics").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll())
             .exceptionHandling(e -> e

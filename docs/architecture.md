@@ -257,6 +257,9 @@ Service 抛出业务异常，`GlobalExceptionHandler` 统一捕获并返回
 所有色值、间距、圆角、阴影、动效统一定义在 `frontend/src/styles/tokens.css`，
 组件通过 `var(--xxx)` 引用，禁止硬编码。吉祥物 Mimi（灰老鼠 + 黄围巾）资产存放在
 `frontend/src/assets/mascot/`，仅在欢迎/学习陪伴/完成庆祝三场景出现。
+学习伙伴使用原创小老鼠「豆豆」（粉色圆润扁平），常驻右下角入口，组件为
+`frontend/src/components/companion/CompanionMouse.vue`（props：`state` 为 idle/listening/thinking/cheer/safety，`size` 默认 56），
+资产存放在 `frontend/src/assets/companion/`，来源与许可见 `docs/assets/companion-mouse-sources.md`。
 动效只用 CSS `transition`/`keyframes`，不引入动画库；装饰动画包裹
 `@media (prefers-reduced-motion: no-preference)`。
 

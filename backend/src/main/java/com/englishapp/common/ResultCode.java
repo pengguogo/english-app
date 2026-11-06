@@ -15,6 +15,8 @@ public enum ResultCode {
     SUCCESS(200, "success"),
     /** 请求参数错误 */
     BAD_REQUEST(400, "请求参数错误"),
+    /** 语音不合格（格式错、过大、过长、非 multipart） */
+    AGENT_AUDIO_INVALID(4001, "没听清，再说一次吧"),
     /** 未登录 */
     UNAUTHORIZED(401, "请先登录"),
     /** 登录邮箱或密码错误 */
@@ -29,14 +31,24 @@ public enum ResultCode {
     PARENT_VERIFY_REQUIRED(4031, "请先验证家长密码"),
     /** 家长密码错误或已锁定 */
     PARENT_PASSWORD_WRONG(4032, "家长密码不正确"),
+    /** 家庭未同意启用学习伙伴（当前 consentVersion） */
+    AGENT_CONSENT_REQUIRED(4033, "请家长先开启学习伙伴"),
     /** 已登录但未选择孩子 */
     CHILD_NOT_SELECTED(4091, "请先选择孩子"),
     /** 邮箱已注册 */
     EMAIL_TAKEN(4092, "该邮箱已注册"),
+    /** Agent 回合：每分钟次数用完 */
+    AGENT_MINUTE_LIMIT(4291, "说得太快啦，休息一下再试"),
+    /** Agent 回合：当日次数用完 */
+    AGENT_DAILY_LIMIT(4292, "今天的次数用完啦，明天再来吧"),
+    /** Agent 回合：全站试用预算用完 */
+    AGENT_BUDGET_EXHAUSTED(4293, "学习伙伴今天休息啦，明天再来吧"),
     /** 资源不存在 */
     NOT_FOUND(404, "资源不存在"),
     /** 语音服务暂时不可用 */
     VOICE_SERVICE_ERROR(503, "语音服务暂时不可用"),
+    /** 语音识别失败或超时 */
+    AGENT_ASR_UNAVAILABLE(5031, "暂时听不清，可以打字告诉我"),
     /** 服务器内部错误 */
     INTERNAL_ERROR(500, "服务器内部错误");
 

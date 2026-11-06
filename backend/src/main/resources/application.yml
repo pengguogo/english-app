@@ -56,6 +56,19 @@ app:
   agent:
     # 不限 Agent 次数的白名单家庭（家长邮箱，逗号分隔）；改动后重启生效
     unlimited-family-emails: ${AGENT_UNLIMITED_FAMILY_EMAILS:}
+    asr:
+      # 中文短语音识别供应商：baidu | dashscope（百度密钥沿用 voice.baidu.*）
+      provider: ${AGENT_ASR_PROVIDER:baidu}
+      connect-timeout-ms: 3000
+      read-timeout-ms: 5000
+      max-duration-ms: 15000
+      baidu:
+        dev-pid: 1537
+      dashscope:
+        api-key: ${DASHSCOPE_API_KEY:}
+        # 华北 2（北京）；也可换成 https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/...
+        endpoint: ${DASHSCOPE_ASR_ENDPOINT:https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation}
+        model: qwen3-asr-flash
   child-photo:
     dir: ${CHILD_PHOTO_DIR:child-photos}
   word-image:
