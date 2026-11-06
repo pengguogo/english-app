@@ -31,9 +31,10 @@ export JAVA_HOME=/Users/dawn/Library/Java/JavaVirtualMachines/corretto-17.0.13/C
 export PATH="$JAVA_HOME/bin:$PATH"
 mvn test
 
-# 2. 前端锁定依赖并构建
+# 2. 前端锁定依赖、单测并构建
 cd ../frontend
 npm ci
+npm test
 npm run build
 
 # 3. 生成包含前端与课程图片的单 JAR
@@ -120,5 +121,5 @@ java -jar target/english-app-backend-1.0.0.jar
 - [ ] 图片 key、文件路径和 `.jpg` 扩展规则一致
 - [ ] 素材来源或 AI 生成信息已记录
 - [ ] 后端测试通过
-- [ ] 前端构建通过
+- [ ] 前端单测与构建通过
 - [ ] 单 JAR 打包并完成 API、图片 URL 和页面验收
