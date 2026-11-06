@@ -4,6 +4,7 @@ import com.englishapp.common.Result;
 import com.englishapp.dto.RecordWrongAnswerRequest;
 import com.englishapp.dto.WrongAnswerDto;
 import com.englishapp.dto.WrongAnswerStatsDto;
+import com.englishapp.security.CurrentChild;
 import com.englishapp.service.WrongAnswerService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,14 +33,17 @@ import java.util.List;
 public class WrongAnswerController {
 
     private final WrongAnswerService wrongAnswerService;
+    private final CurrentChild currentChild;
 
     /**
      * 构造错题集控制器
      *
      * @param wrongAnswerService 错题业务服务
+     * @param currentChild       当前登录孩子
      */
-    public WrongAnswerController(WrongAnswerService wrongAnswerService) {
+    public WrongAnswerController(WrongAnswerService wrongAnswerService, CurrentChild currentChild) {
         this.wrongAnswerService = wrongAnswerService;
+        this.currentChild = currentChild;
     }
 
     /**
@@ -49,55 +53,47 @@ public class WrongAnswerController {
      * </p>
      *
      * @param request 错题记录请求体(含课时、题号、类型、答案等)
-     * @param userId  用户 ID(可选,默认 1)
      * @return 操作结果(data 为 null)
      */
     @PostMapping("/record")
     public Result<Void> recordWrongAnswer(
-            @Valid @RequestBody RecordWrongAnswerRequest request,
-            @RequestParam(required = false, defaultValue = "1") Integer userId) {
-        wrongAnswerService.recordWrongAnswer(request, userId);
+            @Valid @RequestBody RecordWrongAnswerRequest request) {
+        wrongAnswerService.recordWrongAnswer(request, currentChild.requireChildId());
         return Result.success(null);
     }
 
     /**
      * 查询错题列表
      *
-     * @param userId   用户 ID(可选,默认 1)
      * @param resolved 掌握状态筛选(可选):null=全部,true=已掌握,false=未掌握
      * @return 错题 DTO 列表(按最近答错时间降序)
      */
     @GetMapping
     public Result<List<WrongAnswerDto>> getWrongAnswers(
-            @RequestParam(required = false, defaultValue = "1") Integer userId,
             @RequestParam(required = false) Boolean resolved) {
-        return Result.success(wrongAnswerService.getWrongAnswers(userId, resolved));
+        return Result.success(wrongAnswerService.getWrongAnswers(currentChild.requireChildId(), resolved));
     }
 
     /**
      * 获取错题统计
      *
-     * @param userId 用户 ID(可选,默认 1)
      * @return 错题统计 DTO(含总数、未掌握数、已掌握数、按类型分类)
      */
     @GetMapping("/stats")
-    public Result<WrongAnswerStatsDto> getWrongAnswerStats(
-            @RequestParam(required = false, defaultValue = "1") Integer userId) {
-        return Result.success(wrongAnswerService.getWrongAnswerStats(userId));
+    public Result<WrongAnswerStatsDto> getWrongAnswerStats() {
+        return Result.success(wrongAnswerService.getWrongAnswerStats(currentChild.requireChildId()));
     }
 
     /**
      * 将指定错题标记为已掌握
      *
      * @param id     错题记录 ID
-     * @param userId 用户 ID(可选,默认 1)
      * @return 操作结果(data 为 null)
      */
     @PatchMapping("/{id}/resolve")
     public Result<Void> markAsResolved(
-            @PathVariable Integer id,
-            @RequestParam(required = false, defaultValue = "1") Integer userId) {
-        wrongAnswerService.markAsResolved(id, userId);
+            @PathVariable Integer id) {
+        wrongAnswerService.markAsResolved(id, currentChild.requireChildId());
         return Result.success(null);
     }
 
@@ -105,14 +101,12 @@ public class WrongAnswerController {
      * 删除指定错题
      *
      * @param id     错题记录 ID
-     * @param userId 用户 ID(可选,默认 1)
      * @return 操作结果(data 为 null)
      */
     @DeleteMapping("/{id}")
     public Result<Void> deleteWrongAnswer(
-            @PathVariable Integer id,
-            @RequestParam(required = false, defaultValue = "1") Integer userId) {
-        wrongAnswerService.deleteWrongAnswer(id, userId);
+            @PathVariable Integer id) {
+        wrongAnswerService.deleteWrongAnswer(id, currentChild.requireChildId());
         return Result.success(null);
     }
 }

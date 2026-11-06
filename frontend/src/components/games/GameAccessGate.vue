@@ -1,8 +1,8 @@
 <script setup>
-import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import AppButton from '../AppButton.vue'
 import { unlockGames } from '../../api/games'
+import { authErrorMessage } from '../../utils/authError'
 
 defineProps({
   access: { type: Object, default: null },
@@ -10,7 +10,6 @@ defineProps({
   errorMsg: { type: String, default: '' },
   progressPercent: { type: Number, default: 0 }
 })
-const router = useRouter()
 const emit = defineEmits(['retry', 'learn'])
 const showPassword = ref(false)
 const password = ref('')
@@ -18,19 +17,16 @@ const passwordError = ref('')
 const isUnlocking = ref(false)
 
 async function submitPassword() {
-  if (password.value.length !== 6 || isUnlocking.value) return
+  if (!password.value || isUnlocking.value) return
   isUnlocking.value = true
   passwordError.value = ''
   try {
-    const result = await unlockGames(password.value)
-    if (!result.success) {
-      passwordError.value = result.message
-      password.value = ''
-      return
-    }
+    // 密码错误 403/4032、锁定 401/4012 都进 catch
+    await unlockGames(password.value)
     emit('retry')
   } catch (error) {
-    passwordError.value = '解锁失败，请稍后重试'
+    passwordError.value = authErrorMessage(error, '解锁失败，请稍后重试')
+    password.value = ''
     console.error('密码解锁游戏失败:', error)
   } finally {
     isUnlocking.value = false
@@ -45,7 +41,7 @@ async function submitPassword() {
     <AppButton variant="ghost" @click="$emit('retry')">重新检查</AppButton>
   </div>
   <div v-else-if="access && !access.unlocked" class="gate locked">
-    <!-- 家长入口：小锁，展开后才显示密码解锁与设置 -->
+    <!-- 家长入口：小锁，展开后才显示家长密码解锁 -->
     <button
       type="button"
       class="parent-lock"
@@ -62,17 +58,16 @@ async function submitPassword() {
     <AppButton size="lg" class="learn-btn" @click="$emit('learn')">去学习</AppButton>
     <div v-if="showPassword" class="parent-panel">
       <form class="password-form" @submit.prevent="submitPassword">
-        <label for="game-password">输入 6 位家长密码</label>
+        <label for="game-password">家长登录密码</label>
         <div class="password-row">
-          <input id="game-password" v-model="password" type="password" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="off" placeholder="••••••" />
+          <input id="game-password" v-model="password" type="password" autocomplete="current-password" />
           <AppButton
-            :disabled="password.length !== 6 || isUnlocking"
+            :disabled="!password || isUnlocking"
             @click="submitPassword"
           >{{ isUnlocking ? '验证中…' : '解锁' }}</AppButton>
         </div>
         <p v-if="passwordError" class="password-error" role="alert">{{ passwordError }}</p>
       </form>
-      <AppButton variant="ghost" @click="router.push('/parent-center')">设置或修改游戏密码</AppButton>
     </div>
   </div>
   <slot v-else />
@@ -95,7 +90,7 @@ async function submitPassword() {
 .password-form { width: 100%; min-width: 0; max-width: 360px; padding-top: var(--space-4); border-top: 1px solid var(--border-light); text-align: left; }
 .password-form label { display: block; margin-bottom: var(--space-2); color: var(--text-secondary); font-size: var(--text-sm); }
 .password-row { display: flex; gap: var(--space-2); }
-.password-row input { width: 0; min-width: 0; flex: 1; padding: var(--space-3); color: var(--text-primary); background: var(--bg-card); border: 2px solid var(--border-light); border-radius: var(--radius-md); font-size: var(--text-lg); letter-spacing: 0.3em; }
+.password-row input { width: 0; min-width: 0; flex: 1; padding: var(--space-3); color: var(--text-primary); background: var(--bg-card); border: 2px solid var(--border-light); border-radius: var(--radius-md); font-size: var(--text-lg); }
 .password-row input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--focus-ring); outline: none; }
 .password-error { margin-top: var(--space-2); color: var(--color-warning) !important; font-size: var(--text-sm); }
 </style>

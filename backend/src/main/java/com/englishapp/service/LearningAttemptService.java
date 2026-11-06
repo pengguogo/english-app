@@ -21,7 +21,7 @@ public class LearningAttemptService {
     }
 
     @Transactional
-    public void record(LearningAttemptRequestDTO request) {
+    public void record(Integer childId, LearningAttemptRequestDTO request) {
         var lesson = lessons.findById(request.lessonId()).orElseThrow(() -> new IllegalArgumentException("课时不存在"));
         if (!java.util.Set.of("QUIZ", "CALCULATE").contains(lesson.getType().name())) throw new IllegalArgumentException("课型不支持答题统计");
         try {
@@ -32,13 +32,13 @@ public class LearningAttemptService {
         if (attempt == null) {
             attempt = new LearningAttempt();
             attempt.setId(request.eventId());
-            attempt.setUserId(1);
+            attempt.setUserId(childId);
             attempt.setLessonId(request.lessonId());
             attempt.setQuestionIndex(request.questionIndex());
             attempt.setStudyDate(LocalDate.now());
             attempt.setFirstCorrect(request.firstCorrect());
             attempt.setAssistedCorrect(false);
-        } else if (attempt.getUserId() != 1 || !attempt.getLessonId().equals(request.lessonId())
+        } else if (!attempt.getUserId().equals(childId) || !attempt.getLessonId().equals(request.lessonId())
                 || !attempt.getQuestionIndex().equals(request.questionIndex()) || !attempt.getFirstCorrect().equals(request.firstCorrect())) {
             throw new IllegalArgumentException("答题事件与原请求不一致");
         }

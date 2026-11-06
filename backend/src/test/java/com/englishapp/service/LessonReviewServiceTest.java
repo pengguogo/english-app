@@ -58,6 +58,24 @@ class LessonReviewServiceTest {
     }
 
     @Test
+    void should_判分通过且不读写复习记录_当_游客全部答对() {
+        var result = service.submit(null, 7, List.of(1));
+
+        assertTrue(result.passed());
+        assertTrue(result.wrongIndexes().isEmpty());
+        verifyNoInteractions(sessions);
+    }
+
+    @Test
+    void should_返回错题且不读写复习记录_当_游客答错() {
+        var result = service.submit(null, 7, List.of(0));
+
+        assertFalse(result.passed());
+        assertEquals(List.of(0), result.wrongIndexes());
+        verifyNoInteractions(sessions);
+    }
+
+    @Test
     void should_生成选择题_当_旧课时使用单词数组() {
         Lesson lesson = new Lesson();
         lesson.setId(8);

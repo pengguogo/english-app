@@ -41,9 +41,6 @@ import java.util.stream.Collectors;
 @Service
 public class ProgressServiceImpl implements ProgressService {
 
-    /** 默认用户 ID(在未传入 userId 时使用) */
-    private static final Integer DEFAULT_USER_ID = 1;
-
     private final UserProgressRepository userProgressRepository;
     private final LessonRepository lessonRepository;
     private final LessonReviewService lessonReviewService;
@@ -70,10 +67,9 @@ public class ProgressServiceImpl implements ProgressService {
      */
     @Override
     public ProgressDto getLessonProgress(Integer lessonId, Integer userId) {
-        // 未指定用户时使用默认用户,便于匿名/调试场景
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
-        Optional<UserProgress> progress = userProgressRepository
-                .findByUserIdAndLessonId(uid, lessonId);
+        // 游客(userId 为 null)无进度记录,按默认状态返回
+        Optional<UserProgress> progress = userId == null ? Optional.empty()
+                : userProgressRepository.findByUserIdAndLessonId(userId, lessonId);
         if (progress.isPresent()) {
             UserProgress up = progress.get();
             return new ProgressDto(lessonId, up.getStatus().name(),
@@ -96,14 +92,12 @@ public class ProgressServiceImpl implements ProgressService {
         if (!lessonReviewService.hasPassed(userId, lessonId)) {
             throw new IllegalArgumentException("请先完成本课全部复习题");
         }
-        // 未指定用户时使用默认用户,便于匿名/调试场景
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
         UserProgress progress = userProgressRepository
-                .findByUserIdAndLessonId(uid, lessonId)
+                .findByUserIdAndLessonId(userId, lessonId)
                 .orElseGet(() -> {
                     // 首次完成该课时:创建一条新进度记录,初始状态为 IN_PROGRESS
                     UserProgress newUp = new UserProgress();
-                    newUp.setUserId(uid);
+                    newUp.setUserId(userId);
                     newUp.setLessonId(lessonId);
                     newUp.setStatus(ProgressStatus.IN_PROGRESS);
                     newUp.setStars(0);
@@ -134,8 +128,6 @@ public class ProgressServiceImpl implements ProgressService {
      */
     @Override
     public List<UnitProgressDto> getUnitProgress(Integer unitId, Integer userId) {
-        // 未指定用户时使用默认用户,便于匿名/调试场景
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
 
         // 查询单元下所有课时(按 sortOrder 升序),作为返回顺序的基准
         List<Lesson> unitLessons = lessonRepository.findByUnitIdOrderBySortOrderAsc(unitId);
@@ -144,8 +136,9 @@ public class ProgressServiceImpl implements ProgressService {
         }
 
         // 一次性查询该用户在该单元下所有有进度记录的课时,避免 N+1
-        List<UserProgress> progressList = userProgressRepository
-                .findByUserIdAndLessonUnitId(uid, unitId);
+        // 游客(userId 为 null)无进度记录,全部按默认状态返回
+        List<UserProgress> progressList = userId == null ? List.of()
+                : userProgressRepository.findByUserIdAndLessonUnitId(userId, unitId);
         // 构建 lessonId → UserProgress 映射,便于 O(1) 查找
         Map<Integer, UserProgress> progressMap = progressList.stream()
                 .collect(Collectors.toMap(UserProgress::getLessonId, Function.identity()));
@@ -170,9 +163,7 @@ public class ProgressServiceImpl implements ProgressService {
      */
     @Override
     public List<LearnedLessonDto> getLearnedLessons(Integer userId) {
-        // 未指定用户时使用默认用户,便于匿名/调试场景
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
-        return userProgressRepository.findLearnedLessonsByUserId(uid);
+        return userProgressRepository.findLearnedLessonsByUserId(userId);
     }
 
     /**
@@ -180,18 +171,16 @@ public class ProgressServiceImpl implements ProgressService {
      */
     @Override
     public LearnedStatsDto getLearnedStats(Integer userId) {
-        // 未指定用户时使用默认用户,便于匿名/调试场景
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
 
         // 汇总数据:已学总数、累计星星、平均分数
-        Long totalLearned = userProgressRepository.countCompletedByUserId(uid);
-        Integer totalStars = userProgressRepository.sumStarsByUserId(uid);
-        Double avgScore = userProgressRepository.avgScoreByUserId(uid);
+        Long totalLearned = userProgressRepository.countCompletedByUserId(userId);
+        Integer totalStars = userProgressRepository.sumStarsByUserId(userId);
+        Double avgScore = userProgressRepository.avgScoreByUserId(userId);
         // 平均分取整
         Integer averageScore = avgScore != null ? avgScore.intValue() : 0;
 
         // 按学科与课时类型分组统计:从已学课时列表中手动 groupBy
-        List<LearnedLessonDto> lessons = userProgressRepository.findLearnedLessonsByUserId(uid);
+        List<LearnedLessonDto> lessons = userProgressRepository.findLearnedLessonsByUserId(userId);
 
         // 按学科分组:(subjectId, subjectName) → count
         Map<Integer, List<LearnedLessonDto>> bySubjectMap = lessons.stream()

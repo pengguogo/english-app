@@ -12,8 +12,15 @@ import { getSubjects } from '../../../api/subject'
 import MimiMascot from '../../MimiMascot.vue'
 import AppButton from '../../AppButton.vue'
 import { buildHomeTiles } from '../../../utils/homeTiles'
+import { useAuthStore } from '../../../stores/auth'
 
 const router = useRouter()
+const auth = useAuthStore()
+
+async function logout() {
+  await auth.logout()
+  router.replace('/')
+}
 const subjects = ref([])
 const isLoading = ref(true)
 const errorMsg = ref('')
@@ -41,6 +48,15 @@ async function loadSubjects() {
     <header class="welcome-header">
       <span class="decor cloud c1" aria-hidden="true">☁️</span>
       <span class="decor star c2" aria-hidden="true">⭐</span>
+      <div class="account-bar">
+        <template v-if="auth.loggedIn">
+          <button v-if="auth.me?.currentChild" type="button" class="account-btn" @click="router.push('/choose-child')">
+            {{ auth.me.currentChild.nickname }} · 换人
+          </button>
+          <button type="button" class="account-btn" @click="logout">退出</button>
+        </template>
+        <button v-else type="button" class="account-btn" @click="router.push('/login')">家长登录</button>
+      </div>
       <div class="header-content">
         <h1>Mimi 启蒙乐园</h1>
         <MimiMascot variant="welcome" size="md" />
@@ -122,6 +138,26 @@ async function loadSubjects() {
   cursor: pointer;
 }
 
+.account-bar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.account-btn {
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--brand-surface-soft);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.account-btn:focus-visible,
 .parent-lock:focus-visible,
 .tile:focus-visible {
   outline: none;

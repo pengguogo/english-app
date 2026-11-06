@@ -349,10 +349,12 @@ mvn test
 
 ### 家长中心与学习统计
 
-- `/app/parent-center` 使用与成长档案相同的访问口令（`CHILD_GROWTH_ACCESS_KEY`）。
-  `X-Child-Growth-Key` 同时保护 `/api/v1/parent-settings/password` 和
-  `/api/v1/parent-settings/week`。游戏密码支持设置、修改与重置；不再提供固定默认密码。
-- 游戏密码为6位数字，数据库仅保存带随机盐的 PBKDF2 摘要。连续5次错误后暂停验证5分钟。
+- `/app/parent-center` 与成长档案使用同一套家长验证：家长先登录，再输入家长登录密码
+  完成二次验证（`POST /api/v1/auth/parent-verify`），验证状态存在服务端 Session，10 分钟内有效。
+  `/api/v1/child-growth/**` 和 `/api/v1/parent-settings/**` 未验证时返回 403（code 4031）；
+  `GET /api/v1/parent-settings/password` 只要求登录。
+- 家长密码即家长登录密码（BCrypt），与登录共用失败计数：连续5次错误锁定15分钟。
+- 游戏解锁（`POST /api/v1/games/unlock`）同样校验家长登录密码，成功后刷新二次验证时间；
   正确密码仅设置当日游戏解锁标记，不增加学习时长。
 - `POST /api/v1/games/study-time` 接收 `lessonId`、`seconds`（1–30）与 `eventId`。
   前端按15秒发送，隐藏、切课和离页结算尾段；页面不可见或60秒无操作时暂停。

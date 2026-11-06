@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Service
 public class ChildPhotoServiceImpl implements ChildPhotoService {
-    private static final int USER_ID = 1;
     private static final String BASE_URL = "/api/v1/child-growth/photos/";
     private final ChildPhotoRepository repository;
     private final ChildPhotoImageStore store;
@@ -35,24 +34,24 @@ public class ChildPhotoServiceImpl implements ChildPhotoService {
     }
 
     @Override
-    public List<ChildPhotoResponseDTO> list() {
-        return repository.findByUserIdOrderByTakenAtDescIdDesc(USER_ID).stream().map(this::toDto).toList();
+    public List<ChildPhotoResponseDTO> list(Integer childId) {
+        return repository.findByUserIdOrderByTakenAtDescIdDesc(childId).stream().map(this::toDto).toList();
     }
 
     @Override
-    public List<String> listCategories() {
-        return repository.findDistinctCategories(USER_ID);
+    public List<String> listCategories(Integer childId) {
+        return repository.findDistinctCategories(childId);
     }
 
     @Override
-    public ChildPhotoResponseDTO add(LocalDate takenAt, String caption, String category, MultipartFile image) {
+    public ChildPhotoResponseDTO add(Integer childId, LocalDate takenAt, String caption, String category, MultipartFile image) {
         validateDetails(takenAt, caption, category);
         String suffix = store.extensionOf(image.getContentType());
         byte[] bytes = store.reencode(image, suffix);
         String fileName = UUID.randomUUID() + suffix;
         store.write(fileName, bytes);
         ChildPhoto photo = new ChildPhoto();
-        photo.setUserId(USER_ID);
+        photo.setUserId(childId);
         photo.setTakenAt(takenAt);
         photo.setCaption(normalize(caption));
         photo.setCategory(normalize(category));
@@ -64,9 +63,9 @@ public class ChildPhotoServiceImpl implements ChildPhotoService {
     }
 
     @Override
-    public ChildPhotoResponseDTO update(Integer id, LocalDate takenAt, String caption, String category) {
+    public ChildPhotoResponseDTO update(Integer childId, Integer id, LocalDate takenAt, String caption, String category) {
         validateDetails(takenAt, caption, category);
-        ChildPhoto photo = find(id);
+        ChildPhoto photo = find(childId, id);
         photo.setTakenAt(takenAt);
         photo.setCaption(normalize(caption));
         photo.setCategory(normalize(category));
@@ -74,26 +73,26 @@ public class ChildPhotoServiceImpl implements ChildPhotoService {
     }
 
     @Override
-    public ChildPhoto find(Integer id) {
-        return repository.findByIdAndUserId(id, USER_ID)
+    public ChildPhoto find(Integer childId, Integer id) {
+        return repository.findByIdAndUserId(id, childId)
                 .orElseThrow(() -> new NoSuchElementException("照片不存在"));
     }
 
     @Override
-    public byte[] read(Integer id) {
-        return store.read(find(id).getFileName());
+    public byte[] read(Integer childId, Integer id) {
+        return store.read(find(childId, id).getFileName());
     }
 
     @Override
-    public byte[] readThumbnail(Integer id) {
-        return store.readThumbnail(find(id));
+    public byte[] readThumbnail(Integer childId, Integer id) {
+        return store.readThumbnail(find(childId, id));
     }
 
     @Override
-    public List<ChildPhotoZipItem> prepareZip(List<Integer> ids) {
+    public List<ChildPhotoZipItem> prepareZip(Integer childId, List<Integer> ids) {
         List<ChildPhoto> photos = ids == null || ids.isEmpty()
-                ? repository.findByUserIdOrderByTakenAtDescIdDesc(USER_ID)
-                : ids.stream().map(this::find).toList();
+                ? repository.findByUserIdOrderByTakenAtDescIdDesc(childId)
+                : ids.stream().map(id -> find(childId, id)).toList();
         return photos.stream().map(photo -> new ChildPhotoZipItem(entryNameOf(photo), photo.getFileName())).toList();
     }
 
@@ -111,8 +110,8 @@ public class ChildPhotoServiceImpl implements ChildPhotoService {
     }
 
     @Override
-    public void delete(Integer id) {
-        ChildPhoto photo = find(id);
+    public void delete(Integer childId, Integer id) {
+        ChildPhoto photo = find(childId, id);
         repository.delete(photo);
         store.delete(photo.getFileName());
     }

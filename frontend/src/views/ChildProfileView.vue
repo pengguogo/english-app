@@ -8,7 +8,7 @@
   创建日期: 2026-07-20 (2026-09-30 重构为摘要+弹窗布局)
 -->
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BackBar from '../components/BackBar.vue'
 import AppButton from '../components/AppButton.vue'
@@ -19,13 +19,12 @@ import { useChildGrowth } from '../composables/useChildGrowth'
 import { formatAge } from '../utils/date'
 
 const router = useRouter()
-const accessKey = ref('')
 
 // 解构组合式函数: 顶层 ref 在模板中自动解包
 const {
   profile, records, photos, unlocked, loading, saving, pageError, notice,
   profileOpen, measurementOpen, editingRecord, modalError,
-  load, unlock,
+  load,
   openProfile, closeProfile, saveProfile,
   openMeasurement, closeMeasurement, saveMeasurement, removeMeasurement
 } = useChildGrowth()
@@ -37,10 +36,8 @@ const sexText = computed(() => (profile.sex === 'MALE' ? '男' : profile.sex ===
 // 历史记录倒序展示(最新在前),与既有行为保持一致
 const latestRecords = computed(() => [...records.value].reverse())
 
-// 会话内已有口令时自动加载,否则停留在解锁界面
-onMounted(() => {
-  if (sessionStorage.getItem('childGrowthKey')) load()
-})
+// 家长验证失效时 http 拦截器会弹出家长密码框
+onMounted(load)
 </script>
 
 <template>
@@ -56,13 +53,8 @@ onMounted(() => {
     <!-- 家长访问解锁 -->
     <section v-if="!unlocked && !loading" class="panel">
       <h2>家长访问</h2>
-      <p class="muted">请输入成长档案访问口令。本次浏览会话中会记住它。</p>
-      <form class="access-form" @submit.prevent="unlock(accessKey)">
-        <label>访问口令
-          <input v-model="accessKey" type="password" autocomplete="off" required />
-        </label>
-        <AppButton :disabled="loading" @click="unlock(accessKey)">进入档案</AppButton>
-      </form>
+      <p class="muted">查看成长档案需要再次输入家长密码，10 分钟内有效。</p>
+      <AppButton :disabled="loading" @click="load">验证并进入</AppButton>
     </section>
 
     <template v-if="unlocked && !loading">
@@ -151,10 +143,6 @@ h2 { margin: 0; font-size: var(--text-base); }
 .summary-item dd { margin: 0; font-weight: var(--font-bold); }
 
 /* 解锁表单 */
-.access-form { display: flex; align-items: end; gap: var(--space-3); flex-wrap: wrap; }
-.access-form label { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; min-width: 200px; font-weight: var(--font-medium); }
-.access-form input { box-sizing: border-box; min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--border-light); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-primary); font: inherit; }
-.access-form input:focus { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
 /* 轨迹图双列 */
 .charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }

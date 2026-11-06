@@ -90,6 +90,10 @@ cat >.env <<'EOF'
 BAIDU_APP_ID=你的AppID
 BAIDU_API_KEY=你的ApiKey
 BAIDU_SECRET_KEY=你的SecretKey
+# 站点所有者邮箱：首次用该邮箱注册时认领默认家庭（存量学习数据）
+OWNER_EMAIL=你的邮箱
+# HTTPS 部署必须为 true，登录 Cookie 只经 HTTPS 发送
+SESSION_COOKIE_SECURE=true
 EOF
 ```
 
@@ -222,7 +226,13 @@ systemctl enable --now nginx
 systemctl reload nginx
 ```
 
-完成后在阿里云安全组开放 `80`、`443`，关闭 `8080` 公网入口。验证：
+完成后在阿里云安全组开放 `80`、`443`，关闭 `8080` 公网入口。
+
+> 游客 Agent 额度按客户端 IP 计数。后端只在请求来自本机（127.0.0.1 / ::1）时采用
+> `X-Real-IP`，因此 nginx 必须保留 `proxy_set_header X-Real-IP $remote_addr;`，且 `8080`
+> 不得对公网开放，否则游客额度可被绕过或所有游客共用一份额度。
+
+验证：
 
 ```bash
 curl -I http://study.penggeai.com/app/

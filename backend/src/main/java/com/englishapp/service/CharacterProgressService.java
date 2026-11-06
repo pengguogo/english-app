@@ -4,7 +4,7 @@ import com.englishapp.dto.*;
 import java.util.List;
 
 public interface CharacterProgressService {
-    List<CharacterProgressResponseDTO> progress();
-    List<CharacterItemResponseDTO> review();
-    void record(CharacterAttemptRequestDTO request);
+    List<CharacterProgressResponseDTO> progress(Integer childId);
+    List<CharacterItemResponseDTO> review(Integer childId);
+    void record(Integer childId, CharacterAttemptRequestDTO request);
 }

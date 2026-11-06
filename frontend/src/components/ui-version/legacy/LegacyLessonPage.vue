@@ -17,7 +17,7 @@ import LessonComplete from '../../lesson-templates/LessonComplete.vue'
 import LessonReview from '../../lesson-templates/LessonReview.vue'
 
 const { lesson, isLoading, errorMsg, currentIndex, currentScore, currentStars, scoreMessage,
-  isScoring, isComplete, showReview, isSubmitting, saveError, mascotFeedback, currentItem,
+  isScoring, isComplete, showReview, isSubmitting, saveError, needLogin, mascotFeedback, currentItem,
   currentText, totalItems, isLastItem, currentItemEngaged, totalBestScore, totalStars, lessonTemplate,
   lessonTemplateProps, loadLesson, handleRecorded, handleAnswered, handleListened, skipCurrentItem,
   nextItem, prevItem, advanceContinuousPlayback, handleReviewPassed, clearContinuousQuery, goBack, finishLesson } = useLessonLearning()
@@ -53,6 +53,7 @@ const { lesson, isLoading, errorMsg, currentIndex, currentScore, currentStars, s
         :total-score="totalBestScore"
         :is-submitting="isSubmitting"
         :save-error="saveError"
+        :need-login="needLogin"
         @finish="finishLesson"
       />
       <LessonReview v-else-if="showReview" :key="lesson.id" :lesson-id="lesson.id" :saving="isSubmitting" :save-error="saveError" @passed="handleReviewPassed" />

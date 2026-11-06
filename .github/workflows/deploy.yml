@@ -77,13 +77,8 @@ jobs:
             git merge --ff-only '${{ github.sha }}'
             test "$(git rev-parse HEAD)" = '${{ github.sha }}'
             ./scripts/deploy.sh
-            growth_key='${{ secrets.CHILD_GROWTH_ACCESS_KEY }}'
-            if [ -n "$growth_key" ]; then
-              sed -i '/^CHILD_GROWTH_ACCESS_KEY=/d' /opt/english-app/.env
-              printf 'CHILD_GROWTH_ACCESS_KEY=%s\n' "$growth_key" >> /opt/english-app/.env
-              mkdir -p /opt/english-app/child-photos
-              chmod 700 /opt/english-app/child-photos
-            fi
+            mkdir -p /opt/english-app/child-photos
+            chmod 700 /opt/english-app/child-photos
             systemctl restart mimi
             echo "[deploy] 服务已重启,等待健康检查"
             systemctl is-active --quiet mimi

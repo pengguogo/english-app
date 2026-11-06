@@ -16,7 +16,7 @@ const rate = count => props.report.attempts ? `${Math.round(count / props.report
       <div><dt>辅助答对率</dt><dd>{{ rate(report.assistedCorrect) }}</dd></div>
     </dl>
     <p>答题统计包含 {{ report.attempts }} 次选择题/计算题练习。辅助答对表示首次未答对、提示后答对。</p>
-    <p>仅统计功能上线后采集的时长和答题样本；游戏密码解锁不增加学习时长。页面隐藏或60秒无操作时暂停计时。</p>
+    <p>仅统计功能上线后采集的时长和答题样本；家长密码解锁游戏不增加学习时长。页面隐藏或60秒无操作时暂停计时。</p>
     <div class="table-wrap">
       <table><caption>每日学习记录</caption><thead><tr><th scope="col">日期</th><th scope="col">学习时长</th><th scope="col">复习通过</th></tr></thead>
         <tbody><tr v-for="day in report.days" :key="day.date"><th scope="row">{{ day.date }}</th><td>{{ duration(day.seconds) }}</td><td>{{ day.passedLessons }}次</td></tr></tbody>

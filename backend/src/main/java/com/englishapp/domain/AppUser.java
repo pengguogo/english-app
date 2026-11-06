@@ -21,6 +21,8 @@ public class AppUser {
     private LocalDate birthDate;
     private String sex;
     private LocalDateTime createdAt;
+    /** 所属家庭 */
+    private Long familyId;
 
     public Integer getId() {
         return id;
@@ -58,4 +60,7 @@ public class AppUser {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public Long getFamilyId() { return familyId; }
+    public void setFamilyId(Long familyId) { this.familyId = familyId; }
 }

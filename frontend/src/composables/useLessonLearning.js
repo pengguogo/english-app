@@ -39,6 +39,8 @@ export function useLessonLearning() {
   const isSubmitting = ref(false)
   const isProgressSaved = ref(false)
   const saveError = ref('')
+  // 游客完成课时:进度未保存,完成页提示家长登录
+  const needLogin = ref(false)
   const mascotFeedback = ref(null)
   let lessonLoadVersion = 0
   let mascotFeedbackTimer = null
@@ -117,7 +119,7 @@ export function useLessonLearning() {
 
   const state = { route, router, safeBack, lesson, isLoading, errorMsg, currentIndex, currentScore,
       currentStars, scoreMessage, isScoring, isComplete, showReview, isSubmitting, isProgressSaved,
-      saveError, mascotFeedback, bestScores, engagedItems, currentItem, currentText, totalItems,
+      saveError, needLogin, mascotFeedback, bestScores, engagedItems, currentItem, currentText, totalItems,
       isLastItem, currentItemEngaged, totalBestScore, totalStars, lessonTemplate, lessonTemplateProps,
       markCurrentItemEngaged, showMascotFeedback, getVersion: () => lessonLoadVersion }
   const { handleRecorded, updateBestScore, resetCurrentScoreState } = useLessonScoring(state)
@@ -142,6 +144,7 @@ export function useLessonLearning() {
     showReview.value = false
     isProgressSaved.value = false
     saveError.value = ''
+    needLogin.value = false
     resetCurrentScoreState()
 
     try {
@@ -268,7 +271,7 @@ export function useLessonLearning() {
 
   return { route, router, safeBack, lesson, isLoading, errorMsg, currentIndex, currentScore,
       currentStars, scoreMessage, isScoring, isComplete, showReview, isSubmitting, isProgressSaved,
-      saveError, mascotFeedback, bestScores, engagedItems, currentItem, currentText, totalItems,
+      saveError, needLogin, mascotFeedback, bestScores, engagedItems, currentItem, currentText, totalItems,
       isLastItem, currentItemEngaged, totalBestScore, totalStars, lessonTemplate, lessonTemplateProps,
       markCurrentItemEngaged, showMascotFeedback, loadLesson, handleRecorded, handleAnswered, handleListened,
     skipCurrentItem, nextItem, prevItem, ...completion }

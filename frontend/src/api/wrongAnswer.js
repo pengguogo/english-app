@@ -19,7 +19,7 @@ import http from './http'
  * @return {Promise<Object>} 创建结果
  */
 export function recordWrongAnswer(data) {
-  return http.post('/wrong-answers/record', data, { params: { userId: 1 } })
+  return http.post('/wrong-answers/record', data)
 }
 
 /**
@@ -29,7 +29,7 @@ export function recordWrongAnswer(data) {
  * @return {Promise<Array>} 错题列表
  */
 export function getWrongAnswers(resolved = null) {
-  const params = { userId: 1 }
+  const params = {}
   if (resolved !== null) params.resolved = resolved
   return http.get('/wrong-answers', { params })
 }
@@ -40,7 +40,7 @@ export function getWrongAnswers(resolved = null) {
  * @return {Promise<Object>} 统计对象 { total, unresolved, resolved }
  */
 export function getWrongAnswerStats() {
-  return http.get('/wrong-answers/stats', { params: { userId: 1 } })
+  return http.get('/wrong-answers/stats')
 }
 
 /**
@@ -50,7 +50,7 @@ export function getWrongAnswerStats() {
  * @return {Promise<Object>} 更新结果
  */
 export function resolveWrongAnswer(id) {
-  return http.patch(`/wrong-answers/${id}/resolve`, null, { params: { userId: 1 } })
+  return http.patch(`/wrong-answers/${id}/resolve`)
 }
 
 /**
@@ -60,5 +60,5 @@ export function resolveWrongAnswer(id) {
  * @return {Promise<Object>} 删除结果
  */
 export function deleteWrongAnswer(id) {
-  return http.delete(`/wrong-answers/${id}`, { params: { userId: 1 } })
+  return http.delete(`/wrong-answers/${id}`)
 }

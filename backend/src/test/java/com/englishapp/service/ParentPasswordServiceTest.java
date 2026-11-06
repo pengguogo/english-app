@@ -1,55 +1,49 @@
 package com.englishapp.service;
 
-import com.englishapp.domain.ParentGameSetting;
-import com.englishapp.repository.ParentGameSettingRepository;
+import com.englishapp.common.ResultCode;
+import com.englishapp.security.AuthException;
+import com.englishapp.security.AuthPrincipal;
+import com.englishapp.security.GuardianPasswordChecker;
+import com.englishapp.security.SessionCurrentChild;
 import org.junit.jupiter.api.Test;
-import java.time.LocalDateTime;
-import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ParentPasswordServiceTest {
+    private final SessionCurrentChild current = mock(SessionCurrentChild.class);
+    private final GuardianPasswordChecker checker = mock(GuardianPasswordChecker.class);
+    private final ParentPasswordService service = new ParentPasswordService(current, checker);
+
+    ParentPasswordServiceTest() {
+        when(current.principal()).thenReturn(new AuthPrincipal(7L, 3L, "a@b.co"));
+    }
+
     @Test
-    void should_保存摘要并替换密码_当_家长设置或修改() {
-        var repository = mock(ParentGameSettingRepository.class);
-        var setting = new ParentGameSetting();
-        when(repository.findById(1)).thenReturn(Optional.of(setting));
-        var service = new ParentPasswordService(repository);
-        assertFalse(service.isConfigured());
-        service.setPassword("246810");
-        assertNotEquals("246810", setting.getPasswordHash());
-        assertTrue(service.verify("246810"));
-        service.setPassword("135790");
-        assertFalse(service.verify("246810"));
-        assertTrue(service.verify("135790"));
-        when(repository.existsById(1)).thenReturn(true);
+    void should_刷新验证时间_当_家长密码正确() {
+        when(checker.check(7L, "goodpass")).thenReturn(GuardianPasswordChecker.Result.OK);
+        assertTrue(service.verify("goodpass"));
+        verify(current).markParentVerified();
+    }
+
+    @Test
+    void should_抛4032且不刷新_当_密码错误() {
+        when(checker.check(7L, "bad")).thenReturn(GuardianPasswordChecker.Result.WRONG);
+        var e = assertThrows(AuthException.class, () -> service.verify("bad"));
+        assertEquals(ResultCode.PARENT_PASSWORD_WRONG, e.getResultCode());
+        assertEquals(403, e.httpStatus());
+        verify(current, never()).markParentVerified();
+    }
+
+    @Test
+    void should_抛4012_当_账号已锁定() {
+        when(checker.check(7L, "goodpass")).thenReturn(GuardianPasswordChecker.Result.LOCKED);
+        var e = assertThrows(AuthException.class, () -> service.verify("goodpass"));
+        assertEquals(ResultCode.ACCOUNT_LOCKED, e.getResultCode());
+        assertEquals(401, e.httpStatus());
+    }
+
+    @Test
+    void should_始终已配置_当_家长密码即登录密码() {
         assertTrue(service.isConfigured());
-        assertThrows(IllegalArgumentException.class, () -> service.setPassword("abc"));
-    }
-
-    @Test
-    void should_临时锁定且允许过期后重试_当_连续五次错误() {
-        var repository = mock(ParentGameSettingRepository.class);
-        var setting = new ParentGameSetting();
-        when(repository.findById(1)).thenReturn(Optional.of(setting));
-        var service = new ParentPasswordService(repository);
-        service.setPassword("246810");
-        for (int i = 0; i < 5; i++) assertFalse(service.verify("111111"));
-        assertNotNull(setting.getLockedUntil());
-        assertFalse(service.verify("246810"));
-        setting.setLockedUntil(LocalDateTime.now().minusSeconds(1));
-        assertTrue(service.verify("246810"));
-        assertEquals(0, setting.getFailedAttempts());
-        assertNull(setting.getLockedUntil());
-    }
-
-    @Test
-    void should_拒绝默认密码_当_尚未设置() {
-        var repository = mock(ParentGameSettingRepository.class);
-        when(repository.findById(1)).thenReturn(Optional.empty());
-        assertFalse(new ParentPasswordService(repository).verify("000000"));
-        verify(repository, never()).save(any());
-        String first = ParentPasswordHash.encode("246810");
-        assertNotEquals(first, ParentPasswordHash.encode("246810"));
     }
 }

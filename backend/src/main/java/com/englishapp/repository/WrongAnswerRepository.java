@@ -49,6 +49,9 @@ public interface WrongAnswerRepository extends JpaRepository<WrongAnswer, Intege
      * @param questionIndex 题目序号
      * @return 错题记录(可能为空)
      */
+    /** 按 id + 用户查询,用于隔离他人错题 */
+    Optional<WrongAnswer> findByIdAndUserId(Integer id, Integer userId);
+
     Optional<WrongAnswer> findByUserIdAndLessonIdAndQuestionIndex(Integer userId, Integer lessonId, Integer questionIndex);
 
     /**

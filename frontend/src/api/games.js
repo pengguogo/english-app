@@ -1,11 +1,11 @@
-import http from './http'
+import http, { xsrfHeaders } from './http'
 
 export const getGameAccess = () => http.get('/games/access')
 
 // keepalive 允许离页时仍发送不足15秒的尾段；事件ID用于服务端去重。
 export async function recordStudyTime(lessonId, seconds, eventId) {
   const response = await fetch('/api/v1/games/study-time', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
+    method: 'POST', headers: { 'Content-Type': 'application/json', ...xsrfHeaders() }, keepalive: true,
     body: JSON.stringify({ lessonId, seconds, eventId })
   })
   const result = await response.json()
@@ -13,5 +13,6 @@ export async function recordStudyTime(lessonId, seconds, eventId) {
   return result.data
 }
 
+// 密码错误 403/4032、锁定 401/4012,由调用方按 code 提示,不走全局 401 跳转
 export const unlockGames = (password) =>
-  http.post('/games/unlock', { password })
+  http.post('/games/unlock', { password }, { skipAuthRedirect: true })

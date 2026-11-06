@@ -22,8 +22,8 @@ public class CharacterProgressServiceImpl implements CharacterProgressService {
     }
 
     @Override
-    public List<CharacterProgressResponseDTO> progress() {
-        Map<String, CharacterProgress> saved = repository.findAll().stream()
+    public List<CharacterProgressResponseDTO> progress(Integer childId) {
+        Map<String, CharacterProgress> saved = repository.findAll(childId).stream()
                 .collect(Collectors.toMap(CharacterProgress::word, Function.identity()));
         return catalog.items().stream().map(item -> {
             var p = saved.get(item.word());
@@ -34,9 +34,9 @@ public class CharacterProgressServiceImpl implements CharacterProgressService {
     }
 
     @Override
-    public List<CharacterItemResponseDTO> review() {
+    public List<CharacterItemResponseDTO> review(Integer childId) {
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Shanghai"));
-        return progress().stream().filter(p -> p.dueDate() != null && !p.dueDate().isAfter(today))
+        return progress(childId).stream().filter(p -> p.dueDate() != null && !p.dueDate().isAfter(today))
                 .sorted(Comparator.comparingInt((CharacterProgressResponseDTO p) -> "WRONG".equals(p.lastOutcome()) ? 0
                         : "ASSISTED".equals(p.lastOutcome()) ? 1 : 2).thenComparing(CharacterProgressResponseDTO::dueDate))
                 .limit(8).map(CharacterProgressResponseDTO::item).toList();
@@ -44,13 +44,13 @@ public class CharacterProgressServiceImpl implements CharacterProgressService {
 
     @Override
     @Transactional
-    public void record(CharacterAttemptRequestDTO request) {
+    public void record(Integer childId, CharacterAttemptRequestDTO request) {
         var item = catalog.items().stream().filter(i -> i.lessonId() == request.lessonId()
                 && i.itemIndex() == request.itemIndex()).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("不是本批汉字学习项"));
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Shanghai"));
-        if (!repository.insertAttempt(request.eventId(), item.word(), request.outcome().name(), today)) return;
-        var previous = repository.findAll().stream().filter(p -> p.word().equals(item.word())).findFirst().orElse(null);
-        repository.save(CharacterReviewPolicy.apply(previous, item.word(), request.outcome(), today));
+        if (!repository.insertAttempt(childId, request.eventId(), item.word(), request.outcome().name(), today)) return;
+        var previous = repository.findAll(childId).stream().filter(p -> p.word().equals(item.word())).findFirst().orElse(null);
+        repository.save(childId, CharacterReviewPolicy.apply(previous, item.word(), request.outcome(), today));
     }
 }

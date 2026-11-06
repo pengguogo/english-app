@@ -2,6 +2,7 @@ package com.englishapp.exception;
 
 import com.englishapp.common.Result;
 import com.englishapp.common.ResultCode;
+import com.englishapp.security.AuthException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -29,6 +30,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Result<Void>> handleNotFound(NoSuchElementException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new Result<>(ResultCode.NOT_FOUND.getCode(), ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<Result<Void>> handleAuth(AuthException ex) {
+        return ResponseEntity.status(ex.httpStatus()).body(Result.error(ex.getResultCode()));
     }
 
     @ExceptionHandler(RuntimeException.class)

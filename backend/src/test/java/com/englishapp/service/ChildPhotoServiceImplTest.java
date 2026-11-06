@@ -57,12 +57,12 @@ class ChildPhotoServiceImplTest {
         ImageIO.write(new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB), "jpg", output);
         var file = new MockMultipartFile("image", "test.jpg", "image/jpeg", output.toByteArray());
 
-        var saved = service.add(LocalDate.now(), "第一次骑车", "成长", file);
+        var saved = service.add(1, LocalDate.now(), "第一次骑车", "成长", file);
         assertEquals("/api/v1/child-growth/photos/7/image", saved.imageUrl());
         assertEquals("/api/v1/child-growth/photos/7/thumbnail", saved.thumbnailUrl());
         assertEquals("成长", saved.category());
-        assertTrue(service.read(7).length > 0);
-        service.delete(7);
+        assertTrue(service.read(1, 7).length > 0);
+        service.delete(1, 7);
         assertEquals(0, Files.list(tempDir).count());
     }
 
@@ -71,7 +71,7 @@ class ChildPhotoServiceImplTest {
         ChildPhotoRepository repository = mock(ChildPhotoRepository.class);
         ChildPhotoServiceImpl service = newService(repository);
         var file = new MockMultipartFile("image", "fake.jpg", "image/jpeg", "not an image".getBytes());
-        assertThrows(IllegalArgumentException.class, () -> service.add(LocalDate.now(), "", null, file));
+        assertThrows(IllegalArgumentException.class, () -> service.add(1, LocalDate.now(), "", null, file));
         verifyNoInteractions(repository);
     }
 
@@ -79,7 +79,7 @@ class ChildPhotoServiceImplTest {
     void should_返回照片列表_当_查询() {
         ChildPhotoRepository repository = mock(ChildPhotoRepository.class);
         when(repository.findByUserIdOrderByTakenAtDescIdDesc(1)).thenReturn(List.of());
-        assertTrue(newService(repository).list().isEmpty());
+        assertTrue(newService(repository).list(1).isEmpty());
     }
 
     @Test
@@ -90,7 +90,7 @@ class ChildPhotoServiceImplTest {
         when(repository.findByIdAndUserId(2, 1)).thenReturn(Optional.of(photo));
         when(repository.save(any())).thenAnswer(call -> call.getArgument(0));
         var result = newService(repository)
-                .update(2, LocalDate.of(2025, 1, 1), "  一岁生日  ", "  家庭  ");
+                .update(1, 2, LocalDate.of(2025, 1, 1), "  一岁生日  ", "  家庭  ");
         assertEquals(LocalDate.of(2025, 1, 1), result.takenAt());
         assertEquals("一岁生日", result.caption());
         assertEquals("家庭", result.category());
@@ -100,7 +100,7 @@ class ChildPhotoServiceImplTest {
     void should_拒绝超长分类_当_更新照片() {
         ChildPhotoRepository repository = mock(ChildPhotoRepository.class);
         assertThrows(IllegalArgumentException.class, () -> newService(repository)
-                .update(2, LocalDate.now(), null, "很".repeat(51)));
+                .update(1, 2, LocalDate.now(), null, "很".repeat(51)));
         verifyNoInteractions(repository);
     }
 
@@ -108,7 +108,7 @@ class ChildPhotoServiceImplTest {
     void should_返回去重分类列表_当_查询分类() {
         ChildPhotoRepository repository = mock(ChildPhotoRepository.class);
         when(repository.findDistinctCategories(1)).thenReturn(List.of("家庭", "生日"));
-        assertEquals(List.of("家庭", "生日"), newService(repository).listCategories());
+        assertEquals(List.of("家庭", "生日"), newService(repository).listCategories(1));
     }
 
     @Test
@@ -119,14 +119,14 @@ class ChildPhotoServiceImplTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         ImageIO.write(new BufferedImage(600, 400, BufferedImage.TYPE_INT_RGB), "jpg", output);
         var file = new MockMultipartFile("image", "big.jpg", "image/jpeg", output.toByteArray());
-        service.add(LocalDate.now(), null, null, file);
+        service.add(1, LocalDate.now(), null, null, file);
 
-        byte[] thumb = service.readThumbnail(7);
+        byte[] thumb = service.readThumbnail(1, 7);
         BufferedImage decoded = ImageIO.read(new ByteArrayInputStream(thumb));
         assertEquals(480, decoded.getWidth());
         assertEquals(320, decoded.getHeight());
         // 第二次读取应命中磁盘缓存:thumbs 目录下恰好一个缓存文件
-        service.readThumbnail(7);
+        service.readThumbnail(1, 7);
         try (var cached = Files.list(tempDir.resolve("thumbs"))) {
             assertEquals(1, cached.count());
         }
@@ -140,7 +140,7 @@ class ChildPhotoServiceImplTest {
         photo.setFileName("missing.jpg");
         when(repository.findByIdAndUserId(3, 1)).thenReturn(Optional.of(photo));
         // 文件不存在时,readThumbnail 降级为 read,最终抛 404 对应的 NoSuchElementException
-        assertThrows(java.util.NoSuchElementException.class, () -> newService(repository).readThumbnail(3));
+        assertThrows(java.util.NoSuchElementException.class, () -> newService(repository).readThumbnail(1, 3));
     }
 
     @Test
@@ -159,7 +159,7 @@ class ChildPhotoServiceImplTest {
         photo.setCaption("公园/游玩");
         when(repository.findByIdAndUserId(9, 1)).thenReturn(Optional.of(photo));
 
-        var items = service.prepareZip(List.of(9));
+        var items = service.prepareZip(1, List.of(9));
         assertEquals(1, items.size());
         ByteArrayOutputStream zipOutput = new ByteArrayOutputStream();
         service.writeZip(items, zipOutput);
@@ -178,6 +178,6 @@ class ChildPhotoServiceImplTest {
         ChildPhotoRepository repository = mock(ChildPhotoRepository.class);
         when(repository.findByIdAndUserId(99, 1)).thenReturn(Optional.empty());
         assertThrows(java.util.NoSuchElementException.class,
-                () -> newService(repository).prepareZip(List.of(99)));
+                () -> newService(repository).prepareZip(1, List.of(99)));
     }
 }

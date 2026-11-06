@@ -1,48 +1,47 @@
 package com.englishapp.config;
 
+import com.englishapp.common.ResultCode;
+import com.englishapp.security.AuthException;
+import com.englishapp.security.CurrentChild;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ChildGrowthAccessFilterTest {
     @Test
-    void should_保护密码设置和周报_当_没有家长口令() throws Exception {
-        for (String path : new String[]{"/api/v1/parent-settings/password", "/api/v1/parent-settings/week"}) {
+    void should_返回403_4031_当_家长未二次验证() throws Exception {
+        CurrentChild current = mock(CurrentChild.class);
+        doThrow(new AuthException(ResultCode.PARENT_VERIFY_REQUIRED)).when(current).requireParentVerified();
+        for (String path : new String[]{"/api/v1/child-growth/profile", "/api/v1/parent-settings/week"}) {
             var response = new MockHttpServletResponse();
-            new ChildGrowthAccessFilter("secret").doFilter(new MockHttpServletRequest("PUT", path), response, new MockFilterChain());
-            assertEquals(401, response.getStatus());
+            var chain = new MockFilterChain();
+            new ChildGrowthAccessFilter(current).doFilter(new MockHttpServletRequest("GET", path), response, chain);
+            assertEquals(403, response.getStatus());
+            assertTrue(response.getContentAsString().contains("4031"));
+            assertNull(chain.getRequest());
         }
     }
 
     @Test
-    void should_拒绝错误口令_当_读取成长档案() throws Exception {
-        var filter = new ChildGrowthAccessFilter("secret");
-        var request = new MockHttpServletRequest("GET", "/api/v1/child-growth/profile");
-        request.addHeader("X-Child-Growth-Key", "wrong");
-        var response = new MockHttpServletResponse();
-        filter.doFilter(request, response, new MockFilterChain());
-        assertEquals(401, response.getStatus());
-    }
-
-    @Test
-    void should_放行正确口令_当_读取成长档案() throws Exception {
-        var filter = new ChildGrowthAccessFilter("secret");
-        var request = new MockHttpServletRequest("GET", "/api/v1/child-growth/profile");
-        request.addHeader("X-Child-Growth-Key", "secret");
-        var response = new MockHttpServletResponse();
+    void should_放行_当_家长已二次验证() throws Exception {
+        CurrentChild current = mock(CurrentChild.class);
         var chain = new MockFilterChain();
-        filter.doFilter(request, response, chain);
+        new ChildGrowthAccessFilter(current).doFilter(
+                new MockHttpServletRequest("GET", "/api/v1/child-growth/photos"), new MockHttpServletResponse(), chain);
         assertNotNull(chain.getRequest());
     }
 
     @Test
-    void should_拒绝访问_当_未配置口令() throws Exception {
-        var filter = new ChildGrowthAccessFilter("");
-        var response = new MockHttpServletResponse();
-        filter.doFilter(new MockHttpServletRequest("GET", "/api/v1/child-growth/photos"),
-                response, new MockFilterChain());
-        assertEquals(503, response.getStatus());
+    void should_不要求二次验证_当_查询家长密码状态或访问其他接口() throws Exception {
+        CurrentChild current = mock(CurrentChild.class);
+        var filter = new ChildGrowthAccessFilter(current);
+        filter.doFilter(new MockHttpServletRequest("GET", "/api/v1/parent-settings/password"),
+                new MockHttpServletResponse(), new MockFilterChain());
+        filter.doFilter(new MockHttpServletRequest("GET", "/api/v1/subjects"),
+                new MockHttpServletResponse(), new MockFilterChain());
+        verify(current, never()).requireParentVerified();
     }
 }

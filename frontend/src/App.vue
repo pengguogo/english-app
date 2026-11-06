@@ -5,11 +5,14 @@
   创建日期: 2026-07-20
 -->
 <script setup>
+import ParentVerifyModal from './components/ParentVerifyModal.vue'
 </script>
 
 <template>
   <div class="app-container">
     <router-view />
+    <!-- 家长二次验证弹窗,由 http 拦截器触发 -->
+    <ParentVerifyModal />
   </div>
 </template>
 

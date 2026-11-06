@@ -25,6 +25,10 @@ class CharacterMigrationTest {
             ScriptUtils.executeSqlScript(connection,
                     new org.springframework.core.io.support.EncodedResource(
                             new ClassPathResource("db/migration/V82__strengthen_character_recognition.sql"), "UTF-8"));
+            // V87：character_attempt 改为按 (user_id, event_id) 联合唯一
+            ScriptUtils.executeSqlScript(connection,
+                    new org.springframework.core.io.support.EncodedResource(
+                            new ClassPathResource("db/migration/V87__character_attempt_unique_per_child.sql"), "UTF-8"));
         }
         var mapper = new ObjectMapper();
         var words = new java.util.HashSet<String>();
@@ -42,12 +46,12 @@ class CharacterMigrationTest {
         assertEquals(24, words.size());
         var repository = new CharacterProgressRepository(jdbc);
         var today = LocalDate.of(2026, 10, 10);
-        assertTrue(repository.insertAttempt("retry", "山", "WRONG", today));
-        assertFalse(repository.insertAttempt("retry", "山", "WRONG", today));
-        repository.save(new CharacterProgress("山", 0, null, 1, 0, "WRONG", today.plusDays(1)));
-        repository.save(new CharacterProgress("山", 1, today, 1, 0, "INDEPENDENT", today.plusDays(1)));
-        assertEquals(1, repository.findAll().size());
-        assertEquals(1, repository.findAll().get(0).wrongCount());
-        assertEquals(today, repository.findAll().get(0).lastIndependentDate());
+        assertTrue(repository.insertAttempt(1, "retry", "山", "WRONG", today));
+        assertFalse(repository.insertAttempt(1, "retry", "山", "WRONG", today));
+        repository.save(1, new CharacterProgress("山", 0, null, 1, 0, "WRONG", today.plusDays(1)));
+        repository.save(1, new CharacterProgress("山", 1, today, 1, 0, "INDEPENDENT", today.plusDays(1)));
+        assertEquals(1, repository.findAll(1).size());
+        assertEquals(1, repository.findAll(1).get(0).wrongCount());
+        assertEquals(today, repository.findAll(1).get(0).lastIndependentDate());
     }
 }

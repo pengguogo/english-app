@@ -24,12 +24,30 @@ class LearningAttemptServiceTest {
         var event = new LearningAttempt(); event.setId("event"); event.setUserId(1); event.setLessonId(7);
         event.setQuestionIndex(0); event.setStudyDate(LocalDate.now()); event.setFirstCorrect(false); event.setAssistedCorrect(false);
         when(repository.findById("event")).thenReturn(Optional.of(event));
-        service.record(new LearningAttemptRequestDTO("event", 7, 0, false, true));
-        service.record(new LearningAttemptRequestDTO("event", 7, 0, false, false));
+        service.record(1, new LearningAttemptRequestDTO("event", 7, 0, false, true));
+        service.record(1, new LearningAttemptRequestDTO("event", 7, 0, false, false));
         assertFalse(event.getFirstCorrect());
         assertTrue(event.getAssistedCorrect());
-        assertThrows(IllegalArgumentException.class, () -> service.record(new LearningAttemptRequestDTO("event", 7, 0, true, false)));
-        assertThrows(IllegalArgumentException.class, () -> service.record(new LearningAttemptRequestDTO("new", 7, 1, true, false)));
+        assertThrows(IllegalArgumentException.class, () -> service.record(1, new LearningAttemptRequestDTO("event", 7, 0, true, false)));
+        assertThrows(IllegalArgumentException.class, () -> service.record(1, new LearningAttemptRequestDTO("new", 7, 1, true, false)));
+    }
+
+    @Test
+    void should_拒绝且不改原记录_当_另一个孩子复用同一事件ID() {
+        var repository = mock(LearningAttemptRepository.class);
+        var lessons = mock(LessonRepository.class);
+        var lesson = new Lesson(); lesson.setType(LessonType.QUIZ); lesson.setContent("{\"items\":[{}]}");
+        when(lessons.findById(7)).thenReturn(Optional.of(lesson));
+        var event = new LearningAttempt(); event.setId("event"); event.setUserId(1); event.setLessonId(7);
+        event.setQuestionIndex(0); event.setStudyDate(LocalDate.now()); event.setFirstCorrect(false); event.setAssistedCorrect(false);
+        when(repository.findById("event")).thenReturn(Optional.of(event));
+        var service = new LearningAttemptService(repository, lessons, new ObjectMapper());
+
+        assertThrows(IllegalArgumentException.class, () -> service.record(2, new LearningAttemptRequestDTO("event", 7, 0, false, true)));
+
+        assertEquals(1, event.getUserId());
+        assertFalse(event.getAssistedCorrect());
+        verify(repository, never()).save(any());
     }
 
     @Test
@@ -38,7 +56,7 @@ class LearningAttemptServiceTest {
         var lessons = mock(LessonRepository.class);
         var lesson = new Lesson(); lesson.setType(LessonType.CALCULATE); lesson.setContent("{\"items\":[{}]}");
         when(lessons.findById(7)).thenReturn(Optional.of(lesson));
-        new LearningAttemptService(repository, lessons, new ObjectMapper()).record(new LearningAttemptRequestDTO("event", 7, 0, true, false));
+        new LearningAttemptService(repository, lessons, new ObjectMapper()).record(1, new LearningAttemptRequestDTO("event", 7, 0, true, false));
         verify(repository).save(argThat(e -> e.getFirstCorrect() && !e.getAssistedCorrect()));
     }
 }

@@ -37,7 +37,7 @@ public interface ProgressService {
      * </p>
      *
      * @param lessonId 课时 ID
-     * @param userId   用户 ID(为 null 时由实现决定默认值)
+     * @param userId   孩子 ID(即 user_id),游客为 null 时返回默认进度
      * @return 进度信息
      */
     ProgressDto getLessonProgress(Integer lessonId, Integer userId);
@@ -51,7 +51,7 @@ public interface ProgressService {
      *
      * @param lessonId 课时 ID
      * @param request  完成请求(含本次星星与分数)
-     * @param userId   用户 ID(为 null 时由实现决定默认值)
+     * @param userId   孩子 ID(即 user_id,由 CurrentChild 提供)
      * @return 下一课解锁信息(若已是最后一课,nextLessonId 为 null,unlocked 为 false)
      */
     CompleteResponse completeLesson(Integer lessonId, CompleteRequest request, Integer userId);
@@ -68,7 +68,7 @@ public interface ProgressService {
      * </p>
      *
      * @param unitId 单元 ID
-     * @param userId 用户 ID(为 null 时由实现决定默认值)
+     * @param userId 孩子 ID(即 user_id),游客为 null 时返回默认进度
      * @return 该单元所有课时的进度列表(按课时 sortOrder 升序排列)
      */
     List<UnitProgressDto> getUnitProgress(Integer unitId, Integer userId);
@@ -80,7 +80,7 @@ public interface ProgressService {
      * 以及每个课时的星星数、分数与完成时间,按完成时间降序排列。
      * </p>
      *
-     * @param userId 用户 ID(为 null 时使用默认用户)
+     * @param userId 孩子 ID(即 user_id,由 CurrentChild 提供)
      * @return 已学课时 DTO 列表(按完成时间降序)
      */
     List<LearnedLessonDto> getLearnedLessons(Integer userId);
@@ -91,7 +91,7 @@ public interface ProgressService {
      * 返回已学课时总数、累计星星数、平均分数,以及按学科和课时类型的分类统计。
      * </p>
      *
-     * @param userId 用户 ID(为 null 时使用默认用户)
+     * @param userId 孩子 ID(即 user_id,由 CurrentChild 提供)
      * @return 已学课时统计 DTO
      */
     LearnedStatsDto getLearnedStats(Integer userId);

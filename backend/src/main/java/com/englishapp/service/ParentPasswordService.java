@@ -1,40 +1,39 @@
 package com.englishapp.service;
 
-import com.englishapp.domain.ParentGameSetting;
-import com.englishapp.repository.ParentGameSettingRepository;
+import com.englishapp.common.ResultCode;
+import com.englishapp.security.AuthException;
+import com.englishapp.security.GuardianPasswordChecker;
+import com.englishapp.security.SessionCurrentChild;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 
+/**
+ * 家长二次验证：校验当前家庭的家长登录密码，和登录共用失败计数。
+ * 成功后刷新 Session 中的验证时间（10 分钟），/auth/parent-verify 与游戏解锁共用。
+ */
 @Service
 public class ParentPasswordService {
-    private final ParentGameSettingRepository repository;
-    public ParentPasswordService(ParentGameSettingRepository repository) { this.repository = repository; }
+    private final SessionCurrentChild current;
+    private final GuardianPasswordChecker checker;
 
-    public boolean isConfigured() { return repository.existsById(1); }
-
-    @Transactional
-    public void setPassword(String password) {
-        if (password == null || !password.matches("[0-9]{6}")) throw new IllegalArgumentException("请输入6位数字密码");
-        ParentGameSetting setting = repository.findById(1).orElseGet(ParentGameSetting::new);
-        setting.setId(1);
-        setting.setPasswordHash(ParentPasswordHash.encode(password));
-        setting.setFailedAttempts(0);
-        setting.setLockedUntil(null);
-        repository.save(setting);
+    public ParentPasswordService(SessionCurrentChild current, GuardianPasswordChecker checker) {
+        this.current = current;
+        this.checker = checker;
     }
 
-    @Transactional
+    /** 家长密码即登录密码，注册即已设置 */
+    public boolean isConfigured() { return true; }
+
+    /**
+     * 校验成功返回 true；未登录 401，密码错误 403(4032)，锁定 401(4012)。
+     * 须在调用方写库之前调用。
+     */
     public boolean verify(String password) {
-        ParentGameSetting setting = repository.findById(1).orElse(null);
-        if (setting == null) return false;
-        LocalDateTime now = LocalDateTime.now();
-        if (setting.getLockedUntil() != null && now.isBefore(setting.getLockedUntil())) return false;
-        boolean correct = ParentPasswordHash.matches(password, setting.getPasswordHash());
-        int failures = correct || setting.getLockedUntil() != null ? 0 : setting.getFailedAttempts();
-        setting.setFailedAttempts(correct ? 0 : failures + 1);
-        setting.setLockedUntil(setting.getFailedAttempts() >= 5 ? now.plusMinutes(5) : null);
-        repository.save(setting);
-        return correct;
+        switch (checker.check(current.principal().guardianId(), password)) {
+            case LOCKED -> throw new AuthException(ResultCode.ACCOUNT_LOCKED);
+            case WRONG -> throw new AuthException(ResultCode.PARENT_PASSWORD_WRONG);
+            default -> { }
+        }
+        current.markParentVerified();
+        return true;
     }
 }

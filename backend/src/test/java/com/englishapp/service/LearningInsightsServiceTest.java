@@ -24,13 +24,13 @@ class LearningInsightsServiceTest {
         // 主键没有setter，用测试工具设置。
         org.springframework.test.util.ReflectionTestUtils.setField(question, "id", 9);
         when(wrong.findFirstByUserIdAndIsResolvedFalseAndQuestionTypeInOrderByLastWrongAtDesc(eq(1), anyList())).thenReturn(Optional.of(question));
-        assertEquals("/wrong-answers/9/practice", service.today().path());
+        assertEquals("/wrong-answers/9/practice", service.today(1).path());
         when(wrong.findFirstByUserIdAndIsResolvedFalseAndQuestionTypeInOrderByLastWrongAtDesc(eq(1), anyList())).thenReturn(Optional.empty());
         var lesson = new Lesson(); lesson.setId(7); lesson.setName("水果");
         when(lessons.findNextUnfinishedEnglishLesson(eq(1), any())).thenReturn(List.of(lesson));
-        assertEquals("/lesson/7", service.today().path());
+        assertEquals("/lesson/7", service.today(1).path());
         when(lessons.findNextUnfinishedEnglishLesson(eq(1), any())).thenReturn(List.of());
-        assertEquals("/learned", service.today().path());
+        assertEquals("/learned", service.today(1).path());
     }
 
     @Test
@@ -41,7 +41,7 @@ class LearningInsightsServiceTest {
         when(attempts.findByUserIdAndStudyDateBetween(eq(1), any(), any())).thenReturn(List.of(answer));
         var session = new LessonStudySession(); session.setStudyDate(LocalDate.now()); session.setPassed(true);
         when(sessions.findByUserIdAndStudyDateBetween(eq(1), any(), any())).thenReturn(List.of(session));
-        var report = service.week();
+        var report = service.week(1);
         assertEquals(7, report.days().size()); assertEquals(600, report.totalSeconds());
         assertEquals(1, report.activeDays()); assertEquals(1, report.passedLessons());
         assertEquals(1, report.attempts()); assertEquals(0, report.firstCorrect()); assertEquals(1, report.assistedCorrect());
@@ -49,7 +49,7 @@ class LearningInsightsServiceTest {
 
     @Test
     void should_返回空样本_当_尚无新统计数据() {
-        var report = service.week();
+        var report = service.week(1);
         assertEquals(0, report.totalSeconds()); assertEquals(0, report.attempts());
         assertEquals(7, report.days().size());
     }

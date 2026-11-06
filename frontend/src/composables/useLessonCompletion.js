@@ -3,10 +3,11 @@ import { getLessonsByUnit } from '../api/lesson'
 import { getUnitsByTheme } from '../api/unit'
 import { findNextReadingLesson } from '../utils/continuousPlayback'
 import { buildThemeDestination } from '../utils/lessonNav'
+import { isUnauthorized } from '../utils/authError'
 
 export function useLessonCompletion(state) {
   const { route, router, safeBack, lesson, isSubmitting, isProgressSaved, showReview,
-    isComplete, saveError, totalStars, totalBestScore, showMascotFeedback } = state
+    isComplete, saveError, needLogin, totalStars, totalBestScore, showMascotFeedback } = state
   async function advanceContinuousPlayback(reviewPassed = false) {
     if (!reviewPassed) {
       showReview.value = true
@@ -50,6 +51,8 @@ export function useLessonCompletion(state) {
         }
       })
     } catch (error) {
+      // 游客:不再连播,停在完成页提示登录
+      if (isUnauthorized(error)) return showGuestComplete()
       console.error('自动进入下一节阅读课失败:', error)
       saveError.value = '保存或进入下一课失败，请点“重试保存”'
     } finally {
@@ -72,10 +75,19 @@ export function useLessonCompletion(state) {
       isComplete.value = true
       showMascotFeedback('celebrate', '复习全对，本课完成！')
     } catch (error) {
+      if (isUnauthorized(error)) return showGuestComplete()
       saveError.value = '保存失败，请重新提交复习'
     } finally {
       isSubmitting.value = false
     }
+  }
+
+  /** 游客完成:照常庆祝,完成页显示一行登录提示 */
+  function showGuestComplete() {
+    needLogin.value = true
+    showReview.value = false
+    isComplete.value = true
+    clearContinuousQuery()
   }
 
   function clearContinuousQuery() {
@@ -94,7 +106,7 @@ export function useLessonCompletion(state) {
     isSubmitting.value = true
     saveError.value = ''
     try {
-      if (!isProgressSaved.value) {
+      if (!isProgressSaved.value && !needLogin.value) {
         await completeLesson(
           route.params.lessonId,
           totalStars.value,
@@ -104,6 +116,7 @@ export function useLessonCompletion(state) {
       const destination = buildThemeDestination(route.query)
       router.replace(destination)
     } catch (error) {
+      if (isUnauthorized(error)) return showGuestComplete()
       console.error('保存进度失败:', error)
       saveError.value = '保存失败，请检查网络后重试'
     } finally {

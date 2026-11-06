@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Service
 public class GameAccessServiceImpl implements GameAccessService {
     static final int REQUIRED_SECONDS = 300;
-    private static final int DEFAULT_USER_ID = 1;
     private final ParentPasswordService passwords;
     private final StudyTimeEventRepository events;
     private final DailyStudyTimeRepository repository;
@@ -41,38 +40,36 @@ public class GameAccessServiceImpl implements GameAccessService {
     public GameAccessDto recordPendingStudyTime(Integer userId, Integer lessonId, int seconds, String eventId) {
         if (seconds < 1 || seconds > 30) throw new IllegalArgumentException("每次学习时长须为1至30秒");
         if (lessonId == null || !lessons.existsById(lessonId)) throw new IllegalArgumentException("课时不存在");
-        Integer uid = resolveUser(userId);
         LocalDate today = LocalDate.now();
         String id = eventId == null ? java.util.UUID.randomUUID().toString() : eventId;
         StudyTimeEvent existing = events.findById(id).orElse(null);
         if (existing != null) {
-            if (!existing.getUserId().equals(uid) || !existing.getLessonId().equals(lessonId)
+            if (!existing.getUserId().equals(userId) || !existing.getLessonId().equals(lessonId)
                     || existing.getSeconds() != seconds) throw new IllegalArgumentException("计时事件与原请求不一致");
-            return getTodayAccess(uid);
+            return getTodayAccess(userId);
         }
         StudyTimeEvent event = new StudyTimeEvent();
         event.setId(id);
-        event.setUserId(uid);
+        event.setUserId(userId);
         event.setLessonId(lessonId);
         event.setStudyDate(today);
         event.setSeconds(seconds);
         events.save(event);
-        return recordStudyTime(uid, seconds);
+        return recordStudyTime(userId, seconds);
     }
 
     @Override
     public GameAccessDto getTodayAccess(Integer userId) {
-        DailyStudyTime record = repository.findByUserIdAndStudyDate(resolveUser(userId), LocalDate.now()).orElse(null);
+        DailyStudyTime record = repository.findByUserIdAndStudyDate(userId, LocalDate.now()).orElse(null);
         return toAccess(record == null ? 0 : record.getSeconds(), record != null && Boolean.TRUE.equals(record.getParentUnlocked()));
     }
 
     @Override
     @Transactional
     public GameAccessDto recordStudyTime(Integer userId, int seconds) {
-        Integer uid = resolveUser(userId);
         LocalDate today = LocalDate.now();
-        DailyStudyTime record = repository.findByUserIdAndStudyDate(uid, today)
-                .orElseGet(() -> newRecord(uid, today));
+        DailyStudyTime record = repository.findByUserIdAndStudyDate(userId, today)
+                .orElseGet(() -> newRecord(userId, today));
         record.setSeconds(Math.min(REQUIRED_SECONDS, record.getSeconds() + seconds));
         record.setUpdatedAt(LocalDateTime.now());
         repository.save(record);
@@ -82,12 +79,10 @@ public class GameAccessServiceImpl implements GameAccessService {
     @Override
     @Transactional
     public GameUnlockDto unlockWithPassword(Integer userId, String password) {
-        if (!passwords.verify(password)) {
-            return new GameUnlockDto(false, "密码未设置、错误或暂时锁定，请家长前往家长中心检查", getTodayAccess(userId));
-        }
-        Integer uid = resolveUser(userId);
-        DailyStudyTime record = repository.findByUserIdAndStudyDate(uid, LocalDate.now())
-                .orElseGet(() -> newRecord(uid, LocalDate.now()));
+        // 密码错误或锁定时 verify 直接抛 AuthException,不会走到下面的写库逻辑
+        passwords.verify(password);
+        DailyStudyTime record = repository.findByUserIdAndStudyDate(userId, LocalDate.now())
+                .orElseGet(() -> newRecord(userId, LocalDate.now()));
         record.setParentUnlocked(true);
         record.setUpdatedAt(LocalDateTime.now());
         repository.save(record);
@@ -107,9 +102,5 @@ public class GameAccessServiceImpl implements GameAccessService {
         int studied = Math.min(seconds, REQUIRED_SECONDS);
         return new GameAccessDto(studied, REQUIRED_SECONDS,
                 Math.max(0, REQUIRED_SECONDS - studied), parentUnlocked || studied >= REQUIRED_SECONDS);
-    }
-
-    private Integer resolveUser(Integer userId) {
-        return userId == null ? DEFAULT_USER_ID : userId;
     }
 }

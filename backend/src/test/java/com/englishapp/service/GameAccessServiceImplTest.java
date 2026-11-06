@@ -1,5 +1,8 @@
 package com.englishapp.service;
 
+import com.englishapp.common.ResultCode;
+import com.englishapp.security.AuthException;
+
 import com.englishapp.domain.DailyStudyTime;
 import com.englishapp.dto.GameAccessDto;
 import com.englishapp.dto.GameUnlockDto;
@@ -100,14 +103,20 @@ class GameAccessServiceImplTest {
     }
 
     @Test
-    void should_拒绝解锁_当_密码错误() {
-        when(repository.findByUserIdAndStudyDate(1, LocalDate.now()))
-                .thenReturn(Optional.empty());
+    void should_拒绝解锁且不写库_当_密码错误() {
+        when(passwords.verify("123456")).thenThrow(new AuthException(ResultCode.PARENT_PASSWORD_WRONG));
 
-        GameUnlockDto result = service.unlockWithPassword(1, "123456");
+        assertThrows(AuthException.class, () -> service.unlockWithPassword(1, "123456"));
 
-        assertFalse(result.success());
-        assertFalse(result.access().unlocked());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void should_拒绝解锁且不写库_当_账号已锁定() {
+        when(passwords.verify("246810")).thenThrow(new AuthException(ResultCode.ACCOUNT_LOCKED));
+
+        assertThrows(AuthException.class, () -> service.unlockWithPassword(1, "246810"));
+
         verify(repository, never()).save(any());
     }
 

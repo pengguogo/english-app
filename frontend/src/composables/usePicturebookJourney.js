@@ -3,6 +3,7 @@ import { getLessonById, getLessonsByUnit } from '../api/lesson'
 import { completeLesson, getUnitProgress } from '../api/progress'
 import { nextUnfinished, quizScore, readBookmark, writeBookmark } from '../utils/picturebookProgress'
 import { stopActiveTts } from './useTts'
+import { isUnauthorized } from '../utils/authError'
 
 export function usePicturebookJourney(route) {
   const lessons = ref([])
@@ -13,6 +14,7 @@ export function usePicturebookJourney(route) {
   const error = ref('')
   const saving = ref(false)
   const saveError = ref('')
+  const needLogin = ref(false)
   const arrival = ref(false)
   const reviewing = ref(false)
   const scores = ref([])
@@ -101,9 +103,15 @@ export function usePicturebookJourney(route) {
     const activity = activityVersion
     try {
       const score = source.type === 'QUIZ' ? quizScore(scores.value, source.content.items.length) : 0
-      await completeLesson(source.id, 3, score)
+      try {
+        await completeLesson(source.id, 3, score)
+      } catch (e) {
+        // 游客:进度不保存,照常到站并提示家长登录
+        if (!isUnauthorized(e)) throw e
+        needLogin.value = true
+      }
       if (version !== loadVersion) return
-      if (!completedIds.value.includes(source.id)) completedIds.value.push(source.id)
+      if (!needLogin.value && !completedIds.value.includes(source.id)) completedIds.value.push(source.id)
       if (activity !== activityVersion) return
       index.value = 0
       scores.value = []
@@ -117,6 +125,6 @@ export function usePicturebookJourney(route) {
   function timetable() { activityVersion++; stopActiveTts(); active.value = -1; arrival.value = false; reviewing.value = false }
   watch(() => route.params.unitId, load, { immediate: true })
   onBeforeUnmount(() => { loadVersion++; stopActiveTts() })
-  return { lessons, completedIds, active, index, lesson, item, loading, error, saving, saveError, bookmarkError,
+  return { lessons, completedIds, active, index, lesson, item, loading, error, saving, saveError, needLogin, bookmarkError,
     arrival, reviewing, allComplete, load, start, resume, move, answer, finish, timetable }
 }

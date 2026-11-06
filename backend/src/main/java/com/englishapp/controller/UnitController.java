@@ -2,11 +2,11 @@ package com.englishapp.controller;
 
 import com.englishapp.common.Result;
 import com.englishapp.dto.UnitDto;
+import com.englishapp.security.CurrentChild;
 import com.englishapp.service.UnitService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -26,30 +26,31 @@ import java.util.List;
 public class UnitController {
 
     private final UnitService unitService;
+    private final CurrentChild currentChild;
 
     /**
      * 构造单元控制器
      *
-     * @param unitService 单元业务接口
+     * @param unitService  单元业务接口
+     * @param currentChild 当前登录孩子
      */
-    public UnitController(UnitService unitService) {
+    public UnitController(UnitService unitService, CurrentChild currentChild) {
         this.unitService = unitService;
+        this.currentChild = currentChild;
     }
 
     /**
      * 获取某主题下所有单元(带进度)
      * <p>
-     * 通过 themeId 指定主题,可选 userId 参数(默认 1)指定用户。
+     * 公开接口:已选孩子时带该孩子进度,游客或未选孩子时进度为 0。
      * </p>
      *
      * @param themeId 主题 ID
-     * @param userId  用户 ID(可选,默认 1)
      * @return 统一响应,包含单元 DTO 列表
      */
     @GetMapping("/theme/{themeId}")
     public Result<List<UnitDto>> getUnitsByTheme(
-            @PathVariable Integer themeId,
-            @RequestParam(required = false, defaultValue = "1") Integer userId) {
-        return Result.success(unitService.getUnitsByTheme(themeId, userId));
+            @PathVariable Integer themeId) {
+        return Result.success(unitService.getUnitsByTheme(themeId, currentChild.currentChildId().orElse(null)));
     }
 }

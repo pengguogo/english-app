@@ -13,7 +13,6 @@ import java.util.NoSuchElementException;
 
 @Service
 public class ChildGrowthServiceImpl implements ChildGrowthService {
-    private static final int USER_ID = 1;
     private final AppUserRepository userRepository;
     private final GrowthMeasurementRepository measurementRepository;
 
@@ -24,19 +23,19 @@ public class ChildGrowthServiceImpl implements ChildGrowthService {
     }
 
     @Override
-    public ChildProfileResponseDTO getProfile() {
-        return toProfile(userRepository.findById(USER_ID).orElseThrow());
+    public ChildProfileResponseDTO getProfile(Integer childId) {
+        return toProfile(userRepository.findById(childId).orElseThrow());
     }
 
     @Override @Transactional
-    public ChildProfileResponseDTO updateProfile(ChildProfileRequestDTO request) {
+    public ChildProfileResponseDTO updateProfile(Integer childId, ChildProfileRequestDTO request) {
         if (request.birthDate() != null && request.birthDate().isAfter(LocalDate.now()))
             throw new IllegalArgumentException("生日不能晚于今天");
         if (request.nickname() == null || request.nickname().isBlank())
             throw new IllegalArgumentException("请填写昵称");
         if (request.sex() != null && !List.of("MALE", "FEMALE").contains(request.sex()))
             throw new IllegalArgumentException("性别选项无效");
-        AppUser user = userRepository.findById(USER_ID).orElseThrow();
+        AppUser user = userRepository.findById(childId).orElseThrow();
         user.setNickname(request.nickname().trim());
         user.setBirthDate(request.birthDate());
         user.setSex(request.sex());
@@ -44,33 +43,33 @@ public class ChildGrowthServiceImpl implements ChildGrowthService {
     }
 
     @Override
-    public List<GrowthMeasurementResponseDTO> listMeasurements() {
-        return measurementRepository.findByUserIdOrderByMeasuredAtAscIdAsc(USER_ID)
+    public List<GrowthMeasurementResponseDTO> listMeasurements(Integer childId) {
+        return measurementRepository.findByUserIdOrderByMeasuredAtAscIdAsc(childId)
                 .stream().map(this::toMeasurement).toList();
     }
 
     @Override @Transactional
-    public GrowthMeasurementResponseDTO createMeasurement(GrowthMeasurementRequestDTO request) {
+    public GrowthMeasurementResponseDTO createMeasurement(Integer childId, GrowthMeasurementRequestDTO request) {
         validate(request);
         GrowthMeasurement item = new GrowthMeasurement();
-        item.setUserId(USER_ID);
+        item.setUserId(childId);
         item.setCreatedAt(java.time.LocalDateTime.now());
         apply(item, request);
         return toMeasurement(measurementRepository.save(item));
     }
 
     @Override @Transactional
-    public GrowthMeasurementResponseDTO updateMeasurement(Integer id, GrowthMeasurementRequestDTO request) {
+    public GrowthMeasurementResponseDTO updateMeasurement(Integer childId, Integer id, GrowthMeasurementRequestDTO request) {
         validate(request);
-        GrowthMeasurement item = measurementRepository.findByIdAndUserId(id, USER_ID)
+        GrowthMeasurement item = measurementRepository.findByIdAndUserId(id, childId)
                 .orElseThrow(() -> new NoSuchElementException("测量记录不存在"));
         apply(item, request);
         return toMeasurement(measurementRepository.save(item));
     }
 
     @Override @Transactional
-    public void deleteMeasurement(Integer id) {
-        GrowthMeasurement item = measurementRepository.findByIdAndUserId(id, USER_ID)
+    public void deleteMeasurement(Integer childId, Integer id) {
+        GrowthMeasurement item = measurementRepository.findByIdAndUserId(id, childId)
                 .orElseThrow(() -> new NoSuchElementException("测量记录不存在"));
         measurementRepository.delete(item);
     }

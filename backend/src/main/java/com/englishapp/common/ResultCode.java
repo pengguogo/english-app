@@ -15,6 +15,24 @@ public enum ResultCode {
     SUCCESS(200, "success"),
     /** 请求参数错误 */
     BAD_REQUEST(400, "请求参数错误"),
+    /** 未登录 */
+    UNAUTHORIZED(401, "请先登录"),
+    /** 登录邮箱或密码错误 */
+    LOGIN_FAILED(4011, "邮箱或密码错误"),
+    /** 登录失败次数过多被锁定 */
+    ACCOUNT_LOCKED(4012, "登录失败次数过多，请 15 分钟后再试"),
+    /** 无权访问 */
+    FORBIDDEN(403, "无权访问"),
+    /** CSRF 令牌缺失或无效 */
+    CSRF_INVALID(4030, "页面已过期，请刷新后重试"),
+    /** 需要家长二次验证 */
+    PARENT_VERIFY_REQUIRED(4031, "请先验证家长密码"),
+    /** 家长密码错误或已锁定 */
+    PARENT_PASSWORD_WRONG(4032, "家长密码不正确"),
+    /** 已登录但未选择孩子 */
+    CHILD_NOT_SELECTED(4091, "请先选择孩子"),
+    /** 邮箱已注册 */
+    EMAIL_TAKEN(4092, "该邮箱已注册"),
     /** 资源不存在 */
     NOT_FOUND(404, "资源不存在"),
     /** 语音服务暂时不可用 */

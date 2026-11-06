@@ -12,6 +12,9 @@
 import StarBar from '../StarBar.vue'
 import AppButton from '../AppButton.vue'
 import MimiMascot from '../MimiMascot.vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 /**
  * 组件 Props
@@ -45,6 +48,11 @@ const props = defineProps({
   saveError: {
     type: String,
     default: ''
+  },
+  /** 游客完成课时,进度未保存时提示家长登录 */
+  needLogin: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -71,6 +79,10 @@ const emit = defineEmits({
     <p class="total-score">平均得分:{{ totalScore }} 分</p>
 
     <p v-if="saveError" class="save-error" role="alert">{{ saveError }}</p>
+    <p v-if="needLogin" class="login-tip">
+      家长登录后可以保存进度
+      <RouterLink :to="{ path: '/login', query: { redirect: route.fullPath } }">去登录</RouterLink>
+    </p>
 
     <AppButton
       variant="success"
@@ -117,6 +129,15 @@ const emit = defineEmits({
 .save-error {
   color: var(--color-warning);
   font-size: var(--text-sm);
+}
+
+.login-tip {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+.login-tip a {
+  color: var(--color-primary);
+  font-weight: var(--font-medium);
 }
 
 /* 吉祥物的尺寸与动效已由 MimiMascot 统一管理 */

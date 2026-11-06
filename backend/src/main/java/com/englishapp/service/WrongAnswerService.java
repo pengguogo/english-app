@@ -27,14 +27,14 @@ public interface WrongAnswerService {
      * </p>
      *
      * @param request 错题记录请求(含课时、题号、类型、答案等)
-     * @param userId  用户 ID(为 null 时使用默认用户)
+     * @param userId  孩子 ID(即 user_id,由 CurrentChild 提供)
      */
     void recordWrongAnswer(RecordWrongAnswerRequest request, Integer userId);
 
     /**
      * 查询错题列表
      *
-     * @param userId   用户 ID(为 null 时使用默认用户)
+     * @param userId   孩子 ID(即 user_id,由 CurrentChild 提供)
      * @param resolved 掌握状态筛选:null 返回全部,true 返回已掌握,false 返回未掌握
      * @return 错题 DTO 列表(按最近答错时间降序)
      */
@@ -46,7 +46,7 @@ public interface WrongAnswerService {
      * 返回错题总数、未掌握数、已掌握数,以及按题目类型的分类统计。
      * </p>
      *
-     * @param userId 用户 ID(为 null 时使用默认用户)
+     * @param userId 孩子 ID(即 user_id,由 CurrentChild 提供)
      * @return 错题统计 DTO
      */
     WrongAnswerStatsDto getWrongAnswerStats(Integer userId);

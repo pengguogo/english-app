@@ -24,20 +24,21 @@ public class LearningInsightsService {
         this.lessons = lessons;
     }
 
-    public TodayTaskResponseDTO today() {
-        var wrong = wrongAnswers.findFirstByUserIdAndIsResolvedFalseAndQuestionTypeInOrderByLastWrongAtDesc(1, List.of("QUIZ", "CALCULATE"));
+    /** 今日任务;childId 为 null(游客)时跳过错题,推荐第一节英语课 */
+    public TodayTaskResponseDTO today(Integer childId) {
+        var wrong = childId == null ? java.util.Optional.<com.englishapp.domain.WrongAnswer>empty() : wrongAnswers.findFirstByUserIdAndIsResolvedFalseAndQuestionTypeInOrderByLastWrongAtDesc(childId, List.of("QUIZ", "CALCULATE"));
         if (wrong.isPresent()) return new TodayTaskResponseDTO("重练：" + wrong.get().getLessonName(),
                 "先把一道还没掌握的题练会", "/wrong-answers/" + wrong.get().getId() + "/practice");
-        var next = lessons.findNextUnfinishedEnglishLesson(1, org.springframework.data.domain.PageRequest.of(0, 1));
+        var next = lessons.findNextUnfinishedEnglishLesson(childId == null ? -1 : childId, org.springframework.data.domain.PageRequest.of(0, 1));
         if (!next.isEmpty()) return new TodayTaskResponseDTO(next.get(0).getName(), "开始一节还没完成的英语课", "/lesson/" + next.get(0).getId());
         return new TodayTaskResponseDTO("复习学过的课程", "英语课程已完成，选一课再练练", "/learned");
     }
 
-    public WeekReportResponseDTO week() {
+    public WeekReportResponseDTO week(Integer childId) {
         LocalDate to = LocalDate.now(), from = to.minusDays(6);
-        var events = times.findByUserIdAndStudyDateBetween(1, from, to);
-        var answers = attempts.findByUserIdAndStudyDateBetween(1, from, to);
-        var passed = sessions.findByUserIdAndStudyDateBetween(1, from, to).stream()
+        var events = times.findByUserIdAndStudyDateBetween(childId, from, to);
+        var answers = attempts.findByUserIdAndStudyDateBetween(childId, from, to);
+        var passed = sessions.findByUserIdAndStudyDateBetween(childId, from, to).stream()
                 .filter(s -> Boolean.TRUE.equals(s.getPassed())).toList();
         var days = IntStream.range(0, 7).mapToObj(i -> {
             LocalDate date = from.plusDays(i);

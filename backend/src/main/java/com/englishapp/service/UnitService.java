@@ -22,7 +22,7 @@ public interface UnitService {
      * </p>
      *
      * @param themeId 主题 ID
-     * @param userId  用户 ID(为 null 时使用默认用户)
+     * @param userId  孩子 ID(即 user_id),游客为 null 时进度为 0
      * @return 单元 DTO 列表,按排序序号升序
      */
     List<UnitDto> getUnitsByTheme(Integer themeId, Integer userId);

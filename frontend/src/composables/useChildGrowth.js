@@ -39,7 +39,7 @@ export function useChildGrowth() {
   const modalError = ref('')
 
   /**
-   * 加载全部档案数据;口令错误(401)时回到解锁界面。
+   * 加载全部档案数据;家长验证失效时由 http 拦截器弹密码框并重试。
    */
   async function load() {
     loading.value = true
@@ -57,21 +57,11 @@ export function useChildGrowth() {
       photos.value = savedPhotos
       unlocked.value = true
     } catch (e) {
-      if (e.response?.status === 401) unlocked.value = false
+      unlocked.value = false
       pageError.value = e.response?.data?.message || '加载失败，请重试'
     } finally {
       loading.value = false
     }
-  }
-
-  /**
-   * 解锁档案: 写入会话存储(接口层自动携带)后加载数据。
-   * @param {String} accessKey 家长访问口令
-   * @returns {Promise} 加载结果
-   */
-  function unlock(accessKey) {
-    sessionStorage.setItem('childGrowthKey', accessKey)
-    return load()
   }
 
   // ===== 弹窗开关: 打开前清空上一次的接口错误 =====
@@ -162,7 +152,7 @@ export function useChildGrowth() {
   return {
     profile, records, photos, unlocked, loading, saving, pageError, notice,
     profileOpen, measurementOpen, editingRecord, modalError,
-    load, unlock,
+    load,
     openProfile, closeProfile, saveProfile,
     openMeasurement, closeMeasurement, saveMeasurement, removeMeasurement
   }

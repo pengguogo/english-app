@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
  * 核心设计要点:
  * <ul>
  *     <li>幂等累加:同一用户+课时+题号的错题只保留一条,重复答错时 wrongCount 累加</li>
- *     <li>权限隔离:标记掌握与删除操作均校验 userId 匹配,防止越权操作他人错题</li>
+ *     <li>权限隔离:标记掌握与删除按 id + userId 查询,他人错题视为不存在(404)</li>
  *     <li>统计分组:按题目类型分组统计,使用 Java Stream groupBy 实现</li>
  * </ul>
  * </p>
@@ -32,9 +33,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class WrongAnswerServiceImpl implements WrongAnswerService {
-
-    /** 默认用户 ID(在未传入 userId 时使用) */
-    private static final Integer DEFAULT_USER_ID = 1;
 
     private final WrongAnswerRepository wrongAnswerRepository;
 
@@ -53,13 +51,12 @@ public class WrongAnswerServiceImpl implements WrongAnswerService {
     @Override
     @Transactional
     public void recordWrongAnswer(RecordWrongAnswerRequest request, Integer userId) {
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
         LocalDateTime now = LocalDateTime.now();
 
         // 先查找是否已存在同一题的错题记录(用于重复答错累加)
         Optional<WrongAnswer> existing = wrongAnswerRepository
                 .findByUserIdAndLessonIdAndQuestionIndex(
-                        uid, request.getLessonId(), request.getQuestionIndex());
+                        userId, request.getLessonId(), request.getQuestionIndex());
 
         if (existing.isPresent()) {
             // 已存在:累加错误次数,更新最新答题信息,重置为未掌握
@@ -76,7 +73,7 @@ public class WrongAnswerServiceImpl implements WrongAnswerService {
         } else {
             // 不存在:创建新的错题记录
             WrongAnswer wa = new WrongAnswer();
-            wa.setUserId(uid);
+            wa.setUserId(userId);
             wa.setLessonId(request.getLessonId());
             wa.setLessonName(request.getLessonName());
             wa.setQuestionIndex(request.getQuestionIndex());
@@ -98,15 +95,14 @@ public class WrongAnswerServiceImpl implements WrongAnswerService {
      */
     @Override
     public List<WrongAnswerDto> getWrongAnswers(Integer userId, Boolean resolved) {
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
         List<WrongAnswer> list;
         if (resolved == null) {
             // null:返回全部错题
-            list = wrongAnswerRepository.findByUserIdOrderByLastWrongAtDesc(uid);
+            list = wrongAnswerRepository.findByUserIdOrderByLastWrongAtDesc(userId);
         } else {
             // true:已掌握;false:未掌握
             list = wrongAnswerRepository
-                    .findByUserIdAndIsResolvedOrderByLastWrongAtDesc(uid, resolved);
+                    .findByUserIdAndIsResolvedOrderByLastWrongAtDesc(userId, resolved);
         }
         return list.stream()
                 .map(this::toDto)
@@ -118,14 +114,13 @@ public class WrongAnswerServiceImpl implements WrongAnswerService {
      */
     @Override
     public WrongAnswerStatsDto getWrongAnswerStats(Integer userId) {
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
 
-        Long unresolved = wrongAnswerRepository.countByUserIdAndIsResolved(uid, false);
-        Long resolved = wrongAnswerRepository.countByUserIdAndIsResolved(uid, true);
+        Long unresolved = wrongAnswerRepository.countByUserIdAndIsResolved(userId, false);
+        Long resolved = wrongAnswerRepository.countByUserIdAndIsResolved(userId, true);
         Long total = unresolved + resolved;
 
         // 按题目类型分组统计:从全部错题中手动 groupBy
-        List<WrongAnswer> all = wrongAnswerRepository.findByUserIdOrderByLastWrongAtDesc(uid);
+        List<WrongAnswer> all = wrongAnswerRepository.findByUserIdOrderByLastWrongAtDesc(userId);
         Map<String, Long> typeMap = all.stream()
                 .collect(Collectors.groupingBy(WrongAnswer::getQuestionType, Collectors.counting()));
         List<TypeCount> byType = typeMap.entrySet().stream()
@@ -141,13 +136,9 @@ public class WrongAnswerServiceImpl implements WrongAnswerService {
     @Override
     @Transactional
     public void markAsResolved(Integer id, Integer userId) {
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
-        WrongAnswer wa = wrongAnswerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("错题不存在: " + id));
-        // 权限校验:只能操作自己的错题
-        if (!wa.getUserId().equals(uid)) {
-            throw new IllegalArgumentException("无权操作此错题");
-        }
+        // 按 id + user_id 查询:不属于当前孩子与不存在同样返回 404
+        WrongAnswer wa = wrongAnswerRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new NoSuchElementException("错题不存在"));
         wa.setIsResolved(true);
         wa.setUpdatedAt(LocalDateTime.now());
         wrongAnswerRepository.save(wa);
@@ -159,13 +150,9 @@ public class WrongAnswerServiceImpl implements WrongAnswerService {
     @Override
     @Transactional
     public void deleteWrongAnswer(Integer id, Integer userId) {
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
-        WrongAnswer wa = wrongAnswerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("错题不存在: " + id));
-        // 权限校验:只能操作自己的错题
-        if (!wa.getUserId().equals(uid)) {
-            throw new IllegalArgumentException("无权操作此错题");
-        }
+        // 按 id + user_id 查询:不属于当前孩子与不存在同样返回 404
+        WrongAnswer wa = wrongAnswerRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new NoSuchElementException("错题不存在"));
         wrongAnswerRepository.delete(wa);
     }
 

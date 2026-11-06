@@ -18,9 +18,8 @@ import BatchUploadModal from '../components/childgrowth/BatchUploadModal.vue'
 import { useChildPhotos } from '../composables/useChildPhotos'
 
 const router = useRouter()
-const accessKey = ref('')
-// 与成长档案页共用同一口令:会话内已解锁则直接进入相册
-const unlocked = ref(Boolean(sessionStorage.getItem('childGrowthKey')))
+// 列表加载成功即视为已通过家长验证(失效时 http 拦截器弹家长密码框)
+const unlocked = ref(false)
 
 // 解构组合式函数: 顶层 ref 在模板中自动解包
 const {
@@ -159,30 +158,12 @@ async function handleUpload(payload) {
 }
 
 // ===== 解锁与初始加载 =====
-/**
- * 输入口令进入相册: 写入会话后立即加载;口令错误时列表接口会返回错误提示。
- */
-function unlock() {
-  if (!accessKey.value) return
-  sessionStorage.setItem('childGrowthKey', accessKey.value.trim())
-  unlocked.value = true
-  loadPhotos()
+async function unlock() {
+  await loadPhotos()
+  unlocked.value = !error.value
 }
 
-/**
- * 口令失效/输错时重新解锁: 清掉会话密钥回到解锁界面。
- */
-function relock() {
-  sessionStorage.removeItem('childGrowthKey')
-  unlocked.value = false
-  accessKey.value = ''
-  error.value = ''
-}
-
-// 会话内已有口令时自动加载,否则停留在解锁界面
-onMounted(() => {
-  if (sessionStorage.getItem('childGrowthKey')) loadPhotos()
-})
+onMounted(unlock)
 </script>
 
 <template>
@@ -193,7 +174,6 @@ onMounted(() => {
 
     <p v-if="error" role="alert" class="error">
       {{ error }}
-      <button v-if="unlocked" type="button" class="cp-relock" @click="relock">重新输入口令</button>
     </p>
     <p v-if="notice" role="status" class="notice">{{ notice }}</p>
     <p v-if="loading" role="status">正在加载...</p>
@@ -201,13 +181,8 @@ onMounted(() => {
     <!-- 家长访问解锁 -->
     <section v-if="!unlocked && !loading" class="panel">
       <h2>家长访问</h2>
-      <p class="muted">请输入成长档案访问口令。本次浏览会话中会记住它。</p>
-      <form class="access-form" @submit.prevent="unlock">
-        <label>访问口令
-          <input v-model="accessKey" type="password" autocomplete="off" required />
-        </label>
-        <AppButton :disabled="loading" @click="unlock">进入相册</AppButton>
-      </form>
+      <p class="muted">查看成长相册需要再次输入家长密码，10 分钟内有效。</p>
+      <AppButton :disabled="loading" @click="unlock">验证并进入</AppButton>
     </section>
 
     <template v-if="unlocked && !loading">
@@ -289,14 +264,9 @@ onMounted(() => {
 h2 { margin: 0; font-size: var(--text-base); }
 .intro, .muted, .notice { color: var(--text-secondary); }
 .error { color: var(--color-warning); }
-.cp-relock { margin-left: var(--space-2); border: 0; background: transparent; color: var(--color-primary); font: inherit; cursor: pointer; }
 
 /* 解锁面板: 与成长档案页同一卡片形态 */
 .panel { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: var(--space-5); margin: var(--space-5) 0; }
-.access-form { display: flex; align-items: end; gap: var(--space-3); flex-wrap: wrap; }
-.access-form label { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; min-width: 200px; font-weight: var(--font-medium); }
-.access-form input { box-sizing: border-box; min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--border-light); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-primary); font: inherit; }
-.access-form input:focus { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
 /* 工具栏: 筛选与主操作同行,空间不足换行 */
 .cp-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin: var(--space-4) 0; }

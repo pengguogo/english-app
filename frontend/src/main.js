@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import { bindRouter } from './api/http'
 import './styles/tokens.css'
 import './style.css'
 
@@ -9,4 +10,6 @@ import './style.css'
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
+// http 拦截器 401/409 跳转需要路由实例
+bindRouter(router)
 app.mount('#app')

@@ -33,6 +33,11 @@ public class LessonReviewService {
         return build(lesson).stream().map(q -> q.question).toList();
     }
 
+    /**
+     * 提交课后复习并判分。
+     *
+     * @param userId 孩子 ID(即 user_id);为 null 表示游客,只判分不查也不保存复习记录
+     */
     @Transactional
     public ReviewResultDto submit(Integer userId, Integer lessonId, List<Integer> answers) {
         Lesson lesson = lessons.findById(lessonId).orElseThrow(() -> new IllegalArgumentException("课时不存在"));
@@ -45,9 +50,10 @@ public class LessonReviewService {
             if (answers.get(i) == null || answers.get(i) != questions.get(i).answer) wrong.add(i);
         }
         if (!wrong.isEmpty()) return new ReviewResultDto(false, wrong, 0);
-        int uid = userId == null ? 1 : userId;
-        LessonStudySession session = sessions.findByUserIdAndLessonIdAndStudyDate(uid, lessonId, LocalDate.now())
-                .orElseGet(() -> newSession(uid, lessonId));
+        // 游客:判分通过即返回,不落库
+        if (userId == null) return new ReviewResultDto(true, List.of(), 0);
+        LessonStudySession session = sessions.findByUserIdAndLessonIdAndStudyDate(userId, lessonId, LocalDate.now())
+                .orElseGet(() -> newSession(userId, lessonId));
         session.setPendingSeconds(0);
         session.setPassed(true);
         sessions.save(session);
@@ -55,8 +61,7 @@ public class LessonReviewService {
     }
 
     public boolean hasPassed(Integer userId, Integer lessonId) {
-        int uid = userId == null ? 1 : userId;
-        return sessions.findByUserIdAndLessonIdAndStudyDate(uid, lessonId, LocalDate.now())
+        return sessions.findByUserIdAndLessonIdAndStudyDate(userId, lessonId, LocalDate.now())
                 .map(LessonStudySession::getPassed).orElse(false);
     }
 

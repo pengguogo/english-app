@@ -1,11 +1,10 @@
 package com.englishapp.controller;
 
 import com.englishapp.common.Result;
-import com.englishapp.dto.ParentPasswordRequestDTO;
 import com.englishapp.service.ParentPasswordService;
-import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+/** 家长密码即家长登录密码，不再单独设置 */
 @RestController
 @RequestMapping("/api/v1/parent-settings")
 public class ParentSettingsController {
@@ -14,12 +13,6 @@ public class ParentSettingsController {
 
     @GetMapping("/password")
     public Result<PasswordStatus> status() { return Result.success(new PasswordStatus(passwords.isConfigured())); }
-
-    @PutMapping("/password")
-    public Result<PasswordStatus> set(@Valid @RequestBody ParentPasswordRequestDTO request) {
-        passwords.setPassword(request.password());
-        return status();
-    }
 
     public record PasswordStatus(boolean configured) {}
 }

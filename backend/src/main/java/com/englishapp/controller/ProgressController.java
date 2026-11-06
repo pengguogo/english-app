@@ -7,6 +7,7 @@ import com.englishapp.dto.LearnedLessonDto;
 import com.englishapp.dto.LearnedStatsDto;
 import com.englishapp.dto.ProgressDto;
 import com.englishapp.dto.UnitProgressDto;
+import com.englishapp.security.CurrentChild;
 import com.englishapp.service.ProgressService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -23,22 +24,22 @@ import java.util.List;
 public class ProgressController {
 
     private final ProgressService progressService;
+    private final CurrentChild currentChild;
 
-    public ProgressController(ProgressService progressService) {
+    public ProgressController(ProgressService progressService, CurrentChild currentChild) {
         this.progressService = progressService;
+        this.currentChild = currentChild;
     }
 
     /**
      * 获取某课时进度
      * @param lessonId 课时 ID
-     * @param userId 用户 ID(可选,默认 1)
      * @return 进度信息
      */
     @GetMapping("/lesson/{lessonId}")
     public Result<ProgressDto> getLessonProgress(
-            @PathVariable Integer lessonId,
-            @RequestParam(required = false, defaultValue = "1") Integer userId) {
-        return Result.success(progressService.getLessonProgress(lessonId, userId));
+            @PathVariable Integer lessonId) {
+        return Result.success(progressService.getLessonProgress(lessonId, currentChild.currentChildId().orElse(null)));
     }
 
     /**
@@ -48,29 +49,25 @@ public class ProgressController {
      * </p>
      *
      * @param unitId 单元 ID
-     * @param userId 用户 ID(可选,默认 1)
      * @return 该单元所有课时的进度列表
      */
     @GetMapping("/unit/{unitId}")
     public Result<List<UnitProgressDto>> getUnitProgress(
-            @PathVariable Integer unitId,
-            @RequestParam(required = false, defaultValue = "1") Integer userId) {
-        return Result.success(progressService.getUnitProgress(unitId, userId));
+            @PathVariable Integer unitId) {
+        return Result.success(progressService.getUnitProgress(unitId, currentChild.currentChildId().orElse(null)));
     }
 
     /**
      * 完成课时并解锁下一课
      * @param lessonId 课时 ID
      * @param request 完成请求(含星星和分数)
-     * @param userId 用户 ID(可选,默认 1)
      * @return 下一课解锁信息
      */
     @PostMapping("/lesson/{lessonId}/complete")
     public Result<CompleteResponse> completeLesson(
             @PathVariable Integer lessonId,
-            @Valid @RequestBody CompleteRequest request,
-            @RequestParam(required = false, defaultValue = "1") Integer userId) {
-        return Result.success(progressService.completeLesson(lessonId, request, userId));
+            @Valid @RequestBody CompleteRequest request) {
+        return Result.success(progressService.completeLesson(lessonId, request, currentChild.requireChildId()));
     }
 
     /**
@@ -80,13 +77,11 @@ public class ProgressController {
      * 按完成时间降序排列。
      * </p>
      *
-     * @param userId 用户 ID(可选,默认 1)
      * @return 已学课时 DTO 列表
      */
     @GetMapping("/learned")
-    public Result<List<LearnedLessonDto>> getLearnedLessons(
-            @RequestParam(required = false, defaultValue = "1") Integer userId) {
-        return Result.success(progressService.getLearnedLessons(userId));
+    public Result<List<LearnedLessonDto>> getLearnedLessons() {
+        return Result.success(progressService.getLearnedLessons(currentChild.requireChildId()));
     }
 
     /**
@@ -95,12 +90,10 @@ public class ProgressController {
      * 返回已学总数、累计星星数、平均分数,以及按学科和课时类型的分类统计。
      * </p>
      *
-     * @param userId 用户 ID(可选,默认 1)
      * @return 已学课时统计 DTO
      */
     @GetMapping("/learned/stats")
-    public Result<LearnedStatsDto> getLearnedStats(
-            @RequestParam(required = false, defaultValue = "1") Integer userId) {
-        return Result.success(progressService.getLearnedStats(userId));
+    public Result<LearnedStatsDto> getLearnedStats() {
+        return Result.success(progressService.getLearnedStats(currentChild.requireChildId()));
     }
 }

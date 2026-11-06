@@ -11,7 +11,6 @@ import http from './http'
 
 /**
  * 获取某课时的学习进度。
- * 当前按统一 userId=1 处理,后续接入登录态后需补充 userId 参数。
  *
  * @param {number|string} lessonId 课时 ID
  * @return {Promise<Object>} 课时进度信息 { lessonId, status, stars, score }
@@ -47,7 +46,7 @@ export const completeLesson = (lessonId, stars, score) =>
  * @return {Promise<Array>} 已学课时列表,每项包含课时名/类型/分数/星星/完成时间/所属层级等
  */
 export const getLearnedLessons = () =>
-  http.get('/progress/learned', { params: { userId: 1 } })
+  http.get('/progress/learned')
 
 /**
  * 获取学习统计数据(已学课时数/总星星/平均分/学科分布)。
@@ -56,4 +55,4 @@ export const getLearnedLessons = () =>
  * @return {Promise<Object>} 统计对象 { learnedCount, totalStars, averageScore, subjectDistribution }
  */
 export const getLearnedStats = () =>
-  http.get('/progress/learned/stats', { params: { userId: 1 } })
+  http.get('/progress/learned/stats')

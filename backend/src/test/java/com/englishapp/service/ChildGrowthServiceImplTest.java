@@ -34,7 +34,7 @@ class ChildGrowthServiceImplTest {
         AppUser user = new AppUser();
         user.setNickname("小朋友");
         when(users.findById(1)).thenReturn(Optional.of(user));
-        assertEquals("小朋友", service.getProfile().nickname());
+        assertEquals("小朋友", service.getProfile(1).nickname());
     }
 
     @Test
@@ -42,14 +42,14 @@ class ChildGrowthServiceImplTest {
         AppUser user = new AppUser();
         when(users.findById(1)).thenReturn(Optional.of(user));
         when(users.save(any())).thenAnswer(call -> call.getArgument(0));
-        var response = service.updateProfile(new ChildProfileRequestDTO(" 小明 ", LocalDate.of(2020, 1, 1), "MALE"));
+        var response = service.updateProfile(1, new ChildProfileRequestDTO(" 小明 ", LocalDate.of(2020, 1, 1), "MALE"));
         assertEquals("小明", response.nickname());
         assertEquals(LocalDate.of(2020, 1, 1), response.birthDate());
     }
 
     @Test
     void should_拒绝未来生日_当_更新资料() {
-        assertThrows(IllegalArgumentException.class, () -> service.updateProfile(
+        assertThrows(IllegalArgumentException.class, () -> service.updateProfile(1, 
                 new ChildProfileRequestDTO("孩子", LocalDate.now().plusDays(1), null)));
         verifyNoInteractions(users);
     }
@@ -59,13 +59,13 @@ class ChildGrowthServiceImplTest {
         GrowthMeasurement item = new GrowthMeasurement();
         item.setMeasuredAt(LocalDate.of(2026, 1, 1));
         when(measurements.findByUserIdOrderByMeasuredAtAscIdAsc(1)).thenReturn(List.of(item));
-        assertEquals(1, service.listMeasurements().size());
+        assertEquals(1, service.listMeasurements(1).size());
     }
 
     @Test
     void should_允许只记录身高_当_新增测量() {
         when(measurements.save(any())).thenAnswer(call -> call.getArgument(0));
-        var result = service.createMeasurement(new GrowthMeasurementRequestDTO(
+        var result = service.createMeasurement(1, new GrowthMeasurementRequestDTO(
                 LocalDate.now(), new BigDecimal("120.5"), null, null));
         assertEquals(new BigDecimal("120.5"), result.heightCm());
         assertNull(result.weightKg());
@@ -73,7 +73,7 @@ class ChildGrowthServiceImplTest {
 
     @Test
     void should_拒绝空测量_当_新增测量() {
-        assertThrows(IllegalArgumentException.class, () -> service.createMeasurement(
+        assertThrows(IllegalArgumentException.class, () -> service.createMeasurement(1, 
                 new GrowthMeasurementRequestDTO(LocalDate.now(), null, null, null)));
         verifyNoInteractions(measurements);
     }
@@ -83,7 +83,7 @@ class ChildGrowthServiceImplTest {
         GrowthMeasurement item = new GrowthMeasurement();
         when(measurements.findByIdAndUserId(3, 1)).thenReturn(Optional.of(item));
         when(measurements.save(any())).thenAnswer(call -> call.getArgument(0));
-        var result = service.updateMeasurement(3, new GrowthMeasurementRequestDTO(
+        var result = service.updateMeasurement(1, 3, new GrowthMeasurementRequestDTO(
                 LocalDate.now(), null, new BigDecimal("22.40"), "学校体检"));
         assertEquals("学校体检", result.note());
     }
@@ -91,7 +91,7 @@ class ChildGrowthServiceImplTest {
     @Test
     void should_拒绝其他记录_当_删除测量() {
         when(measurements.findByIdAndUserId(9, 1)).thenReturn(Optional.empty());
-        assertThrows(NoSuchElementException.class, () -> service.deleteMeasurement(9));
+        assertThrows(NoSuchElementException.class, () -> service.deleteMeasurement(1, 9));
         verify(measurements, never()).delete(any());
     }
 }

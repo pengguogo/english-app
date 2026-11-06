@@ -29,9 +29,6 @@ import java.util.List;
 @Service
 public class UnitServiceImpl implements UnitService {
 
-    /** 默认用户 ID(在未传入 userId 时使用) */
-    private static final Integer DEFAULT_USER_ID = 1;
-
     private final UnitRepository unitRepository;
     private final LessonRepository lessonRepository;
     private final UserProgressRepository userProgressRepository;
@@ -54,18 +51,16 @@ public class UnitServiceImpl implements UnitService {
     /**
      * 获取某主题下所有单元(带进度)
      * <p>
-     * 当 userId 为 null 时回退到默认用户 ID,保证接口在匿名访问场景下也可用。
+     * 进度按传入的孩子 ID 计算;userId 为 null(游客)时已完成数为 0。
      * 单元锁定状态在此方法中根据用户进度动态计算,不使用数据库静态字段。
      * </p>
      *
      * @param themeId 主题 ID
-     * @param userId  用户 ID(为 null 时使用默认用户)
+     * @param userId  孩子 ID(即 user_id),游客为 null
      * @return 单元 DTO 列表,按排序序号升序
      */
     @Override
     public List<UnitDto> getUnitsByTheme(Integer themeId, Integer userId) {
-        // 未指定用户时使用默认用户,便于匿名/调试场景
-        Integer uid = userId != null ? userId : DEFAULT_USER_ID;
         List<Unit> units = unitRepository.findByThemeIdOrderBySortOrderAsc(themeId);
         if (units.isEmpty()) {
             return List.of();
@@ -76,8 +71,9 @@ public class UnitServiceImpl implements UnitService {
         List<Integer> completeds = new ArrayList<>(units.size());
         for (Unit unit : units) {
             totals.add(lessonRepository.countByUnitId(unit.getId()));
-            completeds.add(userProgressRepository.countByUserIdAndLessonUnitIdAndStatus(
-                    uid, unit.getId(), ProgressStatus.COMPLETED));
+            // 游客(userId 为 null)无进度,已完成数按 0
+            completeds.add(userId == null ? 0 : userProgressRepository.countByUserIdAndLessonUnitIdAndStatus(
+                    userId, unit.getId(), ProgressStatus.COMPLETED));
         }
 
         // 按 sortOrder 顺序遍历,统一通过 computeLocked 计算锁定状态(已取消锁定机制,恒为 false)

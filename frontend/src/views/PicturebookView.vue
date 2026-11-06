@@ -14,7 +14,7 @@ const router = useRouter()
 const interactive = ref(true)
 const calm = ref(false)
 const autoRead = ref(false)
-const { lessons, completedIds, active, index, lesson, item, loading, error, saving, saveError, bookmarkError,
+const { lessons, completedIds, active, index, lesson, item, loading, error, saving, saveError, needLogin, bookmarkError,
   arrival, reviewing, allComplete, load, start, resume, move, answer, finish, timetable } = usePicturebookJourney(route)
 useStudyTimer(computed(() => active.value >= 0 && !!lesson.value && !loading.value && !arrival.value),
   computed(() => lesson.value?.id))
@@ -49,6 +49,7 @@ function begin(position = null) {
         <p class="eyebrow">故事车票</p><h2>{{ allComplete ? '整本故事都听完啦！' : '叮咚！这一站完成啦！' }}</h2>
         <div class="souvenir"><img :src="bookCover" :alt="`${bookTitle}纪念车票`" /><div><strong>{{ bookTitle }}</strong><p>{{ completedIds.length }} / {{ lessons.length }} 枚到站印章</p><span v-for="(entry, position) in lessons" :key="entry.id" class="stamp">{{ completedIds.includes(entry.id) ? '✓' : '○' }} {{ position + 1 }} 站</span></div></div>
         <p>会听、会观察，还愿意开口。谢谢小司机的努力！</p>
+        <p v-if="needLogin" class="login-tip">家长登录后可以保存进度 <RouterLink :to="{ path: '/login', query: { redirect: route.fullPath } }">去登录</RouterLink></p>
         <div class="arrival-actions"><AppButton v-if="active + 1 < lessons.length" variant="success" @click="start(active + 1)">下一大站 →</AppButton><AppButton variant="ghost" @click="timetable">返回路线 / 再开一趟</AppButton></div>
       </section>
       <LessonReview v-else-if="reviewing && lesson" :key="lesson.id" :lesson-id="lesson.id" :saving="saving" :save-error="saveError" @passed="finish(true)" />
@@ -73,6 +74,7 @@ function begin(position = null) {
 .station-list .station { justify-content: start; white-space: normal; border: 1px solid var(--border-light); border-radius: var(--radius-md); text-align: left; padding: var(--space-4); }
 .station-number { font-size: var(--text-lg); color: var(--subject-math); }.station small { display: block; color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-2); }
 .journey-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3); font-size: var(--text-sm); }.journey-toolbar summary { min-height: var(--touch-target); cursor: pointer; color: var(--color-primary); }.journey-toolbar details > div { display: flex; flex-wrap: wrap; gap: var(--space-3); }.journey-toolbar label { display: flex; gap: var(--space-1); align-items: center; min-height: var(--touch-target); color: var(--text-secondary); }
+.login-tip { color: var(--text-secondary); font-size: var(--text-sm); } .login-tip a { color: var(--color-primary); font-weight: var(--font-medium); }
 .arrival { text-align: center; padding: var(--space-6); border: 2px dashed var(--color-warning); border-radius: var(--radius-lg); background: var(--gradient-warm); }.arrival > p { margin: var(--space-4) 0; }
 .souvenir { display: flex; max-width: 640px; margin: var(--space-5) auto; text-align: left; border-radius: var(--radius-md); overflow: hidden; background: var(--bg-card); box-shadow: var(--shadow-card); }.souvenir img { width: 40%; object-fit: cover; }.souvenir > div { padding: var(--space-5); }.souvenir p { margin: var(--space-3) 0; }.stamp { display: inline-block; border: 1px dashed var(--subject-math); padding: var(--space-2); margin: var(--space-1); border-radius: var(--radius-sm); color: var(--text-primary); }
 .arrival-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); }.save-error { margin: var(--space-5) 0; color: var(--text-primary); }

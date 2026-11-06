@@ -14,23 +14,23 @@ import org.springframework.web.multipart.MultipartFile;
  * @since 2026-09-30
  */
 public interface ChildPhotoService {
-    List<ChildPhotoResponseDTO> list();
+    List<ChildPhotoResponseDTO> list(Integer childId);
 
-    List<String> listCategories();
+    List<String> listCategories(Integer childId);
 
-    ChildPhotoResponseDTO add(LocalDate takenAt, String caption, String category, MultipartFile image);
+    ChildPhotoResponseDTO add(Integer childId, LocalDate takenAt, String caption, String category, MultipartFile image);
 
-    ChildPhotoResponseDTO update(Integer id, LocalDate takenAt, String caption, String category);
+    ChildPhotoResponseDTO update(Integer childId, Integer id, LocalDate takenAt, String caption, String category);
 
-    ChildPhoto find(Integer id);
+    ChildPhoto find(Integer childId, Integer id);
 
-    byte[] read(Integer id);
+    byte[] read(Integer childId, Integer id);
 
-    byte[] readThumbnail(Integer id);
+    byte[] readThumbnail(Integer childId, Integer id);
 
-    List<ChildPhotoZipItem> prepareZip(List<Integer> ids);
+    List<ChildPhotoZipItem> prepareZip(Integer childId, List<Integer> ids);
 
     void writeZip(List<ChildPhotoZipItem> items, OutputStream output);
 
-    void delete(Integer id);
+    void delete(Integer childId, Integer id);
 }

@@ -1,6 +1,9 @@
 spring:
   application:
     name: english-app-backend
+  # 不使用默认内存用户（家长账号走 guardian_credential）
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
     url: jdbc:sqlite:english.db
     driver-class-name: org.sqlite.JDBC
@@ -23,6 +26,14 @@ spring:
 
 server:
   port: 8080
+  servlet:
+    session:
+      timeout: 7d
+      cookie:
+        http-only: true
+        same-site: lax
+        # 生产 HTTPS 下设 SESSION_COOKIE_SECURE=true
+        secure: ${SESSION_COOKIE_SECURE:false}
   compression:
     enabled: true
     min-response-size: 1024
@@ -40,8 +51,11 @@ voice:
     read-timeout-ms: ${BAIDU_READ_TIMEOUT_MS:30000}
 
 app:
-  child-growth:
-    access-key: ${CHILD_GROWTH_ACCESS_KEY:}
+  # 站点所有者邮箱：首次用该邮箱注册时认领默认家庭（id=1）
+  owner-email: ${OWNER_EMAIL:}
+  agent:
+    # 不限 Agent 次数的白名单家庭（家长邮箱，逗号分隔）；改动后重启生效
+    unlimited-family-emails: ${AGENT_UNLIMITED_FAMILY_EMAILS:}
   child-photo:
     dir: ${CHILD_PHOTO_DIR:child-photos}
   word-image:

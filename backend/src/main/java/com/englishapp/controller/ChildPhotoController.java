@@ -3,6 +3,7 @@ package com.englishapp.controller;
 import com.englishapp.common.Result;
 import com.englishapp.dto.ChildPhotoResponseDTO;
 import com.englishapp.dto.ChildPhotoRequestDTO;
+import com.englishapp.security.CurrentChild;
 import com.englishapp.service.ChildPhotoService;
 import com.englishapp.service.ChildPhotoZipItem;
 import java.time.LocalDate;
@@ -25,30 +26,41 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/child-growth/photos")
 public class ChildPhotoController {
     private final ChildPhotoService service;
+    private final CurrentChild currentChild;
 
-    public ChildPhotoController(ChildPhotoService service) { this.service = service; }
+    public ChildPhotoController(ChildPhotoService service, CurrentChild currentChild) {
+        this.service = service;
+        this.currentChild = currentChild;
+    }
+
+    /** 家长区:先校验家长二次验证,再取当前孩子 ID */
+    private Integer parentChildId() {
+        currentChild.requireParentVerified();
+        return currentChild.requireChildId();
+    }
 
     @GetMapping
-    public Result<List<ChildPhotoResponseDTO>> list() { return Result.success(service.list()); }
+    public Result<List<ChildPhotoResponseDTO>> list() { return Result.success(service.list(parentChildId())); }
 
     @GetMapping("/categories")
-    public Result<List<String>> categories() { return Result.success(service.listCategories()); }
+    public Result<List<String>> categories() { return Result.success(service.listCategories(parentChildId())); }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Result<ChildPhotoResponseDTO> add(@RequestParam LocalDate takenAt,
             @RequestParam(required = false) String caption,
             @RequestParam(required = false) String category,
             @RequestParam MultipartFile image) {
-        return Result.success(service.add(takenAt, caption, category, image));
+        return Result.success(service.add(parentChildId(), takenAt, caption, category, image));
     }
 
     @GetMapping("/{id}/image")
     public ResponseEntity<byte[]> image(@PathVariable Integer id) {
-        var photo = service.find(id);
+        Integer childId = parentChildId();
+        var photo = service.find(childId, id);
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(photo.getContentType()))
                 .header(HttpHeaders.CACHE_CONTROL, "private, max-age=3600")
                 .header("X-Content-Type-Options", "nosniff")
-                .body(service.read(id));
+                .body(service.read(childId, id));
     }
 
     @GetMapping("/{id}/thumbnail")
@@ -56,13 +68,13 @@ public class ChildPhotoController {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG)
                 .header(HttpHeaders.CACHE_CONTROL, "private, max-age=86400")
                 .header("X-Content-Type-Options", "nosniff")
-                .body(service.readThumbnail(id));
+                .body(service.readThumbnail(parentChildId(), id));
     }
 
     @GetMapping("/zip")
     public ResponseEntity<StreamingResponseBody> zip(@RequestParam(required = false) List<Integer> ids) {
         // 预检在响应流开始前完成,非法 id 走全局 404,而不是输出损坏的 zip
-        List<ChildPhotoZipItem> items = service.prepareZip(ids);
+        List<ChildPhotoZipItem> items = service.prepareZip(parentChildId(), ids);
         StreamingResponseBody body = output -> service.writeZip(items, output);
         String fileName = "child-photos-" + LocalDate.now() + ".zip";
         return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/zip"))
@@ -73,12 +85,12 @@ public class ChildPhotoController {
     @PutMapping("/{id}")
     public Result<ChildPhotoResponseDTO> update(@PathVariable Integer id,
             @Valid @RequestBody ChildPhotoRequestDTO request) {
-        return Result.success(service.update(id, request.takenAt(), request.caption(), request.category()));
+        return Result.success(service.update(parentChildId(), id, request.takenAt(), request.caption(), request.category()));
     }
 
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Integer id) {
-        service.delete(id);
+        service.delete(parentChildId(), id);
         return Result.success(null);
     }
 }
