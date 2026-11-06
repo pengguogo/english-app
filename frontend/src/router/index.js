@@ -18,6 +18,8 @@ const routes = [
   { path: '/consent', name: 'consent', component: () => import('../views/ConsentView.vue'), meta: { requiresLogin: true } },
   { path: '/choose-child', name: 'choose-child', component: () => import('../views/ChooseChildView.vue'), meta: { requiresLogin: true } },
   { path: '/parent-center', name: 'parent-center', component: () => import('../views/ParentCenterView.vue'), meta: { requiresAuth: true } },
+  // 学习伙伴记录:需家长二次验证(接口 403/4031 时弹家长密码框)
+  { path: '/agent-records', name: 'agent-records', component: () => import('../views/AgentRecordsView.vue'), meta: { requiresAuth: true } },
   { path: '/wrong-answers/:id/practice', name: 'wrong-answer-practice', component: () => import('../views/WrongAnswerPracticeView.vue'), meta: { requiresAuth: true } },
   { path: '/character-review', name: 'character-review', component: () => import('../views/CharacterReviewView.vue') },
   { path: '/games/picture-puzzle', name: 'picture-puzzle', component: () => import('../views/PicturePuzzleView.vue'), meta: { requiresAuth: true } },

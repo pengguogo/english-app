@@ -3,6 +3,7 @@ package com.englishapp.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-/** /agent/answer 请求：quizToken 来自 /agent/chat 的 quiz，optionId 为 "a"/"b"/"c" */
+/** /agent/answer 请求：quizToken 来自 /agent/chat 的 quiz，optionId 为 "a"/"b"/"c"；sessionId 有效时记录首次作答 */
 public record AgentAnswerRequestDTO(@NotBlank @Size(max = 512) String quizToken,
-                                    @NotBlank @Size(max = 4) String optionId) { }
+                                    @NotBlank @Size(max = 4) String optionId,
+                                    Long sessionId) { }

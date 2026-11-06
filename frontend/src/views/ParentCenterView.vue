@@ -26,6 +26,7 @@ onMounted(load)
         <AppButton variant="ghost" @click="router.push('/child-profile')">记录身高体重</AppButton>
         <AppButton variant="ghost" @click="router.push('/wrong-answers')">错题集</AppButton>
         <AppButton variant="ghost" @click="router.push('/learned')">学习记录</AppButton>
+        <AppButton variant="ghost" @click="router.push('/agent-records')">学习伙伴记录</AppButton>
         <AppButton variant="ghost" @click="router.push('/consent')">学习伙伴说明与同意</AppButton>
       </nav>
       <AppButton variant="ghost" :disabled="loading" @click="load">刷新周报</AppButton>

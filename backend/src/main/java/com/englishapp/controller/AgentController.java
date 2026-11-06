@@ -22,6 +22,7 @@ import com.englishapp.service.ai.explore.AgentTokens;
 import com.englishapp.service.ai.explore.ExploreService;
 import com.englishapp.service.ai.explore.QuizService;
 import com.englishapp.service.ai.guide.GuideService;
+import com.englishapp.service.ai.record.AgentRecordService;
 import java.util.Optional;
 import jakarta.validation.Valid;
 import java.io.IOException;
@@ -43,7 +44,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 
 /**
  * 学习伙伴：语音识别、课程向导（阶段 1），探索讲解与答题（阶段 2）。
- * 不保存音频和对话，日志不记音频、识别正文、孩子原话与模型原文。
+ * 不保存音频；已同意家庭的文字对话与答题落库（阶段 3），日志不记音频、识别正文、孩子原话与模型原文。
  */
 @RestController
 @RequestMapping("/api/v1/agent")
@@ -60,10 +61,11 @@ public class AgentController {
     private final ExploreService explore;
     private final QuizService quiz;
     private final AgentTokens tokens;
+    private final AgentRecordService records;
 
     public AgentController(CurrentChild current, GuardianConsentRepository consents, QuotaService quota,
                            SpeechRecognizer recognizer, GuideService guide, ExploreService explore,
-                           QuizService quiz, AgentTokens tokens) {
+                           QuizService quiz, AgentTokens tokens, AgentRecordService records) {
         this.current = current;
         this.consents = consents;
         this.quota = quota;
@@ -72,6 +74,7 @@ public class AgentController {
         this.explore = explore;
         this.quiz = quiz;
         this.tokens = tokens;
+        this.records = records;
     }
 
     /** 语音识别：需登录 + 已选孩子 + 家庭已同意；校验通过才消耗回合，额度被拒时不调 ASR */
@@ -114,14 +117,36 @@ public class AgentController {
             return quota.tryConsumeFamily(familyId);
         };
         AgentChatRequestDTO.Context ctx = request.context();
-        return Result.success(explore.chat(request.text(), ctx == null ? null : ctx.lessonId(),
-                ctx == null ? null : ctx.itemIndex(), asker, gate));
+        Integer lessonId = ctx == null ? null : ctx.lessonId();
+        AgentChatResponseDTO r = explore.chat(request.text(), lessonId,
+                ctx == null ? null : ctx.itemIndex(), asker, gate);
+        // 只有已同意家庭（且已选孩子）才落库；记录失败不影响孩子得到回答
+        if (!modelAllowed) return Result.success(r);
+        try {
+            Long sessionId = records.recordChat(familyId, childId.get(), request.sessionId(), request.text(),
+                    lessonId, r);
+            return Result.success(r.withSessionId(sessionId));
+        } catch (RuntimeException e) {
+            log.warn("agent record chat failed: family={} error={}", familyId, e.getClass().getSimpleName());
+            return Result.success(r);
+        }
     }
 
     /** 答题判分：令牌绑定答题人，换孩子或过期 → 400/4002 */
     @PostMapping("/answer")
     public Result<AgentAnswerResponseDTO> answer(@Valid @RequestBody AgentAnswerRequestDTO request) {
-        return Result.success(quiz.answer(request.quizToken(), request.optionId(), subject(current.currentChildId())));
+        Optional<Integer> childId = current.currentChildId();
+        AgentAnswerResponseDTO r = quiz.answer(request.quizToken(), request.optionId(), subject(childId));
+        if (childId.isEmpty() || request.sessionId() == null) return Result.success(r);
+        Long familyId = current.requireFamilyId();
+        if (!consented(familyId)) return Result.success(r);
+        try {
+            records.recordAnswer(childId.get(), request.sessionId(), request.quizToken(), request.optionId(),
+                    r.correct());
+        } catch (RuntimeException e) {
+            log.warn("agent record answer failed: family={} error={}", familyId, e.getClass().getSimpleName());
+        }
+        return Result.success(r);
     }
 
     private boolean consented(Long familyId) {

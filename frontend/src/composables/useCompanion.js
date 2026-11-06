@@ -7,6 +7,8 @@
  *  只有孩子点了「去学」或主题入口才 router.push(服务端给的 route),前端不拼。
  *  EXPLAIN 带 quiz 时,孩子点选项调 /agent/answer:答错播 hint 可再选,答对后锁定不再提交。
  *  在课程页时把 learningContext({lessonId, itemIndex})带进 chat 的 context。
+ *  会话:chat 响应的 sessionId 存在面板里,下一轮 chat 和 answer 都带上;关闭面板或切页(endSession)后清空,
+ *  下次开始新会话。服务端判断会话是否属于当前孩子,前端只透传。
  */
 import { computed, ref } from 'vue'
 import { answerQuiz, chatWithAgent, fetchTopics, recognizeSpeech } from '../api/agent'
@@ -80,6 +82,8 @@ export function useCompanion({ auth, router }) {
   const quiz = ref(null)
 
   let seq = 0
+  // 当前会话 id,只在面板内部流转,不展示
+  let sessionId = null
   let controller = null
   let recordTimer = null
   let slowTimer = null
@@ -187,9 +191,15 @@ export function useCompanion({ auth, router }) {
     if (quiz.value) quiz.value.pending = false
   }
 
+  /** 结束当前会话:下一轮 chat 不带 sessionId,由服务端新建 */
+  function endSession() {
+    sessionId = null
+  }
+
   /** 关闭面板:不跳转、不打断课程(课程自己的音频此时并未被面板占用) */
   function closePanel() {
     cancel()
+    endSession()
     result.value = null
     open.value = false
   }
@@ -263,6 +273,7 @@ export function useCompanion({ auth, router }) {
     startSlowTimer(turn)
     const body = { text }
     if (turnToken) body.turnToken = turnToken
+    if (sessionId) body.sessionId = sessionId
     if (learningContext.value) body.context = { ...learningContext.value }
     let res
     try {
@@ -271,6 +282,7 @@ export function useCompanion({ auth, router }) {
       return fail(turn, companionError(e))
     }
     if (!isCurrent(turn)) return
+    if (res?.sessionId) sessionId = res.sessionId
     clearTimers()
     tts.stop()
     const type = res?.type || 'NO_MATCH'
@@ -307,7 +319,9 @@ export function useCompanion({ auth, router }) {
     state.pending = true
     let res
     try {
-      res = await answerQuiz({ quizToken: token, optionId: option.id }, { signal: controller?.signal })
+      const body = { quizToken: token, optionId: option.id }
+      if (sessionId) body.sessionId = sessionId
+      res = await answerQuiz(body, { signal: controller?.signal })
     } catch (e) {
       if (!isCurrent(turn)) return
       state.pending = false
@@ -350,6 +364,6 @@ export function useCompanion({ auth, router }) {
 
   return {
     open, phase, slow, result, topics, error, needsPlayButton, micMode, mouseState, quiz,
-    openPanel, closePanel, cancel, startRecording, stopRecording, submitText, answer, go, replay
+    openPanel, closePanel, cancel, endSession, startRecording, stopRecording, submitText, answer, go, replay
   }
 }

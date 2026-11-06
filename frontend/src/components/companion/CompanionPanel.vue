@@ -3,7 +3,7 @@
   默认安静:不自动弹出、不自动出声;点小老鼠展开面板。
   面板:按住说话(登录+同意才可用) / 打字 → 候选卡 / 讲解卡 + 点选题 → 点「去学」才跳转;点主题直接跳主题页。
   SAFE_REPLY 只显示话术和主题入口。
-  切页、关闭、卸载时停录音和播报并丢弃过期响应(useCompanion.cancel)。
+  切页、关闭、卸载时停录音和播报并丢弃过期响应(useCompanion.cancel),同时结束会话(endSession)。
 -->
 <script setup>
 import { ref, watch, onBeforeUnmount } from 'vue'
@@ -35,8 +35,8 @@ function send() {
   c.submitText(text)
 }
 
-// 切页:停录音和播报、丢弃在途响应
-watch(() => route.fullPath, () => c.cancel())
+// 切页:停录音和播报、丢弃在途响应,下次开始新会话
+watch(() => route.fullPath, () => { c.cancel(); c.endSession() })
 onBeforeUnmount(() => c.cancel())
 </script>
 

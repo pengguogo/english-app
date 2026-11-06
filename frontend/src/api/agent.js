@@ -26,16 +26,17 @@ export const recognizeSpeech = (audioBlob, { signal } = {}) => {
 
 /**
  * 和学习伙伴对话。
- * @param {{text: string, turnToken?: string, context?: {lessonId: number, itemIndex: number}}} body
+ * @param {{text: string, turnToken?: string, sessionId?: number, context?: {lessonId: number, itemIndex: number}}} body
  * @param {{signal?: AbortSignal}} [options]
  * @return {Promise<{type: 'RECOMMEND'|'CLARIFY'|'EXPLAIN'|'NO_MATCH'|'SAFE_REPLY', speech: string,
- *   explain?: object, quiz?: object, candidates: Array, topics: Array, learnMore?: {title: string, route: string}}>}
+ *   explain?: object, quiz?: object, candidates: Array, topics: Array, learnMore?: {title: string, route: string},
+ *   sessionId?: number}>} sessionId 仅登录且已同意的家庭才有,下一轮回传
  */
 export const chatWithAgent = (body, { signal } = {}) => http.post('/agent/chat', body, { signal })
 
 /**
  * 提交点选题答案。
- * @param {{quizToken: string, optionId: string}} body
+ * @param {{quizToken: string, optionId: string, sessionId?: number}} body
  * @param {{signal?: AbortSignal}} [options]
  * @return {Promise<{correct: boolean, speech: string, hint: string|null}>}
  */

@@ -9,12 +9,23 @@ import java.util.List;
  *
  * @param type       RECOMMEND | CLARIFY | EXPLAIN | NO_MATCH | SAFE_REPLY
  * @param speech     给 TTS 的短句（≤60 字）
- * @param flagParent 是否需要标记给家长（阶段 2 只回传，不落库）
+ * @param flagParent 是否需要标记给家长
+ * @param sessionId  成长记录会话 id：只有已同意家庭且已选孩子时返回
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record AgentChatResponseDTO(Type type, String speech, Explain explain, Quiz quiz,
                                    List<Candidate> candidates, List<AgentTopicDTO> topics, LearnMore learnMore,
-                                   Boolean flagParent) {
+                                   Boolean flagParent, Long sessionId) {
+
+    /** 编排层用：不带会话 id（由 Controller 落库后补上） */
+    public AgentChatResponseDTO(Type type, String speech, Explain explain, Quiz quiz, List<Candidate> candidates,
+                                List<AgentTopicDTO> topics, LearnMore learnMore, Boolean flagParent) {
+        this(type, speech, explain, quiz, candidates, topics, learnMore, flagParent, null);
+    }
+
+    public AgentChatResponseDTO withSessionId(Long id) {
+        return new AgentChatResponseDTO(type, speech, explain, quiz, candidates, topics, learnMore, flagParent, id);
+    }
 
     public enum Type { RECOMMEND, CLARIFY, EXPLAIN, NO_MATCH, SAFE_REPLY }
 

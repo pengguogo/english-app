@@ -361,3 +361,54 @@ test('后端省略 null 字段：EXPLAIN 不带 quiz/learnMore 时正常显示�
   assert.equal(c.result.value.learnMore, null)
   assert.equal(c.phase.value, 'choosing')
 })
+
+test('会话：chat 响应的 sessionId 下一轮 chat 和 answer 都带上', async () => {
+  const bodies = { chat: [], answer: [] }
+  const { c } = setup({ api: {
+    chatWithAgent: async (b) => { bodies.chat.push(plain(b)); return { type: 'EXPLAIN', speech: '讲', sessionId: 42, explain: { title: '苹果' },
+      quiz: { quizToken: 'q', options: [{ id: 'a', text: 'A' }, { id: 'b', text: 'B' }] } } },
+    answerQuiz: async (b) => { bodies.answer.push(plain(b)); return { correct: true, speech: '对' } }
+  } })
+  await c.openPanel()
+  await c.submitText('苹果')
+  assert.equal(bodies.chat[0].sessionId, undefined)
+  await c.answer({ id: 'a' })
+  assert.equal(bodies.answer[0].sessionId, 42)
+  await c.submitText('香蕉')
+  assert.equal(bodies.chat[1].sessionId, 42)
+})
+
+test('会话：游客响应不带 sessionId 时请求也不带', async () => {
+  const bodies = []
+  const { c } = setup({ api: { chatWithAgent: async (b) => { bodies.push(plain(b)); return { type: 'RECOMMEND', speech: '去学', candidates: [] } } } })
+  await c.submitText('一')
+  await c.submitText('二')
+  assert.equal('sessionId' in bodies[1], false)
+})
+
+test('会话：关闭面板或切页(endSession)后清空，下次开始新会话', async () => {
+  const bodies = []
+  let id = 0
+  const { c } = setup({ api: { chatWithAgent: async (b) => { bodies.push(plain(b)); return { type: 'RECOMMEND', speech: '去学', candidates: [], sessionId: ++id } } } })
+  await c.submitText('一')
+  c.closePanel()
+  await c.submitText('二')
+  assert.equal(bodies[1].sessionId, undefined)
+  await c.submitText('三')
+  assert.equal(bodies[2].sessionId, 2)
+  c.cancel(); c.endSession()
+  await c.submitText('四')
+  assert.equal(bodies[3].sessionId, undefined)
+})
+
+test('会话：只取消本轮(cancel)不结束会话；服务端换了新 id 就用新的', async () => {
+  const bodies = []
+  const ids = [7, 9]
+  const { c } = setup({ api: { chatWithAgent: async (b) => { bodies.push(plain(b)); return { type: 'RECOMMEND', speech: '去学', candidates: [], sessionId: ids.shift() ?? 9 } } } })
+  await c.submitText('一')
+  c.cancel()
+  await c.submitText('二')
+  assert.equal(bodies[1].sessionId, 7)
+  await c.submitText('三')
+  assert.equal(bodies[2].sessionId, 9)
+})
