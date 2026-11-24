@@ -22,6 +22,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.web.util.HttpSessionMutexListener;
 
 /**
  * 鉴权配置：服务端 Session + Cookie CSRF（XSRF-TOKEN / X-XSRF-TOKEN）。
@@ -55,8 +56,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/lessons/*/review").permitAll()
                 // 学习伙伴：检索与主题入口游客可用（CSRF 照常）；/agent/asr 需登录，走下面的 authenticated
                 .requestMatchers(HttpMethod.POST, "/api/v1/agent/guide", "/api/v1/agent/chat",
-                        "/api/v1/agent/answer").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/agent/topics").permitAll()
+                        "/api/v1/agent/answer", "/api/v1/agent/journey").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/agent/topics", "/api/v1/agent/journey").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll())
             .exceptionHandling(e -> e
@@ -64,6 +65,11 @@ public class SecurityConfig {
                 .accessDeniedHandler((req, res, ex) -> write(res, mapper, 403,
                         ex instanceof CsrfException ? ResultCode.CSRF_INVALID : ResultCode.FORBIDDEN)));
         return http.build();
+    }
+
+    @Bean
+    public HttpSessionMutexListener httpSessionMutexListener() {
+        return new HttpSessionMutexListener();
     }
 
     @Bean

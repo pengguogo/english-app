@@ -63,9 +63,9 @@ function micError(error) {
 
 /**
  * @param {{auth: {loggedIn: boolean, hasChild: boolean, consented: boolean},
- *          router: {push: Function}}} deps auth 为 pinia store(已解包),router 为路由实例
+ *          router: {push: Function}, onIntent?: (text: string) => boolean}} deps auth 为 pinia store(已解包),router 为路由实例
  */
-export function useCompanion({ auth, router }) {
+export function useCompanion({ auth, router, onIntent }) {
   const recorder = useRecorder()
   const tts = useTts()
 
@@ -269,6 +269,12 @@ export function useCompanion({ auth, router }) {
   }
 
   async function search(turn, text, turnToken) {
+    if (onIntent?.(text)) {
+      clearTimers()
+      result.value = null
+      phase.value = 'idle'
+      return
+    }
     phase.value = 'thinking'
     startSlowTimer(turn)
     const body = { text }

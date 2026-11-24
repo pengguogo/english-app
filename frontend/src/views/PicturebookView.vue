@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BackBar from '../components/BackBar.vue'
 import AppButton from '../components/AppButton.vue'
@@ -9,6 +9,7 @@ import LessonReview from '../components/lesson-templates/LessonReview.vue'
 import { useStudyTimer } from '../composables/useStudyTimer'
 import TrainTrack from '../components/picturebooks/TrainTrack.vue'
 import { usePicturebookJourney } from '../composables/usePicturebookJourney'
+import { advanceJourney } from '../api/agent'
 const route = useRoute()
 const router = useRouter()
 const interactive = ref(true)
@@ -18,6 +19,33 @@ const { lessons, completedIds, active, index, lesson, item, loading, error, savi
   arrival, reviewing, allComplete, load, start, resume, move, answer, finish, timetable } = usePicturebookJourney(route)
 useStudyTimer(computed(() => active.value >= 0 && !!lesson.value && !loading.value && !arrival.value),
   computed(() => lesson.value?.id))
+const guided = computed(() => typeof route.query.guide === 'string' && typeof route.query.lesson === 'string')
+const sendingReturn = ref(false)
+const returnError = ref('')
+const returned = ref(false)
+
+async function reportArrival() {
+  if (!guided.value || !arrival.value || Number(route.query.lesson) !== lesson.value?.id || sendingReturn.value || returned.value) return
+  sendingReturn.value = true
+  returnError.value = ''
+  try {
+    const screen = await advanceJourney('RETURN', route.query.guide)
+    returned.value = screen?.step === 'RECAP' || screen?.step === 'DONE'
+    if (!returned.value && screen?.step === 'BOOK') returnError.value = '还没把到站结果交给豆豆，再试一次。'
+  } catch {
+    returnError.value = '暂时连不上豆豆，再试一次。'
+  } finally {
+    sendingReturn.value = false
+  }
+}
+
+async function backToGuide() {
+  await reportArrival()
+  if (!returnError.value) router.push({ name: 'home' })
+}
+
+watch(arrival, (arrived) => { if (arrived) void reportArrival() })
+
 function next() { index.value < lesson.value.content.items.length - 1 ? move(1) : finish() }
 const bookTitle = computed(() => lessons.value[0]?.content.bookTitle || '绘本小火车')
 const bookCover = computed(() => lessons.value[0]?.content.items.find((entry) => !entry.image?.includes('train-station'))?.image || '/images/picturebooks/train-station.jpg')
@@ -29,7 +57,7 @@ function begin(position = null) {
 
 <template>
   <main class="book-journey">
-    <BackBar title-tag="span" :title="active < 0 ? '绘本出发站' : '绘本小火车'" @back="active < 0 ? router.push('/picturebooks') : timetable()" />
+    <BackBar title-tag="span" :title="active < 0 ? '绘本出发站' : '绘本小火车'" @back="guided ? router.push({ name: 'home' }) : active < 0 ? router.push('/picturebooks') : timetable()" />
     <p v-if="loading" role="status">车票准备中…</p>
     <section v-else-if="error" role="alert"><p>{{ error }}</p><AppButton @click="load">重新加载</AppButton></section>
     <template v-else>
@@ -50,7 +78,11 @@ function begin(position = null) {
         <div class="souvenir"><img :src="bookCover" :alt="`${bookTitle}纪念车票`" /><div><strong>{{ bookTitle }}</strong><p>{{ completedIds.length }} / {{ lessons.length }} 枚到站印章</p><span v-for="(entry, position) in lessons" :key="entry.id" class="stamp">{{ completedIds.includes(entry.id) ? '✓' : '○' }} {{ position + 1 }} 站</span></div></div>
         <p>会听、会观察，还愿意开口。谢谢小司机的努力！</p>
         <p v-if="needLogin" class="login-tip">家长登录后可以保存进度 <RouterLink :to="{ path: '/login', query: { redirect: route.fullPath } }">去登录</RouterLink></p>
-        <div class="arrival-actions"><AppButton v-if="active + 1 < lessons.length" variant="success" @click="start(active + 1)">下一大站 →</AppButton><AppButton variant="ghost" @click="timetable">返回路线 / 再开一趟</AppButton></div>
+        <p v-if="returnError" role="alert">{{ returnError }}</p>
+        <AppButton v-if="guided" size="lg" :disabled="sendingReturn" @click="backToGuide">
+          {{ sendingReturn ? '正在联系豆豆…' : '回到豆豆' }}
+        </AppButton>
+        <div v-else class="arrival-actions"><AppButton v-if="active + 1 < lessons.length" variant="success" @click="start(active + 1)">下一大站 →</AppButton><AppButton variant="ghost" @click="timetable">返回路线 / 再开一趟</AppButton></div>
       </section>
       <LessonReview v-else-if="reviewing && lesson" :key="lesson.id" :lesson-id="lesson.id" :saving="saving" :save-error="saveError" @passed="finish(true)" />
       <template v-else-if="lesson && item">

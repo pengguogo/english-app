@@ -15,7 +15,7 @@ import CompanionPanel from './components/companion/CompanionPanel.vue'
     <!-- 家长二次验证弹窗,由 http 拦截器触发 -->
     <ParentVerifyModal />
     <!-- 学习伙伴入口,默认收起、不出声 -->
-    <CompanionPanel />
+    <CompanionPanel v-if="!$route.meta.agentHome && !($route.name === 'picturebook' && $route.query.guide)" />
   </div>
 </template>
 

@@ -44,3 +44,7 @@ export const answerQuiz = (body, { signal } = {}) => http.post('/agent/answer', 
 
 /** 热门主题入口。 */
 export const fetchTopics = ({ signal } = {}) => http.get('/agent/topics', { signal })
+
+/** 儿童首页引导学习，会话进度由服务端保存。 */
+export const getJourney = () => http.get('/agent/journey')
+export const advanceJourney = (action, revision, option) => http.post('/agent/journey', { action, revision, option })

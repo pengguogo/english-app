@@ -35,7 +35,8 @@ const routes = [
   { path: '/models', name: 'models', component: () => import('../views/ModelsView.vue') },
   { path: '/picturebooks', name: 'picturebooks', component: () => import('../views/PicturebooksView.vue') },
   { path: '/picturebooks/:unitId', name: 'picturebook', component: () => import('../views/PicturebookView.vue') },
-  { path: '/', name: 'home', component: () => import('../views/HomeView.vue') },
+  { path: '/', name: 'home', component: () => import('../views/AgentHomeView.vue'), meta: { agentHome: true } },
+  { path: '/library', name: 'library', component: () => import('../views/HomeView.vue') },
   { path: '/child-profile', name: 'child-profile', component: () => import('../views/ChildProfileView.vue'), meta: { requiresAuth: true } },
   // 成长相册:独立照片墙页面,月份分组+多选下载+分类筛选+批量上传
   { path: '/child-photos', name: 'child-photos', component: () => import('../views/ChildPhotosView.vue'), meta: { requiresAuth: true } },
