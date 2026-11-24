@@ -54,9 +54,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/voice/tts").permitAll()
                 // 游客可提交课后复习：只判分不落库（Controller 按 currentChildId 分支），CSRF 照常
                 .requestMatchers(HttpMethod.POST, "/api/v1/lessons/*/review").permitAll()
-                // 学习伙伴：检索与主题入口游客可用（CSRF 照常）；/agent/asr 需登录，走下面的 authenticated
+                // 学习伙伴：检索、主题和语音游客可用（CSRF 照常）；语音额度由接口校验
                 .requestMatchers(HttpMethod.POST, "/api/v1/agent/guide", "/api/v1/agent/chat",
-                        "/api/v1/agent/answer", "/api/v1/agent/journey").permitAll()
+                        "/api/v1/agent/answer", "/api/v1/agent/journey", "/api/v1/agent/asr").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/agent/topics", "/api/v1/agent/journey").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll())

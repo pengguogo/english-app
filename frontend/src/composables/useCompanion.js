@@ -22,7 +22,7 @@ export const MAX_TEXT = 100
 export const THINKING_SPEECH = '让我想一想'
 
 const MSG = {
-  guestMic: '登录后可以和我说话，现在可以打字或点主题',
+  login: '登录状态变了，刷新页面再试一次',
   consent: '请家长在家长中心开启学习伙伴',
   noChild: '先选一个小朋友，再和我说话吧',
   insecure: '要用 HTTPS 打开才能说话，可以打字或点主题',
@@ -45,7 +45,7 @@ export function companionError(error) {
   const code = error?.response?.data?.code
   if (status === 429) return code === 4291 ? { kind: 'quota', message: MSG.minute } : { kind: 'quota', message: MSG.daily }
   if (status === 403 && code === 4033) return { kind: 'consent', message: MSG.consent }
-  if (status === 401) return { kind: 'login', message: MSG.guestMic }
+  if (status === 401) return { kind: 'login', message: MSG.login }
   if (status === 409) return { kind: 'child', message: MSG.noChild }
   // 400/4001 录音无效(太短/格式/过大/没识别出内容);503/5031 识别服务不可用:都请孩子再说一次
   if ((status === 400 && code === 4001) || status === 503) return { kind: 'retry', message: MSG.retry }
@@ -89,9 +89,9 @@ export function useCompanion({ auth, router, onIntent }) {
   let slowTimer = null
   let stopRequested = false
 
-  /** 录音入口可见性:游客不显示;已登录未同意显示但点了提示家长开启 */
+  /** 游客可录音；已登录时检查选孩子和家长同意 */
   const micMode = computed(() => {
-    if (!auth.loggedIn) return 'hidden'
+    if (!auth.loggedIn) return 'ready'
     if (!auth.hasChild) return 'no-child'
     if (!auth.consented) return 'consent'
     return 'ready'
@@ -206,7 +206,7 @@ export function useCompanion({ auth, router, onIntent }) {
 
   async function startRecording() {
     if (micMode.value !== 'ready') {
-      const message = { hidden: MSG.guestMic, 'no-child': MSG.noChild, consent: MSG.consent }[micMode.value]
+      const message = { 'no-child': MSG.noChild, consent: MSG.consent }[micMode.value]
       error.value = { kind: micMode.value === 'consent' ? 'consent' : 'login', message }
       phase.value = 'error'
       return

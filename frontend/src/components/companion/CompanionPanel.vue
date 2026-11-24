@@ -1,7 +1,7 @@
 <!--
   CompanionPanel.vue - 全站常驻学习伙伴(右下角小老鼠入口)
   默认安静:不自动弹出、不自动出声;点小老鼠展开面板。
-  面板:按住说话(登录+同意才可用) / 打字 → 候选卡 / 讲解卡 + 点选题 → 点「去学」才跳转;点主题直接跳主题页。
+  面板:按住说话(游客可用，登录家庭需同意) / 打字 → 候选卡 / 讲解卡 + 点选题 → 点「去学」才跳转;点主题直接跳主题页。
   SAFE_REPLY 只显示话术和主题入口。
   切页、关闭、卸载时停录音和播报并丢弃过期响应(useCompanion.cancel),同时结束会话(endSession)。
 -->
@@ -18,7 +18,7 @@ import { useCompanion, MAX_TEXT } from '../../composables/useCompanion'
 const auth = useAuthStore()
 const route = useRoute()
 const c = useCompanion({ auth, router: useRouter() })
-const { open, phase, result, topics, error, needsPlayButton, micMode, mouseState, quiz } = c
+const { open, phase, result, topics, error, needsPlayButton, mouseState, quiz } = c
 const draft = ref('')
 
 const STATUS = { recording: '我在听…', recognizing: '听到啦…', thinking: '我找找…', speaking: '', choosing: '' }
@@ -74,7 +74,7 @@ onBeforeUnmount(() => c.cancel())
         </button>
       </div>
 
-      <AppButton v-if="micMode !== 'hidden'" class="mic" size="lg" block
+      <AppButton class="mic" size="lg" block
         :variant="phase === 'recording' ? 'warning' : 'primary'"
         :aria-pressed="phase === 'recording'"
         @pointerdown.prevent="c.startRecording()"

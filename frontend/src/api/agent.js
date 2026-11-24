@@ -1,7 +1,7 @@
 /**
  * @file 学习伙伴 API(阶段 2 探索伙伴)
  * @description 对应后端:
- *  - POST /api/v1/agent/asr     语音识别,multipart audio(16k 单声道 WAV),需登录 + 家庭已同意;返回 turnToken
+ *  - POST /api/v1/agent/asr     语音识别,multipart audio(16k 单声道 WAV),游客按 IP 限流；已同意家庭返回 turnToken
  *  - POST /api/v1/agent/chat    对话(推荐 / 讲解 + 点选题 / 安全话术),游客可用(只走检索)
  *  - POST /api/v1/agent/answer  提交点选题答案,quizToken 由 chat 下发
  *  - GET  /api/v1/agent/topics  热门主题入口,游客可用

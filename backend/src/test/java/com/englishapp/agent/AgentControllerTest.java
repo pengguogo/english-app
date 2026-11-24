@@ -65,13 +65,38 @@ class AgentControllerTest extends IntegrationTestBase {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.text").value("我想看恐龙"))
                 .andExpect(jsonPath("$.data.provider").value("baidu"))
-                .andExpect(jsonPath("$.data.latencyMs").value(321));
+                .andExpect(jsonPath("$.data.latencyMs").value(321))
+                .andExpect(jsonPath("$.data.turnToken").isString());
     }
 
     @Test
-    void should_返回401_当_游客录音() throws Exception {
-        mockMvc.perform(multipart("/api/v1/agent/asr").file(WAV).with(csrf()))
-                .andExpect(status().isUnauthorized());
+    void should_识别语音且使用游客额度_当_游客录音() throws Exception {
+        when(recognizer.recognize(any())).thenReturn(new AsrResult("我想看火车", "baidu", 321));
+        mockMvc.perform(multipart("/api/v1/agent/asr").file(WAV)
+                        .header("X-Real-IP", "192.0.2.11").with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.text").value("我想看火车"))
+                .andExpect(jsonPath("$.data.turnToken").doesNotExist());
+        verify(quota).tryConsumeGuest("192.0.2.11");
+        verify(quota, never()).tryConsumeFamily(anyLong());
+    }
+
+    @Test
+    void should_返回429且不调识别_当_游客超过语音额度() throws Exception {
+        org.mockito.Mockito.doReturn(QuotaService.Decision.MINUTE_LIMIT).when(quota).tryConsumeGuest("192.0.2.12");
+        mockMvc.perform(multipart("/api/v1/agent/asr").file(WAV)
+                        .header("X-Real-IP", "192.0.2.12").with(csrf()))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value(4291));
+        verify(recognizer, never()).recognize(any());
+    }
+
+    @Test
+    void should_返回403_当_游客录音缺CSRF() throws Exception {
+        mockMvc.perform(multipart("/api/v1/agent/asr").file(WAV))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(4030));
+        verify(quota, never()).tryConsumeGuest(any());
         verify(recognizer, never()).recognize(any());
     }
 

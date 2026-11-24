@@ -12,6 +12,7 @@ import com.englishapp.dto.AgentGuideResponseDTO;
 import com.englishapp.dto.AgentTopicDTO;
 import com.englishapp.repository.GuardianConsentRepository;
 import com.englishapp.security.AuthException;
+import com.englishapp.security.ClientIpResolver;
 import com.englishapp.security.CurrentChild;
 import com.englishapp.security.QuotaService;
 import com.englishapp.service.AuthService;
@@ -24,6 +25,7 @@ import com.englishapp.service.ai.explore.QuizService;
 import com.englishapp.service.ai.guide.GuideService;
 import com.englishapp.service.ai.record.AgentRecordService;
 import java.util.Optional;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
@@ -56,6 +58,7 @@ public class AgentController {
     private final CurrentChild current;
     private final GuardianConsentRepository consents;
     private final QuotaService quota;
+    private final ClientIpResolver clientIp;
     private final SpeechRecognizer recognizer;
     private final GuideService guide;
     private final ExploreService explore;
@@ -64,11 +67,12 @@ public class AgentController {
     private final AgentRecordService records;
 
     public AgentController(CurrentChild current, GuardianConsentRepository consents, QuotaService quota,
-                           SpeechRecognizer recognizer, GuideService guide, ExploreService explore,
+                           ClientIpResolver clientIp, SpeechRecognizer recognizer, GuideService guide, ExploreService explore,
                            QuizService quiz, AgentTokens tokens, AgentRecordService records) {
         this.current = current;
         this.consents = consents;
         this.quota = quota;
+        this.clientIp = clientIp;
         this.recognizer = recognizer;
         this.guide = guide;
         this.explore = explore;
@@ -77,25 +81,24 @@ public class AgentController {
         this.records = records;
     }
 
-    /** 语音识别：需登录 + 已选孩子 + 家庭已同意；校验通过才消耗回合，额度被拒时不调 ASR */
+    /** 游客按 IP 限流，登录家庭仍需选择孩子并同意；音频校验通过后才扣额度。 */
     @PostMapping("/asr")
-    public Result<AgentAsrResponseDTO> asr(@RequestPart("audio") MultipartFile audio) throws IOException {
-        current.requireChildId();
-        Long familyId = current.requireFamilyId();
-        if (!consented(familyId)) {
-            throw new AuthException(ResultCode.AGENT_CONSENT_REQUIRED);
-        }
+    public Result<AgentAsrResponseDTO> asr(@RequestPart("audio") MultipartFile audio,
+                                          HttpServletRequest request) throws IOException {
+        Long familyId = request.getUserPrincipal() == null ? null : requireConsentedFamily();
         if (audio.isEmpty() || audio.getSize() > MAX_AUDIO_BYTES) {
             throw new AsrException(AsrException.Reason.INVALID_AUDIO, "音频为空或超过 512KB：" + audio.getSize());
         }
         byte[] wav = audio.getBytes();
         // 本地校验格式与时长，坏文件（误触、录音失败）不消耗回合
         recognizer.validate(wav);
-        QuotaService.Decision decision = quota.tryConsumeFamily(familyId);
+        QuotaService.Decision decision = familyId == null
+                ? quota.tryConsumeGuest(clientIp.resolve(request)) : quota.tryConsumeFamily(familyId);
         if (decision != QuotaService.Decision.ALLOWED) throw quotaRejected(decision);
         AsrResult r = recognizer.recognize(wav);
         log.info("agent asr ok: family={} provider={} latencyMs={}", familyId, r.provider(), r.latencyMs());
-        return Result.success(new AgentAsrResponseDTO(r.text(), r.provider(), r.latencyMs(), tokens.turn(familyId)));
+        String turnToken = familyId == null ? null : tokens.turn(familyId);
+        return Result.success(new AgentAsrResponseDTO(r.text(), r.provider(), r.latencyMs(), turnToken));
     }
 
     /**
@@ -147,6 +150,13 @@ public class AgentController {
             log.warn("agent record answer failed: family={} error={}", familyId, e.getClass().getSimpleName());
         }
         return Result.success(r);
+    }
+
+    private Long requireConsentedFamily() {
+        current.requireChildId();
+        Long familyId = current.requireFamilyId();
+        if (!consented(familyId)) throw new AuthException(ResultCode.AGENT_CONSENT_REQUIRED);
+        return familyId;
     }
 
     private boolean consented(Long familyId) {

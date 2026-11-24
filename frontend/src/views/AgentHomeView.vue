@@ -18,7 +18,7 @@ const showGuide = ref(true)
 const guide = useGuidedLearning()
 const { screen, loading, pending, error, audioError, playing } = guide
 const companion = useCompanion({ auth, router, onIntent: handleIntent })
-const { result, quiz, phase, micMode, mouseState, needsPlayButton, topics } = companion
+const { result, quiz, phase, mouseState, needsPlayButton, topics } = companion
 const awaitingSpeech = computed(() => ['recognizing', 'thinking'].includes(phase.value))
 const chatError = companion.error
 const parentRoute = computed(() => auth.hasChild ? '/parent-center' : auth.loggedIn ? '/choose-child' : '/login')
@@ -134,7 +134,7 @@ onBeforeUnmount(companion.closePanel)
           {{ topic.name }}
         </AppButton>
       </div>
-      <AgentComposer :phase="phase" :mic="micMode !== 'hidden'"
+      <AgentComposer :phase="phase"
         :prompt="showGuide && screen?.options.length ? '告诉豆豆你的答案' : '告诉豆豆你想学什么'"
         :disabled="loading || pending || awaitingSpeech" @send="send" @record="startRecording" @stop="companion.stopRecording" />
     </div>

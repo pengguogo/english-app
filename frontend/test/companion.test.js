@@ -153,9 +153,13 @@ test('识别为空文本提示重说', async () => {
   assert.equal(c.error.value.message, '没听清，再说一次吧')
 })
 
-test('游客不能录音，未同意提示家长开启', async () => {
+test('游客可以录音，已登录但未同意时提示家长开启', async () => {
   const guest = setup({ auth: { loggedIn: false, hasChild: false, consented: false } })
-  assert.equal(guest.c.micMode.value, 'hidden')
+  assert.equal(guest.c.micMode.value, 'ready')
+  await guest.c.startRecording()
+  assert.equal(guest.c.phase.value, 'recording')
+  await guest.c.stopRecording()
+  assert.equal(guest.calls.recStop, 1)
   const noConsent = setup({ auth: { loggedIn: true, hasChild: true, consented: false } })
   assert.equal(noConsent.c.micMode.value, 'consent')
   await noConsent.c.startRecording()

@@ -6,7 +6,6 @@ import { MAX_TEXT } from '../../composables/useCompanion'
 const props = defineProps({
   phase: { type: String, required: true },
   prompt: { type: String, required: true },
-  mic: Boolean,
   disabled: Boolean
 })
 const emit = defineEmits(['send', 'record', 'stop'])
@@ -21,7 +20,7 @@ function send() {
 
 <template>
   <form class="composer" @submit.prevent="send">
-    <AppButton v-if="mic" variant="ghost" class="mic" :disabled="disabled"
+    <AppButton variant="ghost" class="mic" :disabled="disabled"
       :aria-label="phase === 'recording' ? '停下录音' : '开始说话'"
       :aria-pressed="phase === 'recording'"
       @click="phase === 'recording' ? $emit('stop') : $emit('record')">
