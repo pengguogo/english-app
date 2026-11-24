@@ -158,7 +158,7 @@ onBeforeUnmount(companion.closePanel)
 .topics { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 .topics :deep(.app-btn) { background: var(--bg-card); padding-inline: var(--space-3); }
 .prompt-area, .reply { display: grid; gap: var(--space-3); }
-.prompt-area { margin-top: var(--space-6); }
+.prompt-area { grid-template-columns: minmax(0, 1fr); margin-top: var(--space-6); }
 .reply { margin-top: var(--space-3); }
 .reply-speech, .status { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--bg-card); }
 @media (max-width: 620px) {
