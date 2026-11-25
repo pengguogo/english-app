@@ -99,7 +99,7 @@ function toggleCompare() {
 </script>
 
 <template>
-  <div class="pet">
+  <div class="pet" :class="{ comparing: preview && compare }" :data-state="state">
     <div class="pet-pair">
       <AppButton variant="ghost" class="pet-button" aria-label="和豆豆打招呼"
         :aria-disabled="props.state !== 'idle' || !!response" @click="greet">
@@ -118,13 +118,58 @@ function toggleCompare() {
 </template>
 
 <style scoped>
-.pet { flex: none; position: relative; }
-.pet-pair { display: flex; flex-wrap: wrap; gap: var(--space-1); }
-.pet-button, .pet-model { width: clamp(70px, 22vw, 106px); height: clamp(70px, 22vw, 106px); }
-.pet-button.app-btn { padding: 0; overflow: hidden; background: radial-gradient(circle at 42% 33%, var(--bg-card), var(--color-warning-bg)); }
-.pet-button :deep(.companion-mouse) { width: 90% !important; height: 90% !important; }
-.pet-model { display: grid; place-items: center; text-align: center; font-size: var(--text-xs); }
-.pet-model canvas { width: 100%; height: 100%; border-radius: var(--radius-pill); background: var(--color-warning-bg); }
-.pet-greeting:not(:empty) { position: absolute; z-index: 1; top: 100%; left: 0; white-space: nowrap; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); background: var(--bg-card); font-size: var(--text-xs); }
-.preview-button.app-btn { padding: var(--space-1) var(--space-2); font-size: var(--text-xs); }
+.pet {
+  --port-light: var(--cabin-cyan);
+  --port-size: clamp(112px, 35vw, 220px);
+  position: relative;
+  text-align: center;
+}
+.pet[data-state='thinking'] { --port-light: var(--cabin-violet); }
+.pet[data-state='hint'], .pet[data-state='safety'] { --port-light: var(--cabin-warning); }
+.pet[data-state='cheer'] { --port-light: var(--color-success); }
+.pet.comparing { --port-size: clamp(54px, 16vw, 124px); }
+.pet-pair { display: flex; justify-content: center; gap: var(--space-1); }
+.pet-button, .pet-model { width: var(--port-size); height: var(--port-size); }
+.pet .pet-button.app-btn, .pet-model {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid var(--port-light);
+  border-radius: var(--radius-pill);
+  background:
+    radial-gradient(circle at 48% 103%, var(--port-light), transparent 31%),
+    repeating-linear-gradient(0deg, transparent 0 12px, color-mix(in srgb, var(--port-light) 14%, transparent) 13px 14px),
+    radial-gradient(circle, var(--cabin-planet), var(--cabin-space) 78%);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--port-light) 45%, transparent),
+    inset 0 0 0 5px var(--cabin-recess);
+}
+.pet .pet-button.app-btn::before {
+  position: absolute;
+  inset: 8%;
+  border: 1px dashed color-mix(in srgb, var(--port-light) 48%, transparent);
+  border-radius: inherit;
+  content: '';
+}
+.pet-button :deep(.companion-mouse) { width: 88% !important; height: 88% !important; z-index: 1; }
+.pet-model { display: grid; place-items: center; color: var(--cabin-text); font-size: var(--text-xs); }
+.pet-model canvas { width: 100%; height: 100%; }
+.pet-greeting:not(:empty) {
+  position: absolute;
+  z-index: 2;
+  bottom: 4px;
+  left: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--cabin-border);
+  border-radius: var(--radius-sm);
+  background: var(--cabin-panel);
+  color: var(--cabin-cyan);
+  font-size: var(--text-xs);
+}
+.pet:has(.preview-button) .pet-greeting { bottom: var(--space-12); }
+.preview-button.app-btn { margin-top: var(--space-1); padding: var(--space-1) var(--space-2); font-size: var(--text-xs); }
+@media (max-width: 365px) {
+  .pet.comparing .pet-pair { flex-wrap: wrap; }
+}
 </style>

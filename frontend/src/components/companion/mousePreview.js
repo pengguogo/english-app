@@ -5,15 +5,22 @@ export function createMousePreview(canvas) {
   const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true })
   const style = getComputedStyle(canvas)
   const color = name => style.getPropertyValue(name)
-  const pet = buildMouse({ pink: color('--color-pink'), cream: color('--bg-card'),
-    ink: color('--text-primary'), rose: color('--color-warning') })
+  const pet = buildMouse({
+    pink: color('--pilot-fur'), cream: color('--pilot-cream'), ink: color('--pilot-ink'),
+    rose: color('--pilot-shade'), shell: color('--pilot-shell'), rim: color('--pilot-rim'),
+    light: color('--cabin-cyan')
+  })
+  const equipmentColors = {
+    thinking: color('--cabin-violet'), hint: color('--cabin-warning'),
+    safety: color('--cabin-warning'), cheer: color('--color-success')
+  }
   const scene = new Scene()
   const camera = new OrthographicCamera(-1.25, 1.25, 1.25, -1.25, .1, 20)
   camera.position.set(.04, .17, 5)
   camera.lookAt(0, -.02, 0)
-  const light = new DirectionalLight(color('--bg-card').trim(), 2.4)
+  const light = new DirectionalLight(color('--pilot-cream').trim(), 2.4)
   light.position.set(-3, 5, 6)
-  scene.add(pet.mouse, light, new AmbientLight(color('--bg-card').trim(), 1.4))
+  scene.add(pet.mouse, light, new AmbientLight(color('--pilot-cream').trim(), 1.4))
 
   let input = { state: 'idle', action: '', visible: true, reduced: false }
   let raf
@@ -56,6 +63,9 @@ export function createMousePreview(canvas) {
   return {
     update(next) {
       input = next
+      const lightColor = equipmentColors[next.state] || color('--cabin-cyan')
+      pet.equipmentLight.color.set(lightColor.trim())
+      pet.equipmentLight.emissive.copy(pet.equipmentLight.color)
       started = performance.now()
       cancelAnimationFrame(raf)
       draw()

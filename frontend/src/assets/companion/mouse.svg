@@ -14,12 +14,25 @@
   </defs>
   <ellipse cx="50" cy="96" rx="23" ry="3" fill="var(--cm-fur-shadow)" opacity=".22"/>
   <path class="cm-tail" d="M68 90 C86 94 94 82 86 74 C82 70 77 74 80 78" fill="none" stroke="var(--cm-body-dark)" stroke-width="3" stroke-linecap="round"/>
-  <ellipse cx="50" cy="86" rx="21" ry="13" fill="url(#cm-fur-UID)"/>
-  <ellipse cx="50" cy="89" rx="12" ry="8" fill="var(--cm-belly)"/>
+  <rect x="27" y="73" width="13" height="20" rx="5" fill="var(--pilot-rim)"/>
+  <rect x="60" y="73" width="13" height="20" rx="5" fill="var(--pilot-rim)"/>
+  <ellipse cx="50" cy="86" rx="22" ry="13" fill="var(--pilot-shell)" stroke="var(--pilot-rim)" stroke-width="2"/>
+  <path d="M34 84 L40 87 M60 87 L66 84" fill="none" stroke="var(--pilot-rim)" stroke-width="2"/>
+  <rect class="cm-equipment-light" x="43" y="88" width="14" height="4" rx="2"/>
   <g class="cm-head">
     <g class="cm-ear-l"><circle cx="25" cy="30" r="17" fill="url(#cm-fur-UID)"/><circle cx="25" cy="30" r="10.5" fill="url(#cm-ear-UID)"/></g>
     <g class="cm-ear-r"><circle cx="75" cy="30" r="17" fill="url(#cm-fur-UID)"/><circle cx="75" cy="30" r="10.5" fill="url(#cm-ear-UID)"/></g>
+    <path d="M74 43 L83 24 L83 17" stroke="var(--pilot-rim)" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+    <circle class="cm-equipment-light" cx="83" cy="16" r="3.4"/>
+    <ellipse cx="50" cy="52" rx="34" ry="29" fill="var(--pilot-shell)" stroke="var(--pilot-rim)" stroke-width="2.3"/>
     <ellipse cx="50" cy="54" rx="27" ry="24" fill="url(#cm-fur-UID)"/>
+    <path class="cm-equipment-light" d="M34 30 Q49 23 57 27 L55 29 Q44 27 34 32 Z"/>
+    <path d="M29 46 Q31 39 38 37" stroke="var(--pilot-cream)" stroke-width="2.1" opacity=".75" stroke-linecap="round" fill="none"/>
+    <rect x="14" y="44" width="8" height="16" rx="3" fill="var(--pilot-rim)"/>
+    <rect x="78" y="44" width="8" height="16" rx="3" fill="var(--pilot-rim)"/>
+    <path d="M18 48 V55 M82 48 V55" stroke="var(--cm-light)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M82 59 Q79 68 67 70" stroke="var(--pilot-shell)" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+    <circle class="cm-equipment-light" cx="67" cy="70" r="2"/>
     <circle cx="32" cy="62" r="4.5" fill="var(--cm-inner)"/>
     <circle cx="68" cy="62" r="4.5" fill="var(--cm-inner)"/>
     <!-- 眼睛 -->

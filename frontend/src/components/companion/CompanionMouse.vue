@@ -49,20 +49,19 @@ const ariaLabel = computed(() => `学习伙伴小老鼠，${STATE_LABELS[safeSta
   flex: none;
   line-height: 0;
   /* 公共色 */
-  --cm-ink: var(--text-primary);
-  --cm-white: var(--bg-card);
+  --cm-ink: var(--pilot-ink);
+  --cm-white: var(--pilot-cream);
   --cm-fx: var(--color-primary);
   --cm-accent: var(--color-accent);
   --cm-alert: var(--color-orange);
-  /* 豆豆：粉色圆润 */
-  --cm-body: var(--color-pink);
-  --cm-highlight: color-mix(in srgb, var(--color-pink) 45%, var(--bg-card));
-  --cm-fur-shadow: color-mix(in srgb, var(--color-pink) 53%, var(--color-warning));
-  --cm-body-dark: var(--color-warning);
-  --cm-inner: var(--bg-page);
-  --cm-belly: var(--bg-page);
-  --cm-paw: var(--bg-page);
-  --cm-nose: var(--color-warning);
+  --cm-body: var(--pilot-fur);
+  --cm-highlight: var(--pilot-cream);
+  --cm-fur-shadow: var(--pilot-shade);
+  --cm-body-dark: var(--pilot-shade);
+  --cm-inner: var(--pilot-cream);
+  --cm-paw: var(--pilot-rim);
+  --cm-nose: var(--pilot-shade);
+  --cm-light: var(--cabin-cyan);
 }
 .companion-mouse :deep(svg) {
   width: 100%;
@@ -103,6 +102,10 @@ const ariaLabel = computed(() => `学习伙伴小老鼠，${STATE_LABELS[safeSta
 .cm-s-speaking :deep(.cm-mouth),
 .cm-s-wave :deep(.cm-wave),
 .cm-s-hint :deep(.cm-point) { display: inline; }
+.companion-mouse :deep(.cm-equipment-light) { fill: var(--cm-light); }
+.cm-s-thinking { --cm-light: var(--cabin-violet); }
+.cm-s-cheer { --cm-light: var(--color-success); }
+.cm-s-hint, .cm-s-safety { --cm-light: var(--cabin-warning); }
 .cm-s-listening :deep(.cm-head) { transform: translateY(1px) scale(1.04); }
 .cm-s-listening :deep(.cm-ear-l) { transform: rotate(-10deg); }
 .cm-s-listening :deep(.cm-ear-r) { transform: rotate(10deg); }

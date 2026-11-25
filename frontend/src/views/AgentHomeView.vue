@@ -107,7 +107,7 @@ onBeforeUnmount(companion.closePanel)
 <template>
   <main class="agent-home">
     <header class="top">
-      <div class="wordmark"><CompanionMouse still :size="38" /><span>豆豆</span></div>
+      <div class="wordmark"><CompanionMouse still :size="38" /><span>豆豆学习舱</span></div>
       <nav aria-label="学习导航">
         <RouterLink to="/library">学习目录</RouterLink>
         <RouterLink :to="parentRoute">家长</RouterLink>
@@ -115,10 +115,12 @@ onBeforeUnmount(companion.closePanel)
     </header>
 
     <section class="greeting">
-      <CompanionPet :state="portraitState" :preview="petPreview" />
-      <div>
+      <div class="greeting-copy">
         <h1>{{ screen && showGuide ? '和豆豆一起学' : '你想学什么？' }}</h1>
-        <p v-if="!screen || !showGuide">我是豆豆。告诉我你想学什么，或选一个主题一起出发。</p>
+        <p v-if="!screen || !showGuide">我是领航员豆豆。选个任务，或者直接跟我说。</p>
+      </div>
+      <div class="pilot-window">
+        <CompanionPet :state="portraitState" :preview="petPreview" />
       </div>
     </section>
 
@@ -131,7 +133,9 @@ onBeforeUnmount(companion.closePanel)
       :audio-error="audioError" @act="guide.act" @listen="playing ? guide.stop() : guide.listen()" @book="openBook" />
 
     <section v-else-if="!loading && !result && !awaitingSpeech && !error" class="feature">
-      <img :src="trainCover" alt="蓝色火车带着苹果准备出发" />
+      <div class="task-window">
+        <img :src="trainCover" alt="蓝色火车带着苹果准备出发" />
+      </div>
       <div class="feature-copy">
         <h2>火车探险</h2>
         <p>看图找车头，再陪苹果坐一站小火车。</p>
@@ -169,29 +173,4 @@ onBeforeUnmount(companion.closePanel)
   </main>
 </template>
 
-<style scoped>
-.agent-home { min-height: 100dvh; max-width: 1080px; margin: auto; padding: 0 clamp(16px, 6vw, 72px) var(--space-6); }
-.top { display: flex; justify-content: space-between; align-items: center; min-height: 68px; gap: var(--space-2); border-bottom: 1px solid var(--border-light); }
-.wordmark { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-lg); font-weight: var(--font-bold); }
-.top nav { display: flex; gap: clamp(12px, 4vw, 28px); }
-.top a { display: inline-flex; align-items: center; min-height: var(--touch-target); color: var(--text-primary); font-size: var(--text-sm); text-decoration: underline; text-underline-offset: .24em; }
-.greeting { display: flex; align-items: center; gap: var(--space-4); padding: clamp(22px, 6vw, 52px) 0 var(--space-5); }
-.greeting h1 { font-size: clamp(30px, 5vw, 54px); line-height: 1.15; letter-spacing: -.04em; }
-.greeting p, .feature p { margin-top: var(--space-2); color: var(--text-secondary); line-height: 1.65; }
-.feature { display: grid; grid-template-columns: 1.2fr 1fr; overflow: hidden; border-radius: var(--radius-lg); background: var(--bg-card); box-shadow: var(--shadow-card); }
-.feature > img { width: 100%; height: 100%; min-height: 225px; object-fit: cover; }
-.feature-copy { align-self: center; padding: clamp(16px, 4vw, 36px); }
-.feature-copy h2 { font-size: clamp(24px, 4vw, 38px); line-height: 1.2; }
-.feature-copy .app-btn { margin-top: var(--space-4); }
-.topics { display: flex; flex-wrap: wrap; gap: var(--space-1); }
-.topics :deep(.app-btn) { background: var(--bg-card); padding-inline: var(--space-3); }
-.prompt-area, .reply { display: grid; gap: var(--space-3); }
-.prompt-area { grid-template-columns: minmax(0, 1fr); margin-top: var(--space-6); }
-.reply { margin-top: var(--space-3); }
-.reply-speech, .status { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--bg-card); }
-@media (max-width: 620px) {
-  .feature { grid-template-columns: 1fr; }
-  .feature > img { height: auto; aspect-ratio: 1.9; min-height: 0; }
-  .feature-copy .app-btn { width: 100%; }
-}
-</style>
+<style scoped src="./agentCabin.css"></style>

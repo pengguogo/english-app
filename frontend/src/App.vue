@@ -10,7 +10,7 @@ import CompanionPanel from './components/companion/CompanionPanel.vue'
 </script>
 
 <template>
-  <div class="app-container">
+  <div class="app-container" :class="{ 'app-container--wide': $route.meta.agentHome }">
     <router-view />
     <!-- 家长二次验证弹窗,由 http 拦截器触发 -->
     <ParentVerifyModal />
@@ -26,5 +26,8 @@ import CompanionPanel from './components/companion/CompanionPanel.vue'
   min-height: 100dvh;
   background: var(--bg-page);
   position: relative;
+}
+.app-container--wide {
+  max-width: none;
 }
 </style>

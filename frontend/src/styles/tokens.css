@@ -7,6 +7,24 @@
  */
 
 :root {
+  /* 太空学习舱与领航员装备 */
+  --cabin-space: #0a1021;
+  --cabin-panel: #111c33;
+  --cabin-recess: #0d172b;
+  --cabin-border: #35476c;
+  --cabin-text: #f0f6ff;
+  --cabin-muted: #b8c9e4;
+  --cabin-cyan: #6be8fa;
+  --cabin-violet: #a99bff;
+  --cabin-planet: #22375e;
+  --cabin-warning: #ffd29a;
+  --pilot-fur: #ffb6c1;
+  --pilot-cream: #fff4fa;
+  --pilot-shade: #db719a;
+  --pilot-ink: #24223b;
+  --pilot-shell: #263454;
+  --pilot-rim: #657da9;
+
   /* 3D 展台与模型材质：渲染器也从这些令牌读取颜色。 */
   --model-stage: #edf4f4;
   --model-red: #b93d42;

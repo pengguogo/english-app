@@ -1,4 +1,4 @@
-import { CatmullRomCurve3, Group, Mesh, MeshStandardMaterial, SphereGeometry, TubeGeometry, Vector3 } from 'three'
+import { CatmullRomCurve3, Group, Mesh, MeshStandardMaterial, SphereGeometry, TorusGeometry, TubeGeometry, Vector3 } from 'three'
 
 export function buildMouse(style) {
   const mouse = new Group()
@@ -9,6 +9,9 @@ export function buildMouse(style) {
     new MeshStandardMaterial({ color: color.trim(), roughness: 0.72 })
   ]))
 
+  materials.light.emissive.copy(materials.light.color)
+  materials.light.emissiveIntensity = .55
+
   function shape(parent, key, position, scale) {
     const part = new Mesh(sphere, materials[key])
     part.position.set(...position)
@@ -17,8 +20,9 @@ export function buildMouse(style) {
     return part
   }
 
-  shape(mouse, 'pink', [0, -.58, 0], [.48, .46, .34])
-  shape(mouse, 'cream', [0, -.64, .25], [.3, .28, .15])
+  shape(mouse, 'shell', [0, -.58, 0], [.48, .46, .34])
+  shape(mouse, 'rim', [0, -.64, .25], [.28, .24, .14])
+  shape(mouse, 'light', [0, -.68, .39], [.14, .047, .019])
   head.position.y = .19
   mouse.add(head)
   shape(head, 'pink', [0, 0, 0], [.63, .56, .48])
@@ -31,6 +35,17 @@ export function buildMouse(style) {
     shape(ear, 'cream', [0, .14, .125], [.23, .25, .045])
     return ear
   })
+
+  const helmetRim = new Mesh(new TorusGeometry(.625, .045, 10, 40), materials.rim)
+  helmetRim.position.z = .22
+  helmetRim.scale.y = .93
+  head.add(helmetRim)
+  for (const side of [-1, 1]) {
+    shape(head, 'shell', [side * .63, -.04, .13], [.12, .17, .16])
+    shape(head, 'light', [side * .66, -.04, .27], [.059, .091, .038])
+  }
+  shape(head, 'rim', [.59, .44, 0], [.028, .21, .028])
+  shape(head, 'light', [.59, .63, 0], [.074, .074, .074])
 
   const eyes = [-1, 1].map(side => {
     const eye = new Group()
@@ -59,7 +74,8 @@ export function buildMouse(style) {
   function dispose() {
     sphere.dispose()
     tail.geometry.dispose()
+    helmetRim.geometry.dispose()
     Object.values(materials).forEach(material => material.dispose())
   }
-  return { mouse, head, paw, eyes, ears, nose, mouth, tail, dispose }
+  return { mouse, head, paw, eyes, ears, nose, mouth, tail, equipmentLight: materials.light, dispose }
 }
