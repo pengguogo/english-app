@@ -41,7 +41,10 @@ async function reportArrival() {
 
 async function backToGuide() {
   await reportArrival()
-  if (!returnError.value) router.push({ name: 'home' })
+  if (!returnError.value) router.push({
+    name: 'home',
+    query: { from: 'picturebook', 'pet-preview': route.query['pet-preview'] }
+  })
 }
 
 watch(arrival, (arrived) => { if (arrived) void reportArrival() })

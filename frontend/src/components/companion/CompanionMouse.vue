@@ -5,7 +5,7 @@
   创建日期: 2026-11-06
 -->
 <script setup>
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import mouseSvg from '../../assets/companion/mouse.svg?raw'
 
 const STATE_LABELS = {
@@ -13,17 +13,22 @@ const STATE_LABELS = {
   listening: '正在听你说',
   thinking: '正在想',
   cheer: '在为你加油',
+  speaking: '正在讲解',
+  hint: '在给你提示',
+  wave: '在打招呼',
   safety: '有安全提示'
 }
 
 const props = defineProps({
-  /** 状态：idle / listening / thinking / cheer / safety，非法值回退 idle */
   state: { type: String, default: 'idle' },
   /** 宽高像素 */
-  size: { type: Number, default: 56 }
+  size: { type: Number, default: 56 },
+  gesture: { type: String, default: '' },
+  still: Boolean
 })
 
-const safeState = computed(() => (STATE_LABELS[props.state] ? props.state : 'idle'))
+const svg = mouseSvg.replaceAll('UID', useId())
+const safeState = computed(() => (Object.hasOwn(STATE_LABELS, props.state) ? props.state : 'idle'))
 const ariaLabel = computed(() => `学习伙伴小老鼠，${STATE_LABELS[safeState.value]}`)
 </script>
 
@@ -32,9 +37,9 @@ const ariaLabel = computed(() => `学习伙伴小老鼠，${STATE_LABELS[safeSta
   <span
     role="img"
     :aria-label="ariaLabel"
-    :class="['companion-mouse', `cm-s-${safeState}`]"
+    :class="['companion-mouse', `cm-s-${safeState}`, `cm-a-${gesture}`, { 'cm-still': still }]"
     :style="{ width: `${size}px`, height: `${size}px` }"
-    v-html="mouseSvg"
+    v-html="svg"
   />
 </template>
 
@@ -51,6 +56,8 @@ const ariaLabel = computed(() => `学习伙伴小老鼠，${STATE_LABELS[safeSta
   --cm-alert: var(--color-orange);
   /* 豆豆：粉色圆润 */
   --cm-body: var(--color-pink);
+  --cm-highlight: color-mix(in srgb, var(--color-pink) 45%, var(--bg-card));
+  --cm-fur-shadow: color-mix(in srgb, var(--color-pink) 53%, var(--color-warning));
   --cm-body-dark: var(--color-warning);
   --cm-inner: var(--bg-page);
   --cm-belly: var(--bg-page);
@@ -66,6 +73,9 @@ const ariaLabel = computed(() => `学习伙伴小老鼠，${STATE_LABELS[safeSta
 .companion-mouse :deep([data-s]) {
   display: none;
 }
+.cm-s-speaking :deep([data-s='idle']),
+.cm-s-wave :deep([data-s='idle']),
+.cm-s-hint :deep([data-s='idle']),
 .cm-s-idle :deep([data-s='idle']),
 .cm-s-listening :deep([data-s='listening']),
 .cm-s-thinking :deep([data-s='thinking']),
@@ -76,67 +86,49 @@ const ariaLabel = computed(() => `学习伙伴小老鼠，${STATE_LABELS[safeSta
 .companion-mouse :deep(.cm-head),
 .companion-mouse :deep(.cm-ear-l),
 .companion-mouse :deep(.cm-ear-r),
-.companion-mouse :deep(.cm-blink),
-.companion-mouse :deep(.cm-dots > *),
-.companion-mouse :deep(.cm-stars > *),
-.companion-mouse :deep(.cm-fx) {
+.companion-mouse :deep(.cm-blink) {
   transform-box: fill-box;
   transform-origin: center;
 }
 .companion-mouse :deep(.cm-ear-l) { transform-origin: 80% 90%; }
 .companion-mouse :deep(.cm-ear-r) { transform-origin: 20% 90%; }
 .companion-mouse :deep(.cm-head) { transform-origin: 50% 100%; }
-/* 倾听时耳朵竖起 */
-.cm-s-listening :deep(.cm-ear-l) { transform: rotate(-8deg) scale(1.06); }
-.cm-s-listening :deep(.cm-ear-r) { transform: rotate(8deg) scale(1.06); }
-/* 思考时歪头 */
+/* 主动反馈有静止姿势，减少动态效果时也看得懂。 */
+.companion-mouse :deep(.cm-mouth),
+.companion-mouse :deep(.cm-wave),
+.companion-mouse :deep(.cm-point),
+.cm-s-speaking :deep(path[data-s='idle']),
+.cm-s-wave :deep(.cm-rest-paws),
+.cm-s-hint :deep(.cm-rest-paws) { display: none; }
+.cm-s-speaking :deep(.cm-mouth),
+.cm-s-wave :deep(.cm-wave),
+.cm-s-hint :deep(.cm-point) { display: inline; }
+.cm-s-listening :deep(.cm-head) { transform: translateY(1px) scale(1.04); }
+.cm-s-listening :deep(.cm-ear-l) { transform: rotate(-10deg); }
+.cm-s-listening :deep(.cm-ear-r) { transform: rotate(10deg); }
 .cm-s-thinking :deep(.cm-head) { transform: rotate(-6deg); }
+.cm-s-hint :deep(.cm-head) { transform: rotate(7deg) translateY(2px); }
+.cm-s-wave :deep(.cm-wave) { transform-box: fill-box; transform-origin: 78% 90%; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .companion-mouse :deep(.cm-blink) { animation: cm-blink 4s infinite; }
-  .cm-s-idle :deep(.cm-ear-r) { animation: cm-ear-twitch 5s infinite; }
-  .cm-s-listening :deep(.cm-ear-l) { animation: cm-ear-l 1.2s var(--ease-smooth) infinite; }
-  .cm-s-listening :deep(.cm-ear-r) { animation: cm-ear-r 1.2s var(--ease-smooth) infinite; }
-  .cm-s-listening :deep(.cm-fx) { animation: cm-pulse 1.2s infinite; }
-  .cm-s-thinking :deep(.cm-dots > *) { animation: cm-dot 1.2s infinite; }
-  .cm-s-thinking :deep(.cm-dots > :nth-child(2)) { animation-delay: 0.2s; }
-  .cm-s-thinking :deep(.cm-dots > :nth-child(3)) { animation-delay: 0.4s; }
-  .cm-s-cheer :deep(.cm-head) { animation: cm-nod 0.9s var(--ease-bounce) infinite; }
-  .cm-s-cheer :deep(.cm-stars > *) { animation: cm-twinkle 0.9s infinite alternate; }
-  .cm-s-safety :deep(.cm-badge) { animation: cm-pulse 1.6s infinite; }
+  .cm-s-speaking :deep(.cm-mouth) { transform-box: fill-box; transform-origin: center; animation: cm-talk .47s ease-in-out infinite alternate; }
+  .cm-s-cheer:not(.cm-still) :deep(svg) { animation: cm-hop .6s ease-out; }
+  .cm-s-wave :deep(.cm-wave) { animation: cm-wave .3s ease-in-out 3 alternate; }
+  .cm-a-blink :deep(.cm-blink) { animation: cm-blink .26s ease-in-out; }
+  .cm-a-ear :deep(.cm-ear-r) { animation: cm-twitch .28s ease-in-out 2; }
+  .cm-a-sniff :deep(.cm-nose),
+  .cm-a-sniff :deep(.cm-whiskers) { animation: cm-sniff .28s ease-in-out 3; }
+  .cm-a-stretch :deep(svg) { transform-origin: center bottom; animation: cm-stretch 1.05s ease-in-out; }
+  .cm-a-tail :deep(.cm-tail) { transform-origin: 68px 90px; animation: cm-twitch .4s ease-in-out 2; }
+  .cm-a-tilt :deep(.cm-head) { animation: cm-tilt 1s ease-in-out; }
+  .cm-still :deep(*) { animation: none !important; }
 }
-
-@keyframes cm-blink {
-  0%, 92%, 100% { transform: scaleY(1); }
-  95% { transform: scaleY(0.1); }
-}
-@keyframes cm-ear-twitch {
-  0%, 88%, 100% { transform: rotate(0); }
-  92% { transform: rotate(10deg); }
-  96% { transform: rotate(-4deg); }
-}
-@keyframes cm-ear-l {
-  0%, 100% { transform: rotate(-8deg) scale(1.06); }
-  50% { transform: rotate(-14deg) scale(1.08); }
-}
-@keyframes cm-ear-r {
-  0%, 100% { transform: rotate(8deg) scale(1.06); }
-  50% { transform: rotate(14deg) scale(1.08); }
-}
-@keyframes cm-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.45; }
-}
-@keyframes cm-dot {
-  0%, 100% { transform: translateY(0); opacity: 0.5; }
-  50% { transform: translateY(-3px); opacity: 1; }
-}
-@keyframes cm-nod {
-  0%, 100% { transform: rotate(0) translateY(0); }
-  40% { transform: rotate(0) translateY(3px); }
-}
-@keyframes cm-twinkle {
-  from { transform: scale(0.7); }
-  to { transform: scale(1.15); }
-}
+@keyframes cm-talk { 0%, 60% { transform: scaleY(.42); } 36%, 100% { transform: scaleY(1.3); } }
+@keyframes cm-hop { 42% { transform: translateY(-7px) rotate(-5deg); } 73% { transform: translateY(1px); } }
+@keyframes cm-wave { 45% { transform: rotate(-15deg); } }
+@keyframes cm-blink { 50% { transform: scaleY(.12); } }
+@keyframes cm-twitch { 50% { transform: rotate(13deg); } }
+@keyframes cm-sniff { 50% { transform: translateY(-1.8px); } }
+@keyframes cm-stretch { 50% { transform: scale(.94, 1.09); } }
+@keyframes cm-tilt { 40%, 66% { transform: rotate(9deg); } }
 </style>

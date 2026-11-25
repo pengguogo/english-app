@@ -61,6 +61,7 @@ test('打字检索：思考中 → 播报中 → 等待选择，点了「去学�
   await run
   assert.deepEqual(calls.speak, ['去学水果吧'])
   assert.equal(c.phase.value, 'choosing')
+  assert.equal(c.canReplay.value, true)
   assert.equal(calls.push.length, 0)
   c.go(c.result.value.candidates[0])
   assert.deepEqual(calls.push, ['/lesson/12?themeId=3'])
@@ -185,18 +186,22 @@ test('自动播放被拦截时显示播放按钮，点了补播', async () => {
   const spoken = []
   const { c } = setup({ tts: { playAndWait: async (t) => { if (blocked) throw Object.assign(new Error(), { name: 'NotAllowedError' }); spoken.push(t) } } })
   await c.submitText('水果')
-  assert.equal(c.needsPlayButton.value, true)
+  assert.equal(c.canReplay.value, true)
   assert.equal(c.phase.value, 'choosing')
   blocked = false
   await c.replay()
-  assert.equal(c.needsPlayButton.value, false)
+  assert.equal(c.canReplay.value, true)
   assert.deepEqual(spoken, ['去学水果吧'])
 })
 
-test('录音授权期间松手：授权完成后立即停止', async () => {
+test('麦克风授权期间只启动一次，收到停止操作时授权后立即停止', async () => {
   const start = deferred()
-  const { c, calls } = setup({ recorder: { start: () => start.promise } })
+  let starts = 0
+  const { c, calls } = setup({ recorder: { start: () => { starts++; return start.promise } } })
   const run = c.startRecording()
+  assert.equal(c.phase.value, 'openingMic')
+  await c.startRecording()
+  assert.equal(starts, 1)
   await c.stopRecording()
   start.resolve()
   await run

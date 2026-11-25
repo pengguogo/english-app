@@ -1,13 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-  <!-- 学习伙伴「豆豆」圆润扁平：大圆耳 + 粉腮 + 卷尾。造型起点 Fluent Emoji mouse_face_flat（MIT），已重画比例并加身体与手势。 -->
+  <!-- 学习伙伴「豆豆」圆润卡通：大圆耳 + 粉腮 + 卷尾。造型起点 Fluent Emoji mouse_face_flat（MIT），已重画比例并加身体与手势。 -->
   <!-- 色值全部是 CSS 变量，由 CompanionMouse.vue 映射到 tokens.css；data-s 标记该元素属于哪些状态。 -->
-  <path d="M68 90 C86 94 94 82 86 74 C82 70 77 74 80 78" fill="none" stroke="var(--cm-body-dark)" stroke-width="3" stroke-linecap="round"/>
-  <ellipse cx="50" cy="86" rx="21" ry="13" fill="var(--cm-body)"/>
+  <defs>
+    <radialGradient id="cm-fur-UID" cx="33%" cy="26%" r="74%">
+      <stop stop-color="var(--cm-highlight)"/>
+      <stop offset=".58" stop-color="var(--cm-body)"/>
+      <stop offset="1" stop-color="var(--cm-fur-shadow)"/>
+    </radialGradient>
+    <radialGradient id="cm-ear-UID" cx="62%" cy="69%" r="72%">
+      <stop stop-color="var(--cm-inner)"/>
+      <stop offset="1" stop-color="var(--cm-fur-shadow)"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="50" cy="96" rx="23" ry="3" fill="var(--cm-fur-shadow)" opacity=".22"/>
+  <path class="cm-tail" d="M68 90 C86 94 94 82 86 74 C82 70 77 74 80 78" fill="none" stroke="var(--cm-body-dark)" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="50" cy="86" rx="21" ry="13" fill="url(#cm-fur-UID)"/>
   <ellipse cx="50" cy="89" rx="12" ry="8" fill="var(--cm-belly)"/>
   <g class="cm-head">
-    <g class="cm-ear-l"><circle cx="25" cy="30" r="17" fill="var(--cm-body)"/><circle cx="25" cy="30" r="10.5" fill="var(--cm-inner)"/></g>
-    <g class="cm-ear-r"><circle cx="75" cy="30" r="17" fill="var(--cm-body)"/><circle cx="75" cy="30" r="10.5" fill="var(--cm-inner)"/></g>
-    <ellipse cx="50" cy="54" rx="27" ry="24" fill="var(--cm-body)"/>
+    <g class="cm-ear-l"><circle cx="25" cy="30" r="17" fill="url(#cm-fur-UID)"/><circle cx="25" cy="30" r="10.5" fill="url(#cm-ear-UID)"/></g>
+    <g class="cm-ear-r"><circle cx="75" cy="30" r="17" fill="url(#cm-fur-UID)"/><circle cx="75" cy="30" r="10.5" fill="url(#cm-ear-UID)"/></g>
+    <ellipse cx="50" cy="54" rx="27" ry="24" fill="url(#cm-fur-UID)"/>
     <circle cx="32" cy="62" r="4.5" fill="var(--cm-inner)"/>
     <circle cx="68" cy="62" r="4.5" fill="var(--cm-inner)"/>
     <!-- 眼睛 -->
@@ -32,8 +44,8 @@
     <g data-s="safety" fill="none" stroke="var(--cm-ink)" stroke-width="2" stroke-linecap="round">
       <path d="M34 46 L44 43"/><path d="M66 46 L56 43"/>
     </g>
-    <ellipse cx="50" cy="61" rx="3.4" ry="2.6" fill="var(--cm-nose)"/>
-    <g stroke="var(--cm-body-dark)" stroke-width="1.4" stroke-linecap="round">
+    <ellipse class="cm-nose" cx="50" cy="61" rx="3.4" ry="2.6" fill="var(--cm-nose)"/>
+    <g class="cm-whiskers" stroke="var(--cm-body-dark)" stroke-width="1.4" stroke-linecap="round">
       <path d="M29 59 L19 57"/><path d="M29 63 L19 65"/><path d="M71 59 L81 57"/><path d="M71 63 L81 65"/>
     </g>
     <!-- 嘴巴 -->
@@ -43,11 +55,14 @@
       <path data-s="safety" d="M45 66.5 Q50 69 55 66.5"/>
     </g>
     <ellipse data-s="listening" cx="50" cy="67" rx="2.2" ry="2.6" fill="var(--cm-ink)"/>
+    <ellipse class="cm-mouth" cx="50" cy="68" rx="4" ry="3" fill="var(--cm-ink)"/>
     <g data-s="cheer"><path d="M42 65 Q50 76 58 65 Z" fill="var(--cm-ink)"/><ellipse cx="50" cy="70.5" rx="3.5" ry="1.8" fill="var(--cm-inner)"/></g>
   </g>
   <!-- 手臂与爪子 -->
   <g stroke="var(--cm-body)" stroke-width="7" stroke-linecap="round" fill="var(--cm-paw)">
-    <g data-s="idle"><circle cx="38" cy="83" r="5" stroke="none"/><circle cx="62" cy="83" r="5" stroke="none"/></g>
+    <g class="cm-wave"><circle cx="38" cy="83" r="5" stroke="none"/><path d="M63 80 L79 56" fill="none"/><circle cx="80" cy="53" r="6" stroke="none"/></g>
+    <g class="cm-point"><path d="M63 80 Q74 88 83 90" fill="none"/><circle cx="84" cy="91" r="5" stroke="none"/></g>
+    <g class="cm-rest-paws" data-s="idle"><circle cx="38" cy="83" r="5" stroke="none"/><circle cx="62" cy="83" r="5" stroke="none"/></g>
     <g data-s="listening"><circle cx="38" cy="83" r="5" stroke="none"/><path d="M63 80 L80 54" fill="none"/><circle cx="81" cy="51" r="5.5" stroke="none"/></g>
     <g data-s="thinking"><circle cx="38" cy="83" r="5" stroke="none"/><path d="M66 84 L62 80" fill="none"/><ellipse cx="59" cy="78.5" rx="6" ry="4.5" stroke="none"/></g>
     <g data-s="cheer"><path d="M36 80 L19 62" fill="none"/><path d="M64 80 L81 62" fill="none"/><circle cx="17" cy="59" r="5.5" stroke="none"/><circle cx="83" cy="59" r="5.5" stroke="none"/></g>

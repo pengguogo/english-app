@@ -1,12 +1,12 @@
 <!--
   CompanionPanel.vue - 全站常驻学习伙伴(右下角小老鼠入口)
   默认安静:不自动弹出、不自动出声;点小老鼠展开面板。
-  面板:按住说话(游客可用，登录家庭需同意) / 打字 → 候选卡 / 讲解卡 + 点选题 → 点「去学」才跳转;点主题直接跳主题页。
+  面板:点击录音和停止(游客可用，登录家庭需同意) / 打字 → 候选卡 / 讲解卡 + 点选题 → 点「去学」才跳转;点主题直接跳主题页。
   SAFE_REPLY 只显示话术和主题入口。
   切页、关闭、卸载时停录音和播报并丢弃过期响应(useCompanion.cancel),同时结束会话(endSession)。
 -->
 <script setup>
-import { ref, watch, onBeforeUnmount } from 'vue'
+import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppButton from '../AppButton.vue'
 import CompanionMouse from './CompanionMouse.vue'
@@ -18,10 +18,13 @@ import { useCompanion, MAX_TEXT } from '../../composables/useCompanion'
 const auth = useAuthStore()
 const route = useRoute()
 const c = useCompanion({ auth, router: useRouter() })
-const { open, phase, result, topics, error, needsPlayButton, mouseState, quiz } = c
+const { open, phase, result, topics, error, canReplay, mouseState, quiz } = c
 const draft = ref('')
 
-const STATUS = { recording: '我在听…', recognizing: '听到啦…', thinking: '我找找…', speaking: '', choosing: '' }
+const STATUS = { openingMic: '正在打开麦克风…', recording: '我在听…', recognizing: '我在听清楚…', thinking: '我想一想…' }
+const busyPhases = ['openingMic', 'recognizing', 'thinking']
+const inputBusy = computed(() => busyPhases.includes(phase.value))
+const inputLocked = computed(() => inputBusy.value || phase.value === 'recording')
 
 async function toggle() {
   if (open.value) return c.closePanel()
@@ -30,6 +33,7 @@ async function toggle() {
 }
 
 function send() {
+  if (inputLocked.value || !draft.value.trim()) return
   const text = draft.value
   draft.value = ''
   c.submitText(text)
@@ -54,21 +58,21 @@ onBeforeUnmount(() => c.cancel())
         <AppButton variant="ghost" aria-label="关闭学习伙伴" @click="c.closePanel()">✕</AppButton>
       </header>
 
-      <AppButton v-if="needsPlayButton" variant="primary" size="lg" block @click="c.replay()">
+      <AppButton v-if="canReplay" variant="primary" size="lg" block @click="c.replay()">
         ▶ 听一听
       </AppButton>
 
-      <div v-if="result?.candidates?.length" class="cands">
+      <div v-if="!inputLocked && result?.candidates?.length" class="cands">
         <CompanionCandidateCard v-for="cand in result.candidates" :key="cand.lessonId ?? cand.route"
           :candidate="cand" @go="c.go" />
       </div>
 
-      <CompanionExplainCard v-if="result?.explain" :explain="result.explain" :quiz="result.quiz"
+      <CompanionExplainCard v-if="!inputLocked && result?.explain" :explain="result.explain" :quiz="result.quiz"
         :state="quiz" :learn-more="result.learnMore" @answer="c.answer" @go="c.go" />
 
-      <div v-if="!result?.explain && (!result?.candidates?.length || result?.type === 'NO_MATCH')" class="topics">
+      <div v-if="!inputLocked && !result?.explain && (!result?.candidates?.length || result?.type === 'NO_MATCH')" class="topics">
         <button v-for="t in (result?.topics?.length ? result.topics : topics)" :key="t.themeId ?? t.name"
-          type="button" class="topic" :disabled="phase === 'recording'" @click="c.go(t)">
+          type="button" class="topic" @click="c.go(t)">
           <img v-if="t.image" :src="t.image" alt="" loading="lazy" />
           <span>{{ t.name }}</span>
         </button>
@@ -77,15 +81,14 @@ onBeforeUnmount(() => c.cancel())
       <AppButton class="mic" size="lg" block
         :variant="phase === 'recording' ? 'warning' : 'primary'"
         :aria-pressed="phase === 'recording'"
-        @pointerdown.prevent="c.startRecording()"
-        @pointerup="c.stopRecording()" @pointercancel="c.stopRecording()" @pointerleave="c.stopRecording()"
-        @contextmenu.prevent>
-        🎤 {{ phase === 'recording' ? '松开就好' : '按住说话' }}
+        :disabled="inputBusy"
+        @click="phase === 'recording' ? c.stopRecording() : c.startRecording()">
+        🎤 {{ phase === 'recording' ? '说完了' : error?.kind === 'retry' ? '再说一次' : '说话' }}
       </AppButton>
 
       <form class="typing" @submit.prevent="send">
-        <input v-model="draft" class="typing-input" :maxlength="MAX_TEXT" placeholder="打字也行" aria-label="想学什么" />
-        <AppButton variant="success" :disabled="!draft.trim()" @click="send">找</AppButton>
+        <input v-model="draft" class="typing-input" :maxlength="MAX_TEXT" :disabled="inputLocked" placeholder="打字也行" aria-label="想学什么" />
+        <AppButton variant="success" :disabled="inputLocked || !draft.trim()" type="submit">发送</AppButton>
       </form>
     </section>
 
@@ -155,7 +158,6 @@ onBeforeUnmount(() => c.cancel())
   color: var(--text-primary);
 }
 .topic img { width: 48px; height: 48px; object-fit: cover; border-radius: var(--radius-sm); }
-.mic { touch-action: none; user-select: none; -webkit-user-select: none; }
 .typing { display: flex; gap: var(--space-2); }
 .typing-input {
   flex: 1;

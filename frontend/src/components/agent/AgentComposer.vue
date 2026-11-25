@@ -6,7 +6,8 @@ import { MAX_TEXT } from '../../composables/useCompanion'
 const props = defineProps({
   phase: { type: String, required: true },
   prompt: { type: String, required: true },
-  disabled: Boolean
+  disabled: Boolean,
+  retry: Boolean
 })
 const emit = defineEmits(['send', 'record', 'stop'])
 const text = ref('')
@@ -24,7 +25,7 @@ function send() {
       :aria-label="phase === 'recording' ? '停下录音' : '开始说话'"
       :aria-pressed="phase === 'recording'"
       @click="phase === 'recording' ? $emit('stop') : $emit('record')">
-      <span aria-hidden="true">🎙</span>{{ phase === 'recording' ? '说完了' : '说话' }}
+      <span aria-hidden="true">🎙</span>{{ phase === 'recording' ? '说完了' : retry ? '再说一次' : '说话' }}
     </AppButton>
     <input v-model="text" :maxlength="MAX_TEXT" :disabled="disabled || phase === 'recording'" :placeholder="prompt" :aria-label="prompt" />
     <AppButton type="submit" :disabled="disabled || phase === 'recording' || !text.trim()">发送</AppButton>

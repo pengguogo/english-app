@@ -8,8 +8,10 @@ export function useGuidedLearning() {
   const pending = ref(false)
   const error = ref('')
   const audioError = ref('')
+  const reaction = ref('')
   const tts = useTts()
   let disposed = false
+  let reactionTimer
 
   async function listen() {
     const current = screen.value
@@ -37,15 +39,28 @@ export function useGuidedLearning() {
     }
   }
 
+  function react(name) {
+    clearTimeout(reactionTimer)
+    reaction.value = name
+    reactionTimer = setTimeout(() => { reaction.value = '' }, 1500)
+  }
+
   async function act(action, option) {
     if (loading.value || pending.value) return
     pending.value = true
     error.value = ''
     audioError.value = ''
     tts.stop()
+    reaction.value = ''
     try {
-      screen.value = await advanceJourney(action, screen.value?.revision, option)
-      if (!disposed) void listen()
+      const previous = screen.value
+      const next = await advanceJourney(action, previous?.revision, option)
+      if (disposed) return
+      screen.value = next
+      if (action === 'ANSWER' && next && (next.revision !== previous?.revision || next.feedback)) {
+        react(['BOOK', 'DONE'].includes(next.step) ? 'cheer' : 'hint')
+      }
+      void listen()
     } catch {
       error.value = '豆豆刚才没接上，再点一次试试。'
     } finally {
@@ -55,7 +70,8 @@ export function useGuidedLearning() {
 
   onBeforeUnmount(() => {
     disposed = true
+    clearTimeout(reactionTimer)
     tts.stop()
   })
-  return { screen, loading, pending, error, audioError, playing: tts.isPlaying, load, act, listen, stop: tts.stop }
+  return { screen, reaction, react, loading, pending, error, audioError, playing: tts.isPlaying, load, act, listen, stop: tts.stop }
 }

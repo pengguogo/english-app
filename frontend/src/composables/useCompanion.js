@@ -1,7 +1,7 @@
 /**
  * @file useCompanion.js - 学习伙伴面板状态机
  * @description 管理“按住说话 / 打字 / 点主题 → 识别 → 对话(/agent/chat) → 播报 → 等孩子选 / 答题”的流程。
- *  phase: idle 待机 | recording 录音中 | recognizing 识别中 | thinking 检索中
+ *  phase: idle 待机 | openingMic 打开麦克风 | recording 录音中 | recognizing 识别中 | thinking 检索中
  *         | speaking 播报中 | choosing 等待选择 | error 异常
  *  每次发起流程分配一个序号 seq;cancel() 让 seq 失效并 abort 请求,过期响应一律丢弃。
  *  只有孩子点了「去学」或主题入口才 router.push(服务端给的 route),前端不拼。
@@ -75,9 +75,8 @@ export function useCompanion({ auth, router, onIntent }) {
   const result = ref(null)
   const topics = ref([])
   const error = ref(null)
-  // 自动播放被浏览器拦截时显示「播放」按钮,由孩子点一下补播
-  const needsPlayButton = ref(false)
   const lastSpeech = ref('')
+  const canReplay = computed(() => Boolean(lastSpeech.value) && phase.value === 'choosing')
   // 当前题的答题状态:wrong 为答错过的选项 id;solved 后不能再提交
   const quiz = ref(null)
 
@@ -100,10 +99,11 @@ export function useCompanion({ auth, router, onIntent }) {
   /** 给小老鼠组件的状态 */
   const mouseState = computed(() => {
     switch (phase.value) {
+      case 'openingMic':
       case 'recording': return 'listening'
-      case 'recognizing':
-      case 'thinking': return slow.value ? 'thinking' : 'listening'
-      case 'speaking':
+      case 'recognizing': return 'thinking'
+      case 'thinking': return 'thinking'
+      case 'speaking': return result.value?.type === 'SAFE_REPLY' ? 'safety' : 'speaking'
       case 'choosing':
         if (result.value?.type === 'SAFE_REPLY') return 'safety'
         if (result.value?.type === 'NO_MATCH') return 'idle'
@@ -127,7 +127,7 @@ export function useCompanion({ auth, router, onIntent }) {
     controller = new AbortController()
     clearTimers()
     error.value = null
-    needsPlayButton.value = false
+    lastSpeech.value = ''
     quiz.value = null
     return ++seq
   }
@@ -151,15 +151,15 @@ export function useCompanion({ auth, router, onIntent }) {
     }, SLOW_MS)
   }
 
-  /** 播报 speech;被自动播放策略拦下时显示播放按钮 */
-  async function speak(turn, text) {
+  /** 保留最近一条讲解，方便孩子主动重听。 */
+  async function speak(text) {
     if (!text) return
     lastSpeech.value = text
     stopActiveTts()
     try {
       await tts.playAndWait(text, 'zh')
-    } catch (e) {
-      if (isCurrent(turn) && e?.name === 'NotAllowedError') needsPlayButton.value = true
+    } catch {
+      // 浏览器拦截自动播放时，仍可通过重听按钮补播。
     }
   }
 
@@ -186,7 +186,7 @@ export function useCompanion({ auth, router, onIntent }) {
     tts.stop()
     phase.value = 'idle'
     error.value = null
-    needsPlayButton.value = false
+    lastSpeech.value = ''
     // 在途的答题请求已作废,放开选项让孩子可以重新点
     if (quiz.value) quiz.value.pending = false
   }
@@ -211,8 +211,9 @@ export function useCompanion({ auth, router, onIntent }) {
       phase.value = 'error'
       return
     }
-    if (phase.value === 'recording') return
+    if (['openingMic', 'recording', 'recognizing', 'thinking'].includes(phase.value)) return
     const turn = nextTurn()
+    phase.value = 'openingMic'
     stopRequested = false
     stopActiveTts()
     tts.stop()
@@ -233,7 +234,7 @@ export function useCompanion({ auth, router, onIntent }) {
 
   async function stopRecording() {
     if (phase.value !== 'recording') {
-      stopRequested = true
+      if (phase.value === 'openingMic') stopRequested = true
       return
     }
     const turn = seq
@@ -308,7 +309,7 @@ export function useCompanion({ auth, router, onIntent }) {
     }
     quiz.value = result.value.quiz ? { wrong: [], solved: false, pending: false, expired: false, feedback: '' } : null
     phase.value = 'speaking'
-    await speak(turn, result.value.speech)
+    await speak(result.value.speech)
     if (isCurrent(turn)) phase.value = 'choosing'
   }
 
@@ -351,7 +352,7 @@ export function useCompanion({ auth, router, onIntent }) {
       state.feedback = res?.hint || res?.speech || ''
     }
     phase.value = 'speaking'
-    await speak(turn, state.feedback)
+    await speak(state.feedback)
     if (isCurrent(turn)) phase.value = 'choosing'
   }
 
@@ -364,12 +365,15 @@ export function useCompanion({ auth, router, onIntent }) {
 
   /** 播放按钮:用户手势下补播 */
   async function replay() {
-    needsPlayButton.value = false
-    await speak(seq, lastSpeech.value)
+    if (!canReplay.value) return
+    const turn = seq
+    phase.value = 'speaking'
+    await speak(lastSpeech.value)
+    if (isCurrent(turn)) phase.value = 'choosing'
   }
 
   return {
-    open, phase, slow, result, topics, error, needsPlayButton, micMode, mouseState, quiz,
+    open, phase, slow, result, topics, error, canReplay, micMode, mouseState, quiz,
     openPanel, closePanel, cancel, endSession, startRecording, stopRecording, submitText, answer, go, replay
   }
 }
