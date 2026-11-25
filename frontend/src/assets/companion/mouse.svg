@@ -73,7 +73,10 @@
   </g>
   <!-- 手臂与爪子 -->
   <g stroke="var(--cm-body)" stroke-width="7" stroke-linecap="round" fill="var(--cm-paw)">
-    <g class="cm-wave"><circle cx="38" cy="83" r="5" stroke="none"/><path d="M63 80 L79 56" fill="none"/><circle cx="80" cy="53" r="6" stroke="none"/></g>
+    <g class="cm-wave-pose">
+      <circle cx="38" cy="83" r="5" stroke="none"/>
+      <g class="cm-wave"><path d="M63 80 Q73 71 78 59" fill="none"/><circle cx="80" cy="54" r="6" stroke="none"/></g>
+    </g>
     <g class="cm-point"><path d="M63 80 Q74 88 83 90" fill="none"/><circle cx="84" cy="91" r="5" stroke="none"/></g>
     <g class="cm-rest-paws" data-s="idle"><circle cx="38" cy="83" r="5" stroke="none"/><circle cx="62" cy="83" r="5" stroke="none"/></g>
     <g data-s="listening"><circle cx="38" cy="83" r="5" stroke="none"/><path d="M63 80 L80 54" fill="none"/><circle cx="81" cy="51" r="5.5" stroke="none"/></g>
@@ -92,6 +95,7 @@
     <path d="M10 38 Q10 44 16 44 Q10 44 10 50 Q10 44 4 44 Q10 44 10 38 Z"/>
     <path d="M90 36 Q90 42 96 42 Q90 42 90 48 Q90 42 84 42 Q90 42 90 36 Z"/>
     <path d="M50 2 Q50 7 55 7 Q50 7 50 12 Q50 7 45 7 Q50 7 50 2 Z"/>
+    <circle cx="25" cy="29" r="1.6"/><circle cx="75" cy="26" r="1.6"/>
   </g>
   <g data-s="safety" class="cm-badge">
     <path d="M16 64 L25 67.5 V74 C25 79 21 82 16 84 C11 82 7 79 7 74 V67.5 Z" fill="var(--cm-alert)"/>

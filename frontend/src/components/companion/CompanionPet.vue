@@ -19,6 +19,7 @@ const unavailable = ref(false)
 const model = shallowRef(null)
 const state = computed(() => response.value === 'wave' ? 'wave' : props.state)
 const still = computed(() => !visible.value || reduced.value)
+const portState = computed(() => response.value || state.value)
 const greeting = computed(() => response.value === 'wave' ? '你好呀！' : response.value === 'tilt' ? '嗯？我在这儿。' : '')
 
 let media
@@ -99,13 +100,14 @@ function toggleCompare() {
 </script>
 
 <template>
-  <div class="pet" :class="{ comparing: preview && compare }" :data-state="state">
+  <div class="pet" :class="{ comparing: preview && compare, 'motion-off': still }"
+    :data-state="state" :data-feedback="portState">
     <div class="pet-pair">
-      <AppButton variant="ghost" class="pet-button" aria-label="和豆豆打招呼"
+      <AppButton variant="ghost" class="pet-button pet-port" aria-label="和豆豆打招呼"
         :aria-disabled="props.state !== 'idle' || !!response" @click="greet">
-        <CompanionMouse :state="state" :gesture="action" :still="still" :size="88" />
+        <CompanionMouse :state="state" :gesture="action" :still="still" :size="88" flight />
       </AppButton>
-      <div v-if="preview && compare" class="pet-model">
+      <div v-if="preview && compare" class="pet-model pet-port">
         <canvas v-if="!unavailable" ref="canvas" role="img" aria-label="Three.js 立体豆豆"
           @webglcontextlost="unavailable = true" />
         <span v-else role="status">当前浏览器无法显示 3D</span>
@@ -143,11 +145,19 @@ function toggleCompare() {
   box-shadow: 0 0 18px color-mix(in srgb, var(--port-light) 45%, transparent),
     inset 0 0 0 5px var(--cabin-recess);
 }
-.pet .pet-button.app-btn::before {
+.pet .pet-port::before {
   position: absolute;
   inset: 8%;
   border: 1px dashed color-mix(in srgb, var(--port-light) 48%, transparent);
   border-radius: inherit;
+  pointer-events: none;
+  content: '';
+}
+.pet .pet-port::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
   content: '';
 }
 .pet-button :deep(.companion-mouse) { width: 88% !important; height: 88% !important; z-index: 1; }
@@ -173,3 +183,4 @@ function toggleCompare() {
   .pet.comparing .pet-pair { flex-wrap: wrap; }
 }
 </style>
+<style scoped src="./companionPortMotion.css"></style>

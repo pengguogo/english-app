@@ -24,7 +24,8 @@ const props = defineProps({
   /** 宽高像素 */
   size: { type: Number, default: 56 },
   gesture: { type: String, default: '' },
-  still: Boolean
+  still: Boolean,
+  flight: Boolean
 })
 
 const svg = mouseSvg.replaceAll('UID', useId())
@@ -37,7 +38,7 @@ const ariaLabel = computed(() => `学习伙伴小老鼠，${STATE_LABELS[safeSta
   <span
     role="img"
     :aria-label="ariaLabel"
-    :class="['companion-mouse', `cm-s-${safeState}`, `cm-a-${gesture}`, { 'cm-still': still }]"
+    :class="['companion-mouse', `cm-s-${safeState}`, `cm-a-${gesture}`, { 'cm-still': still, 'cm-flight': flight }]"
     :style="{ width: `${size}px`, height: `${size}px` }"
     v-html="svg"
   />
@@ -94,13 +95,13 @@ const ariaLabel = computed(() => `学习伙伴小老鼠，${STATE_LABELS[safeSta
 .companion-mouse :deep(.cm-head) { transform-origin: 50% 100%; }
 /* 主动反馈有静止姿势，减少动态效果时也看得懂。 */
 .companion-mouse :deep(.cm-mouth),
-.companion-mouse :deep(.cm-wave),
+.companion-mouse :deep(.cm-wave-pose),
 .companion-mouse :deep(.cm-point),
 .cm-s-speaking :deep(path[data-s='idle']),
 .cm-s-wave :deep(.cm-rest-paws),
 .cm-s-hint :deep(.cm-rest-paws) { display: none; }
 .cm-s-speaking :deep(.cm-mouth),
-.cm-s-wave :deep(.cm-wave),
+.cm-s-wave :deep(.cm-wave-pose),
 .cm-s-hint :deep(.cm-point) { display: inline; }
 .companion-mouse :deep(.cm-equipment-light) { fill: var(--cm-light); }
 .cm-s-thinking { --cm-light: var(--cabin-violet); }
@@ -111,27 +112,53 @@ const ariaLabel = computed(() => `学习伙伴小老鼠，${STATE_LABELS[safeSta
 .cm-s-listening :deep(.cm-ear-r) { transform: rotate(10deg); }
 .cm-s-thinking :deep(.cm-head) { transform: rotate(-6deg); }
 .cm-s-hint :deep(.cm-head) { transform: rotate(7deg) translateY(2px); }
-.cm-s-wave :deep(.cm-wave) { transform-box: fill-box; transform-origin: 78% 90%; }
+.cm-s-wave :deep(.cm-wave) { transform-box: fill-box; transform-origin: 10% 95%; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .cm-s-speaking :deep(.cm-mouth) { transform-box: fill-box; transform-origin: center; animation: cm-talk .47s ease-in-out infinite alternate; }
-  .cm-s-cheer:not(.cm-still) :deep(svg) { animation: cm-hop .6s ease-out; }
-  .cm-s-wave :deep(.cm-wave) { animation: cm-wave .3s ease-in-out 3 alternate; }
-  .cm-a-blink :deep(.cm-blink) { animation: cm-blink .26s ease-in-out; }
+  .cm-flight.cm-s-idle:not(.cm-still) { animation: cm-float 5.6s ease-in-out infinite; }
+  .cm-flight :deep(.cm-head) { transition: transform .28s var(--ease-smooth); }
+  .cm-s-listening :deep(.cm-fx) { animation: cm-signal 1.6s ease-in-out infinite; }
+  .cm-s-thinking :deep(.cm-dots > *) { animation: cm-think 1.5s ease-in-out infinite; }
+  .cm-s-thinking :deep(.cm-dots > :nth-child(2)) { animation-delay: .15s; }
+  .cm-s-thinking :deep(.cm-dots > :nth-child(3)) { animation-delay: .3s; }
+  .cm-s-speaking :deep(.cm-mouth) { transform-box: fill-box; transform-origin: center; animation: cm-talk .62s ease-in-out infinite; }
+  .cm-s-cheer :deep(svg) { transform-origin: center 86%; animation: cm-hop .78s var(--ease-smooth); }
+  .cm-s-cheer :deep(.cm-stars) { transform-origin: center; animation: cm-stars 1.2s ease-out both; }
+  .cm-s-wave :deep(.cm-wave) { animation: cm-wave 1.05s var(--ease-smooth) both; }
+  .cm-s-hint :deep(.cm-point) { transform-origin: 63px 80px; animation: cm-point .62s ease-out; }
+  .cm-a-blink :deep(.cm-blink) { animation: cm-blink .34s ease-in-out; }
   .cm-a-ear :deep(.cm-ear-r) { animation: cm-twitch .28s ease-in-out 2; }
   .cm-a-sniff :deep(.cm-nose),
   .cm-a-sniff :deep(.cm-whiskers) { animation: cm-sniff .28s ease-in-out 3; }
   .cm-a-stretch :deep(svg) { transform-origin: center bottom; animation: cm-stretch 1.05s ease-in-out; }
   .cm-a-tail :deep(.cm-tail) { transform-origin: 68px 90px; animation: cm-twitch .4s ease-in-out 2; }
   .cm-a-tilt :deep(.cm-head) { animation: cm-tilt 1s ease-in-out; }
-  .cm-still :deep(*) { animation: none !important; }
+  .cm-still :deep(*) { animation: none !important; transition: none !important; }
 }
-@keyframes cm-talk { 0%, 60% { transform: scaleY(.42); } 36%, 100% { transform: scaleY(1.3); } }
-@keyframes cm-hop { 42% { transform: translateY(-7px) rotate(-5deg); } 73% { transform: translateY(1px); } }
-@keyframes cm-wave { 45% { transform: rotate(-15deg); } }
-@keyframes cm-blink { 50% { transform: scaleY(.12); } }
+@keyframes cm-float { 50% { transform: translateY(-2.5%) rotate(-1deg); } }
+@keyframes cm-signal { 0%, 100% { opacity: .54; } 45% { opacity: 1; } }
+@keyframes cm-think { 0%, 85%, 100% { opacity: .46; } 35% { opacity: 1; } }
+@keyframes cm-talk { 0%, 62%, 100% { transform: scale(.84, .43); } 28%, 79% { transform: scale(1.04, 1.25); } }
+@keyframes cm-hop {
+  14% { transform: translateY(1%) scale(1.05, .94); }
+  43% { transform: translateY(-7.5%) rotate(-6deg) scale(.96, 1.05); }
+  75% { transform: scale(1.035, .965); }
+}
+@keyframes cm-stars {
+  0% { opacity: 0; transform: scale(.76); }
+  37% { opacity: 1; transform: scale(1.025); }
+  83% { opacity: .72; }
+  100% { opacity: .25; }
+}
+@keyframes cm-wave {
+  0%, 100% { transform: rotate(5deg); }
+  20%, 53%, 81% { transform: rotate(-23deg); }
+  36%, 68% { transform: rotate(10deg); }
+}
+@keyframes cm-point { 0% { opacity: .65; transform: rotate(-15deg); } 64% { transform: rotate(5deg); } }
+@keyframes cm-blink { 34%, 48% { transform: scaleY(.12); } 75% { transform: scaleY(.84); } }
 @keyframes cm-twitch { 50% { transform: rotate(13deg); } }
 @keyframes cm-sniff { 50% { transform: translateY(-1.8px); } }
 @keyframes cm-stretch { 50% { transform: scale(.94, 1.09); } }
-@keyframes cm-tilt { 40%, 66% { transform: rotate(9deg); } }
+@keyframes cm-tilt { 36%, 62% { transform: rotate(12deg) translateY(1px); } }
 </style>

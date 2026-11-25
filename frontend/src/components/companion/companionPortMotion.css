@@ -1,0 +1,57 @@
+@media (prefers-reduced-motion: no-preference) {
+  .pet:not(.motion-off) .pet-port {
+    transition: border-color .25s ease, box-shadow .35s ease;
+  }
+
+  .pet:not(.motion-off)[data-state='thinking'] .pet-port::before {
+    border-width: 2px;
+    border-style: solid;
+    border-color: transparent;
+    border-top-color: var(--port-light);
+    border-bottom-color: color-mix(in srgb, var(--port-light) 38%, transparent);
+    animation: port-orbit 2.8s linear infinite;
+  }
+
+  .pet:not(.motion-off):is([data-state='listening'], [data-state='speaking']) .pet-port::after {
+    background: linear-gradient(0deg, transparent 44%, var(--port-light) 50%, transparent 53%);
+    animation: port-scan 2.4s ease-in-out infinite;
+  }
+
+  .pet:not(.motion-off)[data-state='speaking'] .pet-port::after {
+    animation-duration: 1.65s;
+  }
+
+  .pet:not(.motion-off):is([data-feedback='wave'], [data-feedback='tilt'], [data-state='cheer'], [data-state='hint']) .pet-port::after {
+    inset: 7%;
+    border: 2px solid var(--port-light);
+    opacity: 0;
+    animation: port-echo .9s var(--ease-smooth) both;
+  }
+
+  .pet:not(.motion-off)[data-state='cheer'] .pet-port::after {
+    animation: port-echo .48s .12s var(--ease-smooth) 2 both;
+  }
+
+  .pet:not(.motion-off) .pet-greeting:not(:empty) {
+    animation: greeting-rise .3s var(--ease-bounce) both;
+  }
+}
+
+@keyframes port-orbit { to { transform: rotate(1turn); } }
+
+@keyframes port-scan {
+  0% { opacity: 0; transform: translateY(31%); }
+  23%, 62% { opacity: .26; }
+  82%, 100% { opacity: 0; transform: translateY(-42%); }
+}
+
+@keyframes port-echo {
+  0% { opacity: 0; transform: scale(.63); }
+  20% { opacity: .91; }
+  100% { opacity: 0; transform: scale(1.19); }
+}
+
+@keyframes greeting-rise {
+  from { opacity: 0; transform: translateY(5px) scale(.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
