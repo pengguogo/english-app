@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import AppButton from '../AppButton.vue'
+import CompanionMini from './CompanionMini.vue'
 import CompanionMouse from './CompanionMouse.vue'
 
 const props = defineProps({
@@ -15,6 +16,7 @@ const action = ref('')
 const response = ref('')
 const compare = ref(false)
 const canvas = ref(null)
+const mini = ref(null)
 const unavailable = ref(false)
 const model = shallowRef(null)
 const state = computed(() => response.value === 'wave' ? 'wave' : props.state)
@@ -25,6 +27,8 @@ const greeting = computed(() => response.value === 'wave' ? '你好呀！' : res
 let media
 let timer
 let lastIdle
+let touchStart = null
+let dragged = false
 let nextResponse = 'wave'
 
 function clearAction() {
@@ -44,7 +48,24 @@ function scheduleIdle() {
   }, 3800 + Math.random() * 4400)
 }
 
-function greet() {
+function startPointer(event) {
+  dragged = false
+  touchStart = event.pointerType === 'mouse' ? null : event.clientX
+}
+
+function movePointer(event) {
+  if (event.pointerType !== 'mouse') {
+    if (touchStart === null) return
+    dragged ||= Math.abs(event.clientX - touchStart) >= 9
+    if (!dragged) return
+  }
+  const bounds = event.currentTarget.getBoundingClientRect()
+  const x = (event.clientX - bounds.left) / bounds.width * 2 - 1
+  mini.value?.follow(Math.max(-1, Math.min(1, x)))
+}
+
+function greet(event) {
+  if (event.detail && dragged) return
   if (props.state !== 'idle' || response.value) return
   clearAction()
   response.value = nextResponse
@@ -104,8 +125,12 @@ function toggleCompare() {
     :data-state="state" :data-feedback="portState">
     <div class="pet-pair">
       <AppButton variant="ghost" class="pet-button pet-port" aria-label="和豆豆打招呼"
-        :aria-disabled="props.state !== 'idle' || !!response" @click="greet">
-        <CompanionMouse :state="state" :gesture="action" :still="still" :size="88" flight />
+        :aria-disabled="props.state !== 'idle' || !!response" @click="greet"
+        @pointerdown="startPointer" @pointermove="movePointer"
+        @pointerup="touchStart = null" @pointercancel="touchStart = null">
+        <CompanionMini ref="mini" :state="state" :gesture="action" :still="still">
+          <CompanionMouse :state="state" :gesture="action" :still="still" :size="88" flight />
+        </CompanionMini>
       </AppButton>
       <div v-if="preview && compare" class="pet-model pet-port">
         <canvas v-if="!unavailable" ref="canvas" role="img" aria-label="Three.js 立体豆豆"
@@ -135,6 +160,7 @@ function toggleCompare() {
 .pet .pet-button.app-btn, .pet-model {
   position: relative;
   overflow: hidden;
+  touch-action: pan-y;
   padding: 0;
   border: 2px solid var(--port-light);
   border-radius: var(--radius-pill);
